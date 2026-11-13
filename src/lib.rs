@@ -54,6 +54,22 @@ impl Hooks for FarmersDelight {
         }
     }
 
+    fn component_types(&self, _: &RegistrationContext, event: &mut ComponentTypesEvent<'_>) {
+        event.types.extend(
+            items::skillet::COMPONENT_TYPES
+                .iter()
+                .map(|t| t.to_string()),
+        );
+    }
+
+    fn living_entity_use_item_finish(
+        &self,
+        host: HostSide<'_>,
+        event: &mut LivingEntityUseItemFinishEvent<'_>,
+    ) {
+        items::skillet::on_finish(host, event);
+    }
+
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
         items::skillet::on_attack(host, event);
         Flow::Continue

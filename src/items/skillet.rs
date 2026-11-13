@@ -20,8 +20,254 @@ pub fn attack_sound(attacker_is_player: bool, charge: f32) -> (&'static str, f32
 
 pub struct SkilletItem;
 
+// ---------------------------------------------------------------- held cooking (M2-07)
+
+pub const INGREDIENT: &str = "farmersdelight:skillet_ingredient";
+pub const COOKING_TIME: &str = "farmersdelight:cooking_time_length";
+pub const FLIP_TIMESTAMP: &str = "farmersdelight:skillet_flip_timestamp";
+pub const FLIPPED: &str = "farmersdelight:skillet_flipped";
+/// The four FD data components the skillet carries (registered in `component_types`).
+pub const COMPONENT_TYPES: [&str; 4] = [INGREDIENT, COOKING_TIME, FLIP_TIMESTAMP, FLIPPED];
+const HEAT_SOURCES: &str = "farmersdelight:heat_sources";
+/// `SkilletBlock.MINIMUM_COOKING_TIME`.
+pub const MINIMUM_COOKING_TIME: i32 = 60;
+
+/// `SkilletBlock#getSkilletCookingTime`: the recipe time (600 when absent) as whole seconds × 0.2,
+/// less 0.05 per Fire Aspect level, back in ticks, clamped to `[60, original]`.
+pub fn skillet_cooking_time(original: i32, fire_aspect: i32) -> i32 {
+    let time = if original > 0 { original } else { 600 };
+    let seconds = time / 20;
+    let mut reduction = 0.2f32;
+    if fire_aspect > 0 {
+        reduction -= fire_aspect as f32 * 0.05;
+    }
+    let result = (seconds as f32 * reduction) as i32 * 20;
+    // Mth.clamp(value, min, max) = value < min ? min : min(value, max)
+    if result < MINIMUM_COOKING_TIME {
+        MINIMUM_COOKING_TIME
+    } else {
+        result.min(original)
+    }
+}
+
+fn patch_of(stack: &ItemStack) -> Compound {
+    stack
+        .components()
+        .map(|c| c.as_nbt().clone())
+        .unwrap_or_default()
+}
+
+fn ingredient_of(host: &dyn Host, stack: &ItemStack) -> Option<ItemStack> {
+    match patch_of(stack).get(&INGREDIENT.into()) {
+        Some(Tag::Compound(c)) => ItemStack::from_nbt(host, c),
+        _ => None,
+    }
+}
+
+fn cooking_time_of(stack: &ItemStack) -> Option<i32> {
+    match patch_of(stack).get(&COOKING_TIME.into()) {
+        Some(Tag::Int(t)) => Some(*t),
+        _ => None,
+    }
+}
+
+/// The skillet with FD's cooking components set (`Some`) or all four removed (`None`).
+fn with_cooking(
+    host: &dyn Host,
+    skillet: &ItemStack,
+    cooking: Option<(&ItemStack, i32)>,
+) -> ItemStack {
+    let mut patch = patch_of(skillet);
+    for key in COMPONENT_TYPES {
+        patch.remove(&key.into());
+    }
+    if let Some((unit, time)) = cooking
+        && let Some(nbt) = unit.to_nbt(host)
+    {
+        patch.insert(INGREDIENT.into(), Tag::Compound(nbt));
+        patch.insert(COOKING_TIME.into(), Tag::Int(time));
+    }
+    let mut out = skillet.clone();
+    let _ = out.set_components(patch);
+    out
+}
+
+fn fire_aspect(stack: &ItemStack) -> i32 {
+    match patch_of(stack).get(&"minecraft:enchantments".into()) {
+        Some(Tag::Compound(levels)) => match levels.get(&"minecraft:fire_aspect".into()) {
+            Some(Tag::Int(l)) => *l,
+            _ => 0,
+        },
+        _ => 0,
+    }
+}
+
+/// `SkilletItem#isPlayerNearHeatSource`: on fire, or any heat source (lit or not, as the reference
+/// reads only the tag) in the 3×3×3 around the player's block.
+fn near_heat(host: &dyn Host, player: PlayerRef) -> bool {
+    let e = player.entity();
+    if e.fire_ticks(host).is_some_and(|t| t > 0) {
+        return true;
+    }
+    let (Some(level), Some(pos)) = (player.level(host), e.block_position(host)) else {
+        return false;
+    };
+    (-1..=1).any(|dx| {
+        (-1..=1).any(|dy| {
+            (-1..=1).any(|dz| {
+                level
+                    .block_state(host, [pos[0] + dx, pos[1] + dy, pos[2] + dz])
+                    .is_some_and(|s| host.block_in_tag(s.block(), HEAT_SOURCES) == Some(true))
+            })
+        })
+    })
+}
+
+fn under_water(host: &dyn Host, player: PlayerRef) -> bool {
+    let e = player.entity();
+    let (Some(level), Some(eye)) = (player.level(host), e.eye_position(host)) else {
+        return false;
+    };
+    let at = [
+        eye[0].floor() as i32,
+        eye[1].floor() as i32,
+        eye[2].floor() as i32,
+    ];
+    let water = host
+        .block_state_id("minecraft:water")
+        .and_then(|w| host.state_fluid_state(w));
+    level
+        .fluid_state(host, at)
+        .zip(water)
+        .is_some_and(|(f, w)| f.fluid == w.fluid)
+}
+
+fn campfire_result(host: &dyn Host, level: LevelRef, stack: &ItemStack) -> Option<RecipeMatch> {
+    let kind = Identifier::parse("minecraft:campfire_cooking").ok()?;
+    level
+        .recipe_for(host, &kind, &RecipeInput::Single(stack.clone()))
+        .ok()
+        .flatten()
+}
+
+fn other(hand: Hand) -> Hand {
+    match hand {
+        Hand::Main => Hand::Off,
+        Hand::Off => Hand::Main,
+    }
+}
+
+/// `SkilletItem#use` on the server.
+fn start_cooking(host: &mut dyn ServerHost, hand: Hand, skillet: &ItemStack) -> InteractionResult {
+    let Some(player) = host.players().acting_player() else {
+        return InteractionResult::Pass;
+    };
+    if !near_heat(&*host, player) {
+        return InteractionResult::Pass;
+    }
+    let Some(living) = host.living(player.entity()) else {
+        return InteractionResult::Pass;
+    };
+    if ingredient_of(&*host, skillet).is_some() {
+        living.start_using_item(host, hand);
+        return InteractionResult::Pass;
+    }
+    let Some(level) = player.level(&*host) else {
+        return InteractionResult::Pass;
+    };
+    let cooking = living.hand_item(&*host, other(hand));
+    let recipe = cooking
+        .as_ref()
+        .and_then(|c| campfire_result(&*host, level, c));
+    let (Some(cooking), Some(recipe)) = (cooking, recipe) else {
+        let _ = player.action_bar(
+            host,
+            Text::translate("item.farmersdelight.skillet.how_to_cook", vec![]),
+        );
+        return InteractionResult::Pass;
+    };
+    if under_water(&*host, player) {
+        let _ = player.action_bar(
+            host,
+            Text::translate("item.farmersdelight.skillet.underwater", vec![]),
+        );
+        return InteractionResult::Pass;
+    }
+    let split = cooking.split(1);
+    let Some(unit) = split.taken else {
+        return InteractionResult::Consume;
+    };
+    let next = with_cooking(
+        &*host,
+        skillet,
+        Some((&unit, recipe.processing_time as i32)),
+    );
+    let _ = living.set_hand_item(host, hand, Some(next));
+    living.start_using_item(host, hand);
+    // The reference sets the other hand to the copy it split the unit from (count − 1).
+    let _ = living.set_hand_item(host, other(hand), split.remainder);
+    InteractionResult::Consume
+}
+
 #[mod_api::horizon_part]
 impl ItemPart for SkilletItem {
+    fn use_item(
+        &self,
+        host: HostSide<'_>,
+        event: &mut UseItemEvent<'_>,
+    ) -> Option<InteractionResult> {
+        match host {
+            HostSide::Server(host) => Some(start_cooking(host, event.hand, event.stack)),
+            // The server starts the use; the client follows its synced use state.
+            HostSide::Client(_) => Some(InteractionResult::Consume),
+        }
+    }
+
+    /// `SkilletItem#getUseDuration`.
+    fn use_duration(&self, _: &dyn Host, event: &mut UseDurationEvent<'_>) {
+        if let Some(time) = cooking_time_of(event.stack) {
+            event.duration = skillet_cooking_time(time, fire_aspect(event.stack));
+        }
+    }
+
+    /// `SkilletItem#releaseUsing`: an early release gives the ingredient back.
+    fn release_using(&self, host: HostSide<'_>, event: &mut ReleaseUsingEvent<'_>) {
+        let HostSide::Server(host) = host else { return };
+        let Some(ingredient) = ingredient_of(&*host, event.stack) else {
+            return;
+        };
+        let Some(player) = host.players().acting_player() else {
+            return;
+        };
+        let Some(living) = host.living(player.entity()) else {
+            return;
+        };
+        let hand = living.used_item_hand(&*host).unwrap_or(Hand::Main);
+        let cleared = with_cooking(&*host, event.stack, None);
+        let _ = living.set_hand_item(host, hand, Some(cleared));
+        let _ = host.transaction(|host, tx| {
+            crate::inventory::give_or_drop(host, tx, player, ingredient.clone());
+            Ok::<_, ()>(())
+        });
+    }
+
+    /// The bar shows cooking progress in `0xFF8B4F` (`getBarWidth`/`getBarColor`).
+    fn item_bar(&self, host: &dyn ClientHost, event: &mut ItemBarEvent<'_>) {
+        let Some(time) = cooking_time_of(event.stack) else {
+            return;
+        };
+        let total = skillet_cooking_time(time, fire_aspect(event.stack)).max(1);
+        let remaining = host
+            .local_player()
+            .and_then(|p| host.living(p.entity()))
+            .and_then(|l| l.item_use_remaining(host))
+            .unwrap_or(total);
+        let width = (13.0 - (total + remaining) as f32 * 13.0 / total as f32 + 13.0)
+            .round()
+            .clamp(0.0, 13.0) as i32;
+        *event.bar = Some((width, 0xFF8B4F));
+    }
+
     /// `SkilletItem#postHurtEnemy`: 1 more wear per hit, on top of `Weapon(1)` (reference: 2 per hit, Q17).
     fn hurt_enemy(&self, host: &mut dyn ServerHost, _: &mut HurtEnemyEvent<'_>) {
         if let Some(living) = host
@@ -186,9 +432,53 @@ pub fn on_attack(host: &mut dyn ServerHost, event: &AttackEntityEvent<'_>) {
     level.play_sound(host, sound, at, SoundSource::Players, volume, pitch);
 }
 
+/// `SkilletItem#finishUsingItem`: the cooked result to the inventory (or dropped), one more of the
+/// other hand used up, the components cleared.
+pub fn on_finish(host: HostSide<'_>, event: &mut LivingEntityUseItemFinishEvent<'_>) {
+    let HostSide::Server(host) = host else { return };
+    if event.stack.item().id(&*host) != ITEM {
+        return;
+    }
+    let Some(ingredient) = ingredient_of(&*host, event.stack) else {
+        return;
+    };
+    let Some(player) = host.players().acting_player() else {
+        return;
+    };
+    let Some(level) = player.level(&*host) else {
+        return;
+    };
+    if let Some(recipe) = campfire_result(&*host, level, &ingredient) {
+        let result = recipe.output;
+        let _ = host.transaction(|host, tx| {
+            crate::inventory::give_or_drop(host, tx, player, result.clone());
+            Ok::<_, ()>(())
+        });
+    }
+    if let Some(living) = host.living(player.entity()) {
+        let other_hand = other(event.hand);
+        let rest = living
+            .hand_item(&*host, other_hand)
+            .and_then(|s| s.shrink(1));
+        let _ = living.set_hand_item(host, other_hand, rest);
+    }
+    *event.result = Some(with_cooking(&*host, event.stack, None));
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cooking_time_formula() {
+        assert_eq!(skillet_cooking_time(600, 0), 120); // 30 s × 0.2
+        assert_eq!(skillet_cooking_time(600, 1), 80); // × 0.15 → 4.5 s → 4 s
+        assert_eq!(skillet_cooking_time(600, 2), 60); // × 0.10 → 3 s
+        assert_eq!(skillet_cooking_time(600, 3), 60); // clamped to the minimum
+        assert_eq!(skillet_cooking_time(0, 0), 0); // the max is the *original* time (0): no use
+        assert_eq!(skillet_cooking_time(100, 0), 60);
+        assert_eq!(skillet_cooking_time(200, 0), 60); // 10 s × 0.2 = 2 s = 40 → min 60
+    }
 
     #[test]
     fn attack_sound_choice() {
