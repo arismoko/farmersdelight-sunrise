@@ -152,3 +152,7 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - also: sound now on in the test env (`HORIZON_NO_AUDIO` removed from `run/launch.sh`; vanilla sounds imported from
   the user's Prism asset store with Mojang's 26.3 version JSON, sha1 11f1aefe… verified).
 - note: boards placed before this change in the FDTest world kept loading (16 found after rebuild).
+- follow-up (user report): water is missing for one tick on the client when a waterlogged board is placed or broken.
+  Cause: client prediction uses the stonecutter template (no water on removal; no `waterlogged` on placement); the
+  server's correct state follows one tick later. **Decision (user, 2026-11-13): accept until E-13/E-14 land**; no
+  fork change. Recorded as accepted delta A10.
