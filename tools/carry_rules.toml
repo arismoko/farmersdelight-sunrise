@@ -1,0 +1,41 @@
+# Rules for tools/carry_fd.py (PORT_PLAN D6, M0-05). Change these and re-run; never hand-edit carried files.
+
+[source]
+repo = "https://github.com/MehVahdJukaar/FarmersDelightRefabricated"
+sha = "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3"
+# Order matters only for reporting: an overlapping path between roots is a hard error.
+roots = ["src/generated/resources", "src/main/resources"]
+
+# A file is carried only if its path (relative to a root) starts with one of these.
+include_prefixes = [
+  "assets/farmersdelight/",
+  "data/farmersdelight/",
+  "data/c/tags/",
+  "data/minecraft/tags/",
+]
+
+# fnmatch patterns (matched against the relative path); exclusion wins over inclusion.
+exclude = [
+  "data/farmersdelight/recipe/integration/*",
+  "data/farmersdelight/scripts/*",
+  "data/farmersdelight/create/*",
+  "data/farmersdelight/potato_cannon_projectile_types/*",
+  "data/farmersdelight/weapon_attributes/*",
+  "data/farmersdelight/horizon/*",          # owned by tools/gen_decls.py
+  "assets/farmersdelight/rrv/*",
+  "assets/farmersdelight/textures/gui/jei/*",
+  "assets/farmersdelight/textures/gui/emi/*",
+  "assets/farmersdelight/textures/gui/eiv/*",
+  "*.classtweaker",
+  "*.mixins.json",
+  "fabric.mod.json",
+  "*.java",
+]
+
+# Only rewrite: fabric:load_conditions -> neoforge:conditions with a mod-registered condition.
+# Any fabric:load_conditions value not listed here makes the script fail.
+[[load_condition]]
+fabric = [{ condition = "farmersdelight:vanilla_crates_enabled" }]
+# The condition is registered under the mod id: Horizon requires a load condition's namespace to equal the
+# registering mod's id (crates/horizon-mod-vocab/src/content/load_conditions.rs, LoadConditionDeclarations).
+neoforge = [{ type = "ported_farmersdelight:vanilla_crates_enabled" }]
