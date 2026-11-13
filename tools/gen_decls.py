@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate Horizon content declarations from tools/decl/*.toml (PORT_PLAN M0-06).
+"""Generate Horizon content declarations from tools/decl/*.toml.in (PORT_PLAN M0-06).
 
-Each tools/decl/<kind>.toml holds one table per id (the path under `farmersdelight:`). Every row
+Each tools/decl/<kind>.toml.in holds one table per id (the path under `farmersdelight:`). Every row
 carries `source = "<FD file:SYMBOL>"` (dropped from the output); the other keys are the
 declaration exactly as Horizon reads it. Keys are checked against the build pin's
 `deny_unknown_fields` structs (crates/horizon-mod-package/src/content.rs @ afe471cf) so a typo fails
@@ -56,7 +56,7 @@ class DeclError(Exception):
 
 def validate(kind: str, name: str, row: dict) -> dict:
     _, allowed, required = KINDS[kind]
-    where = f"tools/decl/{kind}.toml [{name}]"
+    where = f"tools/decl/{kind}.toml.in [{name}]"
     if not name or any(not (c.islower() or c.isdigit() or c in "_/.-") for c in name):
         raise DeclError(f"{where}: bad id path")
     if "source" not in row:
@@ -78,7 +78,7 @@ def render(decl: Path = DECL) -> dict[str, bytes]:
     """Relative output path (under data/farmersdelight/horizon) -> file bytes."""
     out: dict[str, bytes] = {}
     for kind in sorted(KINDS):
-        path = decl / f"{kind}.toml"
+        path = decl / f"{kind}.toml.in"
         if not path.exists():
             continue
         with path.open("rb") as f:

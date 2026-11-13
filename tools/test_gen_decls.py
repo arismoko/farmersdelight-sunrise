@@ -15,7 +15,7 @@ class GenDeclsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp)
             for name, text in files.items():
-                (d / name).write_text(text, "utf-8")
+                (d / (name + ".in")).write_text(text, "utf-8")
             return gen_decls.render(d)
 
     def test_item_and_block(self):

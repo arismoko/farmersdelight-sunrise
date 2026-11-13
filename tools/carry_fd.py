@@ -7,7 +7,7 @@ Usage:
   carry_fd.py --fd <checkout> --out <dir>                           # write into another tree
 
 Files are copied byte for byte; the only content change is the fabric:load_conditions rewrite
-from tools/carry_rules.toml. tools/carry_manifest.json records every carried file.
+from tools/carry_rules.toml.in. tools/carry_manifest.json records every carried file.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-RULES = REPO / "tools" / "carry_rules.toml"
+RULES = REPO / "tools" / "carry_rules.toml.in"
 MANIFEST_REL = "tools/carry_manifest.json"
 FABRIC_KEY = "fabric:load_conditions"
 NEOFORGE_KEY = "neoforge:conditions"

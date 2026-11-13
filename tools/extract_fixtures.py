@@ -3,7 +3,7 @@
 
 Data-derived (JSON parse of FD data): cutting_recipes, cooking_recipes, heat_tags.
 Java-derived (FD is MIT; parsed from source text, each row cites its symbol): foods, config_defaults.
-Transcribed (tools/fixture_src/*.toml, each row cites its symbol): knives.
+Transcribed (tools/fixture_src/*.toml.in, each row cites its symbol): knives.
 loot_rules is transcribed in M8-05 (not produced yet).
 
 Usage: extract_fixtures.py --fd <checkout> [--check]
@@ -144,7 +144,7 @@ def config_defaults(fd: Path) -> dict:
 
 
 def knives() -> dict:
-    with (SRC / "knives.toml").open("rb") as f:
+    with (SRC / "knives.toml.in").open("rb") as f:
         return tomllib.load(f)
 
 

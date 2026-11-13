@@ -1,3 +1,4 @@
+# (Named *.toml.in: the Horizon packager refuses .toml files outside src/.)
 # Knife table (PORT_PLAN M0-09). Transcribed from FD Java (MIT); vanilla ToolMaterial values for the
 # non-flint knives are verified in M8-01 and are left as material names here.
 # Attribute rule (J/common/item/KnifeItem.java:createAttributes, ModItems.knifeItem):

@@ -9,7 +9,7 @@ Data, assets and behaviour are carried or adapted from Farmer's Delight
 Refabricated (https://github.com/MehVahdJukaar/FarmersDelightRefabricated,
 branch fabric/latest/26.3, commit 1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3,
 version 26.3-3.6.30+refabricated), MIT License, Copyright (c) 2020 vectorwing.
-Full licence text: third_party/farmersdelight/LICENSE.
+Full licence text: LICENSE-farmersdelight (also third_party/farmersdelight/LICENSE).
 
 Credits: vectorwing (Farmer's Delight); MehVahdJukaar, cassiancc and the
 Refabricated contributors (Fabric port). Courtesy credits as named by the

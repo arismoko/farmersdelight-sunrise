@@ -1,7 +1,7 @@
 {
  "fd_repo": "https://github.com/MehVahdJukaar/FarmersDelightRefabricated",
  "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
- "rules_sha256": "2c80b539c1d4326d325c7fe260912e7a32aef569ac6c847022babb593c46a28f",
+ "rules_sha256": "e6c5060846b460527da74f2e77d3a388c9a5f41eb9f724b3deaff7a266317678",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",

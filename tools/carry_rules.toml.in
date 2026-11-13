@@ -1,3 +1,4 @@
+# (Named *.toml.in: the Horizon packager refuses .toml files outside src/.)
 # Rules for tools/carry_fd.py (PORT_PLAN D6, M0-05). Change these and re-run; never hand-edit carried files.
 
 [source]
