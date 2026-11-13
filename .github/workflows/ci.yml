@@ -29,6 +29,7 @@ jobs:
       - run: python3 tools/test_fixtures.py
       - run: python3 tools/carry_fd.py --fd ../fd --check
       - run: python3 tools/gen_decls.py --check
+      - run: python3 tools/gen_conventional_tags.py --check
       - run: python3 tools/extract_fixtures.py --fd ../fd --check
       - run: cargo fetch --locked
       - run: cargo fmt --all --check
