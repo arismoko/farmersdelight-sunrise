@@ -481,6 +481,16 @@ pub fn on_finish(host: HostSide<'_>, event: &mut LivingEntityUseItemFinishEvent<
     *event.result = Some(with_cooking(&*host, event.stack, None));
 }
 
+/// The mod's item-model node type for the cooking skillet (see the carry override of
+/// `items/skillet.json`).
+pub const FLIP_MODEL: &str = "ported_farmersdelight:skillet_flip";
+pub const IS_COOKING: &str = "farmersdelight:skillet/is_cooking";
+
+/// `SkilletCookingConditionalItemModelProperty`: the stack holds an ingredient.
+pub fn is_cooking(stack: &ItemStack) -> bool {
+    patch_of(stack).contains_key(&INGREDIENT.into())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

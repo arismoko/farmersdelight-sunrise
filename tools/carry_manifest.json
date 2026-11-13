@@ -1,7 +1,7 @@
 {
  "fd_repo": "https://github.com/MehVahdJukaar/FarmersDelightRefabricated",
  "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
- "rules_sha256": "e6c5060846b460527da74f2e77d3a388c9a5f41eb9f724b3deaff7a266317678",
+ "rules_sha256": "7f4a678e0aec62bd6f8442007d019b2b8c65026c5aef83c0f98ea9461e447f8a",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -2009,8 +2009,8 @@
    "source": "src/main/resources/assets/farmersdelight/items/skillet.json",
    "dest": "assets/farmersdelight/items/skillet.json",
    "sha256_source": "ad4eee36a3c88f954b41b9a39a34fa651cde718087ff40f17773aa4da69a28dd",
-   "sha256_dest": "ad4eee36a3c88f954b41b9a39a34fa651cde718087ff40f17773aa4da69a28dd",
-   "rule": "copy"
+   "sha256_dest": "6b3cb675277cfca95329b84eccceef5a42f859a9f415b901e43dd6b0f7391fe9",
+   "rule": "override"
   },
   {
    "source": "src/main/resources/assets/farmersdelight/items/smoked_ham.json",

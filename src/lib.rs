@@ -78,6 +78,27 @@ impl Hooks for FarmersDelight {
         items::skillet::on_finish(host, event);
     }
 
+    fn register_item_models(
+        &self,
+        _: &RegistrationContext,
+        event: &mut RegisterItemModelsEvent<'_>,
+    ) {
+        event.models.push(items::skillet::FLIP_MODEL.into());
+    }
+
+    /// Draws the cooking skillet's model; FD's flip animation is omitted (delta A12).
+    fn item_model_update(&self, _: &dyn ClientHost, event: &mut ItemModelUpdateEvent<'_>) {
+        if event.kind == items::skillet::FLIP_MODEL {
+            event.models.push("cooking".into());
+        }
+    }
+
+    fn item_model_property(&self, _: &dyn ClientHost, event: &mut ItemModelPropertyEvent<'_>) {
+        if event.property == items::skillet::IS_COOKING {
+            event.value = items::skillet::is_cooking(event.stack);
+        }
+    }
+
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
         items::skillet::on_attack(host, event);
         Flow::Continue

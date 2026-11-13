@@ -40,3 +40,13 @@ fabric = [{ condition = "farmersdelight:vanilla_crates_enabled" }]
 # The condition is registered under the mod id: Horizon requires a load condition's namespace to equal the
 # registering mod's id (crates/horizon-mod-vocab/src/content/load_conditions.rs, LoadConditionDeclarations).
 neoforge = [{ type = "ported_farmersdelight:vanilla_crates_enabled" }]
+
+# Whole-file overrides (approved exceptions to D6's single rewrite, each with its reason). The file
+# under tools/carry_overrides/<dest> replaces the carried one; the manifest records rule "override".
+[[override]]
+dest = "assets/farmersdelight/items/skillet.json"
+# FD's `farmersdelight:skillet_flip` node is `{"model": id}` with an animated Java renderer. Horizon's
+# mod item-model nodes list named child nodes under `models` and only choose among them
+# (register_item_models / item_model_update; ids must be `<mod id>:<path>`), so the node is restated in
+# that shape; the flip animation itself is omitted (delta A12, E-16).
+reason = "item-model node shape differs (A12/E-16)"

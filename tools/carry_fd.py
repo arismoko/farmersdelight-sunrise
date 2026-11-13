@@ -107,6 +107,10 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
             if changed:
                 result = (json.dumps(new, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
                 rule = "load_conditions"
+        overrides = {o["dest"] for o in rules.get("override", [])}
+        if rel in overrides:
+            result = (REPO / "tools" / "carry_overrides" / rel).read_bytes()
+            rule = "override"
         dest = out / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists() or dest.read_bytes() != result:
@@ -177,8 +181,10 @@ def counts(manifest: dict) -> list[tuple[str, int]]:
             c["structures"] += 1
         if d.startswith("data/farmersdelight/villager_trade/"):
             c["villager trades"] += 1
-        if e["rule"] != "copy":
+        if e["rule"] == "load_conditions":
             c["rewritten"] += 1
+        if e["rule"] == "override":
+            c["overridden"] += 1
     c["total files"] = len(manifest["files"])
     return sorted(c.items())
 
