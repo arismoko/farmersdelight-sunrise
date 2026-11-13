@@ -157,77 +157,93 @@ fn other(hand: Hand) -> Hand {
     }
 }
 
-/// `SkilletItem#use` on the server.
-fn start_cooking(host: &mut dyn ServerHost, hand: Hand, skillet: &ItemStack) -> InteractionResult {
-    let Some(player) = host.players().acting_player() else {
-        return InteractionResult::Pass;
-    };
-    if !near_heat(&*host, player) {
-        return InteractionResult::Pass;
+/// The duration a bare skillet answers so a click starts a use; `on_use_start` replaces it.
+const USE_PROBE: i32 = 72_000;
+
+/// `SkilletItem#use`, at the use's start on both sides (`LivingEntity.startUsingItem`): near a heat
+/// source, with an ingredient already in the skillet or a campfire-cookable stack in the other hand
+/// (not under water), the use runs for `getSkilletCookingTime`; otherwise it is cancelled. The
+/// server stores one unit in the skillet and leaves the rest in the other hand.
+pub fn on_use_start(host: HostSide<'_>, event: &mut LivingEntityUseItemStartEvent<'_>) -> Flow {
+    if event.entity.is_some() {
+        return Flow::Continue;
     }
-    let Some(living) = host.living(player.entity()) else {
-        return InteractionResult::Pass;
+    let (read, player): (&dyn Host, Option<PlayerRef>) = match &host {
+        HostSide::Server(h) => (&**h, h.players().acting_player()),
+        HostSide::Client(h) => (&**h, h.local_player()),
     };
-    if ingredient_of(&*host, skillet).is_some() {
-        living.start_using_item(host, hand);
-        return InteractionResult::Pass;
+    if event.stack.item().id(read) != ITEM {
+        return Flow::Continue;
     }
-    let Some(level) = player.level(&*host) else {
-        return InteractionResult::Pass;
+    let Some(player) = player else {
+        return Flow::Continue;
     };
-    let cooking = living.hand_item(&*host, other(hand));
-    let recipe = cooking
-        .as_ref()
-        .and_then(|c| campfire_result(&*host, level, c));
+    let fa = fire_aspect(event.stack);
+    if !near_heat(read, player) {
+        event.cancelled = true;
+        return Flow::Continue;
+    }
+    if ingredient_of(read, event.stack).is_some()
+        && let Some(time) = cooking_time_of(event.stack)
+    {
+        event.duration = skillet_cooking_time(time, fa);
+        return Flow::Continue;
+    }
+    let hand = event.hand;
+    let cooking = read
+        .living(player.entity())
+        .and_then(|l| l.hand_item(read, other(hand)));
+    let recipe = player
+        .level(read)
+        .zip(cooking.as_ref())
+        .and_then(|(level, c)| campfire_result(read, level, c));
+    let underwater = under_water(read, player);
     let (Some(cooking), Some(recipe)) = (cooking, recipe) else {
-        let _ = player.action_bar(
-            host,
-            Text::translate("item.farmersdelight.skillet.how_to_cook", vec![]),
-        );
-        return InteractionResult::Pass;
+        event.cancelled = true;
+        if let HostSide::Server(h) = host {
+            let _ = player.action_bar(
+                h,
+                Text::translate("item.farmersdelight.skillet.how_to_cook", vec![]),
+            );
+        }
+        return Flow::Continue;
     };
-    if under_water(&*host, player) {
-        let _ = player.action_bar(
-            host,
-            Text::translate("item.farmersdelight.skillet.underwater", vec![]),
-        );
-        return InteractionResult::Pass;
+    if underwater {
+        event.cancelled = true;
+        if let HostSide::Server(h) = host {
+            let _ = player.action_bar(
+                h,
+                Text::translate("item.farmersdelight.skillet.underwater", vec![]),
+            );
+        }
+        return Flow::Continue;
     }
-    let split = cooking.split(1);
-    let Some(unit) = split.taken else {
-        return InteractionResult::Consume;
-    };
-    let next = with_cooking(
-        &*host,
-        skillet,
-        Some((&unit, recipe.processing_time as i32)),
-    );
-    let _ = living.set_hand_item(host, hand, Some(next));
-    living.start_using_item(host, hand);
-    // The reference sets the other hand to the copy it split the unit from (count − 1).
-    let _ = living.set_hand_item(host, other(hand), split.remainder);
-    InteractionResult::Consume
+    let time = recipe.processing_time as i32;
+    event.duration = skillet_cooking_time(time, fa);
+    if let HostSide::Server(h) = host
+        && let Some(living) = h.living(player.entity())
+    {
+        let split = cooking.split(1);
+        if let Some(unit) = split.taken {
+            let next = with_cooking(&*h, event.stack, Some((&unit, time)));
+            let _ = living.set_hand_item(h, hand, Some(next));
+            // The reference sets the other hand to the copy the unit was split from (count − 1).
+            let _ = living.set_hand_item(h, other(hand), split.remainder);
+        }
+    }
+    Flow::Continue
 }
 
 #[mod_api::horizon_part]
 impl ItemPart for SkilletItem {
-    fn use_item(
-        &self,
-        host: HostSide<'_>,
-        event: &mut UseItemEvent<'_>,
-    ) -> Option<InteractionResult> {
-        match host {
-            HostSide::Server(host) => Some(start_cooking(host, event.hand, event.stack)),
-            // The server starts the use; the client follows its synced use state.
-            HostSide::Client(_) => Some(InteractionResult::Consume),
-        }
-    }
-
-    /// `SkilletItem#getUseDuration`.
+    /// `SkilletItem#getUseDuration`. Always above 0 so a right click starts a use on both sides
+    /// (the engine then treats the skillet as used over time); `on_use_start` sets the real
+    /// time or cancels.
     fn use_duration(&self, _: &dyn Host, event: &mut UseDurationEvent<'_>) {
-        if let Some(time) = cooking_time_of(event.stack) {
-            event.duration = skillet_cooking_time(time, fire_aspect(event.stack));
-        }
+        event.duration = match cooking_time_of(event.stack) {
+            Some(time) => skillet_cooking_time(time, fire_aspect(event.stack)),
+            None => USE_PROBE,
+        };
     }
 
     /// `SkilletItem#releaseUsing`: an early release gives the ingredient back.

@@ -62,6 +62,14 @@ impl Hooks for FarmersDelight {
         );
     }
 
+    fn living_entity_use_item_start(
+        &self,
+        host: HostSide<'_>,
+        event: &mut LivingEntityUseItemStartEvent<'_>,
+    ) -> Flow {
+        items::skillet::on_use_start(host, event)
+    }
+
     fn living_entity_use_item_finish(
         &self,
         host: HostSide<'_>,
