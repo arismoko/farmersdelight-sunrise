@@ -190,3 +190,41 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - env: `run/play.sh` added for the user to play with a captured mouse; `run/launch.sh` (agent, `--control`) never
   captures the pointer at afe471cf (`unclaimed_window` is never cleared, also on main 2026-11-13).
 - next: M2-01
+
+## M2-01 Heat module — PASS (unit) — 2026-11-13
+- mod commit: 2026 series (cd17057) | `src/heat.rs`: HeatableBlockEntity rule over a lookup; 12-case table test; carried
+  tags checked. In-game proof is due with the placed skillet (M2-09) and pot heat icon (M3-05), per plan.
+
+## M2-02 Stove block — PASS — 2026-11-13
+- template `minecraft:stonecutter` (native facing placed opposite; no BE), full-cube shape, bricks' properties,
+  declared `lit` default true, `state_light` lit→13; empty-hand template use (stonecutter menu) answered Pass.
+- in game (M1Demo): placed → `lit=true` (Q7); block light at the stove = 13; iron shovel → unlit, durability −1;
+  flint & steel → lit, durability −1; water bucket → unlit and an empty bucket returned.
+- found: FD relies on **Fabric API convention tags** (`c:buckets/water`, `c:tools/shear`, crops, dyes, ingots …)
+  that Horizon does not ship. The mod now generates the 28 item tags FD's data needs
+  (`tools/conventional/item_tags.toml.in` → `data/c/tags/item`, `tools/gen_conventional_tags.py --check` in CI);
+  skipped cutting recipes 60 → 57. Biome convention tags left for M6.
+
+## M2-03 Stove block entity — PASS — 2026-11-13
+- 6 one-item slots, campfire recipes via `LevelRef::recipe_for`; NBT `CookingTimes`=totals,
+  `CookingTotalTimes`=progress (Q4); `Inventory` mirrored for the client; ticks always.
+- in game: 6 beef accepted, 7th refused; 6 cooked beef after 600 ticks each; shovel mid-cook → progress −2/tick
+  (342 → 260 in ~2 s), relight resumes; save & quit + reopen mid-cook keeps progress and continues (no instant cook);
+  bottom slab above → items drop; placing food under a bottom slab refused. Top slab: unit-tested only
+  (`covers_grill`). No XP (Q12).
+
+## M2-04 Stove client — PARTIAL — 2026-11-13
+- renderer: 6 items flat in the 3×2 grid on the lit top (`../run/shots/m2-stove-6-beef.png`, facing north).
+  Client tick: crackle 1/10, smoke + flame at the front, item steam 20%×3, lit only (code; particles not yet
+  screenshotted, other three facings not yet checked).
+
+## M2-05 Stove burn — PASS (with delta A11) — 2026-11-13
+- `block_step_on` has no host and `entity_inside` cannot hurt, so the stove's tick hurts living, on-ground,
+  non-sneaking entities meeting the grilling area above (FD's condition), 1.0 per hit.
+- **E-15**: mod damage types are not loaded (damage catalog built without mod packs; `/damage …
+  farmersdelight:stove_burn` → "invulnerable"; tags naming it "unresolved"). Burn uses `minecraft:hot_floor`
+  (same `is_fire`/`burn_from_stepping` tags) → accepted delta **A11** (death message differs).
+- in game: standing on lit stove → hurt 1.0; sneaking 4 s → 0; unlit → 0.
+- engine observation: `/damage` with `generic` or `hot_floor` (both in `#no_knockback`) still knocks the player
+  ~1 block at the pin → being burned also flings the player off the stove. Not mod code; candidate engine bug report.
+- next: M2-06 (skillet item)
