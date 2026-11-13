@@ -335,6 +335,21 @@ impl BlockEntityPart for Skillet {
         }
     }
 
+    /// Records the placed stack while the block entity is still readable (see [`Removed`]).
+    fn pre_remove_side_effects(
+        &self,
+        _: &mut dyn LevelRandomHost,
+        event: &mut PreRemoveSideEffectsEvent<'_>,
+    ) {
+        if let Some(Tag::Compound(c)) = event.entity.nbt.get(&SKILLET.into()) {
+            let pos = [event.pos.x, event.pos.y, event.pos.z];
+            self.removed
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .insert(pos, c.clone());
+        }
+    }
+
     fn block_entity_update_tag(
         &self,
         event: &mut BlockEntityUpdateTagEvent<'_>,
