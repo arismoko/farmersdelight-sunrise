@@ -33,6 +33,15 @@ impl Hooks for FarmersDelight {
         registry::register_load_conditions(event);
     }
 
+    fn tags_updated(&self, host: HostSide<'_>, event: &mut TagsUpdatedEvent) {
+        // The server's data tables were (re)built: rebuild the recipe tables from them.
+        if let (HostSide::Server(host), TagsUpdateCause::ServerDataLoad { .. }) =
+            (host, event.cause)
+        {
+            self.recipes.rebuild(&*host);
+        }
+    }
+
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
         self.recipes.clear();
     }
@@ -47,6 +56,16 @@ mod tests {
     use super::*;
     use std::sync::Arc;
 
+    fn beef_recipe() -> recipes::cutting::CuttingRecipe {
+        recipes::cutting::CuttingRecipe {
+            id: "farmersdelight:cutting/beef".into(),
+            input: Ingredient::of(vec!["minecraft:beef".into()]),
+            tools: vec![],
+            results: vec![],
+            sound: None,
+        }
+    }
+
     fn with_mod(recipes: Arc<recipes::RecipeTables>, f: impl FnOnce()) {
         let fd = FarmersDelight { recipes };
         testing::with_mods(vec![ModEntry::new(ids::MOD_ID, Box::new(fd))].into(), f);
@@ -57,14 +76,10 @@ mod tests {
         let tables = Arc::new(recipes::RecipeTables::default());
         let mut host = testing::FakeHost::new();
         with_mod(tables.clone(), || {
-            tables
-                .cutting
-                .publish(vec!["farmersdelight:cutting/beef".into()]);
+            tables.cutting.publish(vec![beef_recipe()]);
             dispatch_server_stopped(&mut host, false);
             assert!(tables.cutting.snapshot().is_empty());
-            tables
-                .cutting
-                .publish(vec!["farmersdelight:cutting/beef".into()]);
+            tables.cutting.publish(vec![beef_recipe()]);
             dispatch_server_about_to_start(&mut host, true);
             assert!(tables.cutting.snapshot().is_empty());
         });
