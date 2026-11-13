@@ -273,3 +273,13 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `loot_drops` runs: `farmersdelight:copy_skillet` is a no-op loot function and the placed stack is recorded in
   `pre_remove_side_effects` and applied in `loot_drops`.
 - next: M2-10 (demo incl. save/restart mid-cook and LAN second client)
+
+## M2-10 multiplayer part — PARTIAL — 2026-11-13
+- setup (no account): dedicated server exported with the mod (`native-build --server-output run/server-engine`,
+  server SDK prebuilt-afe471cf, sha256 verified), `run/fd-server` offline mode bound to 127.0.0.1:25570; two
+  clients run directly from a copy of the modded build (`run/mp/client.sh A Alice`, `B Bob`; ctl wrappers
+  `run/mp/ctlA|ctlB`, console `run/mp/sv`). Music 0, master volume 25% on both (user request).
+- PASS: second client (Bob) sees Alice's stove items on the lit stove, its flames/smoke, and the placed skillet's
+  contents (beef in the pan, steam) (`run/shots/m2-10-bob-view*.png`).
+- NOT RUN yet: skillet attack sound with a player victim (FD's attack sounds have no subtitle, so it needs a
+  listen check), save/restart mid-cook on the server, single-player recorded demo run.
