@@ -19,3 +19,42 @@ pub fn register_load_conditions(event: &mut RegisterLoadConditionsEvent<'_>) {
         VanillaCratesEnabled,
     );
 }
+
+/// Block-entity types and their Parts (PORT_PLAN §6.4 step 4).
+pub fn register(
+    registrar: &mut dyn Registrar,
+    recipes: &std::sync::Arc<crate::recipes::RecipeTables>,
+    water: &std::sync::Arc<std::sync::OnceLock<FluidKey>>,
+) {
+    use crate::blocks::cutting_board;
+    let board = registrar
+        .block_entity_type(cutting_board::ID)
+        .blocks(&[cutting_board::ID])
+        .build();
+    let item_particle = registrar.particle_key("minecraft:item");
+    registrar
+        .block_entity_part(
+            &board,
+            cutting_board::CuttingBoard {
+                recipes: recipes.clone(),
+                item_particle,
+                water: water.clone(),
+            },
+        )
+        .expect("cutting board block entity type");
+}
+
+/// Item storage of the mod's block entities (`ModContainer`).
+pub fn container(block: &str) -> Option<ModContainer> {
+    match block {
+        // One slot, open to automation on every face (Fabric Transfer, all sides).
+        crate::blocks::cutting_board::ID => Some(ModContainer {
+            slots: 1,
+            faces: std::array::from_fn(|_| vec![0]),
+            inputs: vec![0],
+            outputs: vec![0],
+            menu: None,
+        }),
+        _ => None,
+    }
+}

@@ -21,6 +21,8 @@ use mod_api::*;
 #[derive(Default)]
 struct FarmersDelight {
     recipes: std::sync::Arc<recipes::RecipeTables>,
+    /// `minecraft:water`'s fluid key, resolved at the first server data load.
+    water: std::sync::Arc<std::sync::OnceLock<FluidKey>>,
 }
 
 #[mod_api::horizon_mod]
@@ -33,11 +35,26 @@ impl Hooks for FarmersDelight {
         registry::register_load_conditions(event);
     }
 
+    fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
+        registry::register(registrar, &self.recipes, &self.water);
+    }
+
+    fn block_entity_container(
+        &self,
+        _: &dyn Host,
+        event: &mut BlockEntityContainerEvent<'_>,
+    ) -> Option<ModContainer> {
+        registry::container(event.block)
+    }
+
     fn tags_updated(&self, host: HostSide<'_>, event: &mut TagsUpdatedEvent) {
         // The server's data tables were (re)built: rebuild the recipe tables from them.
         if let (HostSide::Server(host), TagsUpdateCause::ServerDataLoad { .. }) =
             (host, event.cause)
         {
+            if let Some(water) = host.fluid_key("minecraft:water") {
+                let _ = self.water.set(water);
+            }
             self.recipes.rebuild(&*host);
         }
     }
@@ -67,7 +84,10 @@ mod tests {
     }
 
     fn with_mod(recipes: Arc<recipes::RecipeTables>, f: impl FnOnce()) {
-        let fd = FarmersDelight { recipes };
+        let fd = FarmersDelight {
+            recipes,
+            ..Default::default()
+        };
         testing::with_mods(vec![ModEntry::new(ids::MOD_ID, Box::new(fd))].into(), f);
     }
 
