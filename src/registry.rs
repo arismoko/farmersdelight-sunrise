@@ -24,7 +24,6 @@ pub fn register_load_conditions(event: &mut RegisterLoadConditionsEvent<'_>) {
 pub fn register(
     registrar: &mut dyn Registrar,
     recipes: &std::sync::Arc<crate::recipes::RecipeTables>,
-    water: &std::sync::Arc<std::sync::OnceLock<FluidKey>>,
 ) {
     use crate::blocks::cutting_board;
     let board = registrar
@@ -38,7 +37,6 @@ pub fn register(
             cutting_board::CuttingBoard {
                 recipes: recipes.clone(),
                 item_particle,
-                water: water.clone(),
             },
         )
         .expect("cutting board block entity type");

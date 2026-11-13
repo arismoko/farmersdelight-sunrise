@@ -1,1 +1,2 @@
-//! See PORT_PLAN §6.1.
+//! Client-side drawing. See PORT_PLAN §6.1.
+pub mod render;

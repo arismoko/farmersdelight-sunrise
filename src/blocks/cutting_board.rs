@@ -3,6 +3,7 @@
 //! Block: `facing` (opposite the placer), `waterlogged`, survives on a rigid or center-supported
 //! floor and pops off otherwise (`updateShape` on DOWN). Block entity: one slot (`Items`, engine
 //! owned) and `IsItemCarved` in its NBT. Interaction uses the **main hand only** (Q8).
+use crate::client::render::{Pose, draw_board, model_count};
 use crate::recipes::{RecipeTables, cutting};
 use mod_api::*;
 use std::collections::BTreeMap;
@@ -10,6 +11,8 @@ use std::sync::Arc;
 
 pub const ID: &str = "farmersdelight:cutting_board";
 pub const CARVED: &str = "IsItemCarved";
+pub const INVENTORY: &str = "Inventory";
+const FLAT_TAG: &str = "farmersdelight:flat_on_cutting_board";
 /// `ItemStackHandler`'s default slot limit.
 pub const SLOT_LIMIT: u32 = 64;
 
@@ -96,8 +99,6 @@ pub fn is_carved(nbt: &Compound) -> bool {
 pub struct CuttingBoard {
     pub recipes: Arc<RecipeTables>,
     pub item_particle: ParticleKey,
-    /// `Fluids.WATER`, resolved once the server's registries are known (`tags_updated`).
-    pub water: Arc<std::sync::OnceLock<FluidKey>>,
 }
 
 /// The value of `key` in a state string such as `ns:block[facing=north,waterlogged=true]`.
@@ -126,7 +127,11 @@ impl BlockPart for CuttingBoard {
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
         let facing = facing_for_yaw(event.context.yaw);
-        let water = self.water.get().is_some_and(|w| event.fluid.fluid == *w);
+        // `fluid.getType() == Fluids.WATER`: water's source fluid, read from the water block.
+        let water = level
+            .block_state_id("minecraft:water")
+            .and_then(|w| level.state_fluid_state(w))
+            .is_some_and(|w| w.fluid == event.fluid.fluid);
         let state = level.state_with_property(event.state, "facing", facing)?;
         let state = level.state_with_property(
             state,
@@ -213,12 +218,9 @@ impl CuttingBoard {
             pos[2] as f64 + 0.5,
         ];
 
-        let held_info = held.as_ref().map(|s| {
-            (
-                s.count(),
-                host.max_stack_size(s.item()).unwrap_or(64),
-            )
-        });
+        let held_info = held
+            .as_ref()
+            .map(|s| (s.count(), host.max_stack_size(s.item()).unwrap_or(64)));
         let stored_info = stored.as_ref().map(|s| {
             (
                 s.count(),
@@ -238,6 +240,7 @@ impl CuttingBoard {
                 })
                 .ok()?;
                 clear_carved(host, be, carved);
+                mirror_inventory(host, be, None);
                 level.play_sound(host, SOUND_REMOVE, center, SoundSource::Blocks, 0.25, 0.5);
                 host.block_entity_sync(pos);
                 Some(InteractionResult::Success)
@@ -260,6 +263,7 @@ impl CuttingBoard {
                     Ok::<_, ()>(())
                 })
                 .ok()?;
+                mirror_inventory(host, be, Some(&next));
                 if !creative {
                     let living = host.living(player.entity())?;
                     let _ = living.set_hand_item(host, Hand::Main, held.shrink(n));
@@ -382,6 +386,7 @@ impl CuttingBoard {
                 .map(|_| ())
                 .map_err(|_| ())
         });
+        mirror_inventory(host, be, remaining.as_ref());
         if let Ok(trigger) = Identifier::parse(USE_CUTTING_BOARD) {
             let _ = player.trigger_criterion(host, &trigger, Arc::new(Always));
         }
@@ -427,6 +432,18 @@ fn in_item_tag(host: &dyn Host, stack: &ItemStack, tag: &str) -> bool {
         == Some(true)
 }
 
+/// Keep the reference's `Inventory` list (one stack or none) in the block entity's NBT, so the
+/// update tag can send what the board holds. `Items` stays the engine-owned saved copy.
+fn mirror_inventory(host: &mut dyn ServerHost, be: BlockEntityRef, stack: Option<&ItemStack>) {
+    let list = stack
+        .and_then(|s| s.to_nbt(&*host))
+        .map(|c| vec![Tag::Compound(c)])
+        .unwrap_or_default();
+    let mut data = BTreeMap::new();
+    data.insert(INVENTORY.into(), Tag::List(list));
+    let _ = be.merge_data(host, data);
+}
+
 fn clear_carved(host: &mut dyn ServerHost, be: BlockEntityRef, carved: bool) {
     if carved {
         let mut data = BTreeMap::new();
@@ -441,10 +458,59 @@ impl BlockEntityPart for CuttingBoard {
         &self,
         event: &mut BlockEntityUpdateTagEvent<'_>,
     ) -> Option<Compound> {
-        // Inventory (via the update tag, never relying on Items reaching the client) is added by M1-06.
+        // The client copy never receives `items` (seen in game, U-6): the update tag carries the
+        // reference's `Inventory` list, mirrored into the NBT on each server-side change.
         let mut tag = BTreeMap::new();
         tag.insert(CARVED.into(), Tag::Byte(is_carved(&event.entity.nbt) as i8));
+        if let Some(inv) = event.entity.nbt.get(&INVENTORY.into()) {
+            tag.insert(INVENTORY.into(), inv.clone());
+        }
         Some(tag)
+    }
+
+    fn block_entity_submit(&self, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
+        let Some(stack) = stored_on_client(host, event.entity) else {
+            return;
+        };
+        let name = host.block_state_string(event.state).unwrap_or_default();
+        let facing = state_value(&name, "facing").unwrap_or("north");
+        let pose = if is_carved(&event.entity.nbt) {
+            let tool = in_item_tag(host, &stack, "minecraft:pickaxes")
+                || in_item_tag(host, &stack, "minecraft:hoes");
+            // TridentItem → 135: M8-03 (tool carving)
+            Pose::Carved {
+                angle: if tool { 225.0 } else { 180.0 },
+            }
+        } else if host.item_block(stack.item()).is_some() && !in_item_tag(host, &stack, FLAT_TAG) {
+            Pose::Block
+        } else {
+            Pose::Flat
+        };
+        let max = host.max_stack_size(stack.item()).unwrap_or(64);
+        let seed = stack.item().id(host).len() as i32; // stand-in for Item.getId + damage
+        draw_board(
+            event.draw,
+            &stack,
+            facing,
+            pose,
+            model_count(stack.count(), max),
+            seed,
+        );
+    }
+}
+
+/// The stored stack as the client sees it: the mirrored item list if the engine sends it,
+/// else the `Inventory` list of the update tag.
+fn stored_on_client(host: &dyn Host, entity: &ModBlockEntity) -> Option<ItemStack> {
+    if let Some(Some(stack)) = entity.items.first() {
+        return Some(stack.clone());
+    }
+    match entity.nbt.get(&INVENTORY.into()) {
+        Some(Tag::List(list)) => list.iter().find_map(|t| match t {
+            Tag::Compound(c) => ItemStack::from_nbt(host, c),
+            _ => None,
+        }),
+        _ => None,
     }
 }
 
