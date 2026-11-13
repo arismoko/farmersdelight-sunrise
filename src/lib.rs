@@ -99,6 +99,14 @@ impl Hooks for FarmersDelight {
         }
     }
 
+    /// Known kinds keep the rolled stack: `farmersdelight:copy_skillet`'s copy is made in
+    /// `loot_drops` (blocks::skillet), where the block entity is still readable.
+    fn loot_function(&self, _: &mut LootFunctionEvent<'_>) {}
+
+    fn loot_drops(&self, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
+        blocks::skillet::on_loot_drops(host, event);
+    }
+
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
         items::skillet::on_attack(host, event);
         Flow::Continue

@@ -67,6 +67,32 @@ pub fn is_heated_in_level(
     )
 }
 
+/// Facts of the block at `pos` read through a full host and a level handle (block-entity Parts).
+pub fn facts_at(host: &dyn Host, level: LevelRef, pos: [i32; 3]) -> HeatFacts {
+    let Some(state) = level.block_state(host, pos) else {
+        return HeatFacts::default();
+    };
+    let block = state.block();
+    let lit = host
+        .block_state_string(state)
+        .and_then(|s| crate::blocks::cutting_board::state_value(&s, "lit").map(|v| v == "true"));
+    HeatFacts {
+        source: host.block_in_tag(block, HEAT_SOURCES) == Some(true),
+        conductor: host.block_in_tag(block, HEAT_CONDUCTORS) == Some(true),
+        lit,
+    }
+}
+
+/// `HeatableBlockEntity#isHeated` (conductors allowed) through a full host.
+pub fn is_heated_in_level_ref(host: &dyn Host, level: LevelRef, pos: [i32; 3]) -> bool {
+    let [x, y, z] = pos;
+    is_heated(
+        facts_at(host, level, [x, y - 1, z]),
+        || facts_at(host, level, [x, y - 2, z]),
+        false,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

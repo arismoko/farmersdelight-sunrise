@@ -56,6 +56,13 @@ pub fn register(
             },
         )
         .expect("stove block entity type");
+    let skillet_block = registrar
+        .block_entity_type(crate::blocks::skillet::ID)
+        .blocks(&[crate::blocks::skillet::ID])
+        .build();
+    registrar
+        .block_entity_part(&skillet_block, crate::blocks::skillet::Skillet)
+        .expect("skillet block entity type");
     let skillet = registrar.item_key(crate::items::skillet::ITEM);
     registrar.item_part(skillet, crate::items::skillet::SkilletItem);
 }
@@ -77,6 +84,13 @@ pub fn container(block: &str) -> Option<ModContainer> {
             faces: std::array::from_fn(|_| (0..crate::blocks::stove::SLOTS).collect()),
             inputs: (0..crate::blocks::stove::SLOTS).collect(),
             outputs: (0..crate::blocks::stove::SLOTS).collect(),
+            menu: None,
+        }),
+        crate::blocks::skillet::ID => Some(ModContainer {
+            slots: 1,
+            faces: std::array::from_fn(|_| vec![0]),
+            inputs: vec![0],
+            outputs: vec![0],
             menu: None,
         }),
         _ => None,

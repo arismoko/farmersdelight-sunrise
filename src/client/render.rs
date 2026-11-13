@@ -73,6 +73,35 @@ pub fn draw_board(
     }
 }
 
+/// `SkilletRenderer#submit`: the stack lies flat in the pan, layered, rotated by facing.
+pub fn draw_skillet(
+    draw: &mut dyn BlockEntityDrawContext,
+    stack: &ItemStack,
+    facing: &str,
+    layers: u32,
+    seed: i32,
+) {
+    // direction = FACING (not its opposite); toYRot: south 0, west 90, north 180, east 270
+    let y_rot = match facing {
+        "south" => 0.0,
+        "west" => 90.0,
+        "north" => 180.0,
+        _ => 270.0,
+    };
+    let mut random = LegacyRandom::new(seed as i64);
+    for i in 0..layers {
+        let dx = (random.next_float() * 2.0 - 1.0) * 0.15 * 0.5;
+        let dz = (random.next_float() * 2.0 - 1.0) * 0.15 * 0.5;
+        draw.push();
+        draw.translate([0.5 + dx, 0.1 + 0.03 * (i + 1) as f32, 0.5 + dz]);
+        draw.rotate_about([0.0, 1.0, 0.0], -y_rot, [0.0; 3]);
+        draw.rotate_about([1.0, 0.0, 0.0], 90.0, [0.0; 3]);
+        draw.scale([0.5; 3]);
+        draw.item(stack, ItemDisplayContext::Fixed, None, 0);
+        draw.pop();
+    }
+}
+
 /// `DefaultStoveRenderer#getStoveItemOffset`.
 pub const STOVE_OFFSETS: [[f32; 2]; 6] = [
     [0.3, 0.2],
