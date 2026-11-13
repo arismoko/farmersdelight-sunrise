@@ -25,3 +25,17 @@ state_properties = { lit = { type = "boolean" } }
 default_state = { lit = "true" }
 state_light = { properties = ["lit"], values = { "true" = 13 }, default = 0 }
 shapes = { default = [[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] }
+
+[skillet]
+source = "J/common/registry/ModBlocks.java:SKILLET (mapColor METAL, strength 0.5/6.0, sound LANTERN); J/common/block/SkilletBlock.java:FACING,SUPPORT,WATERLOGGED,SHAPE,SHAPE_WITH_TRAY"
+# Template minecraft:stone_stairs: native `facing` placed the way the player looks and native
+# `waterlogged`, both as SkilletBlock; its `half`/`shape` are unused by the skillet's models. Not
+# flammable. The block's item is the separately declared farmersdelight:skillet (sneak-placed in code).
+template = "minecraft:stone_stairs"
+properties = { hardness = 0.5, explosion_resistance = 6.0, requires_tool = false, sounds = "minecraft:lantern", map_color = 6, occludes = false }
+state_properties = { support = { type = "boolean" } }
+default_state = { support = "false" }
+shapes = { default = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375]] }
+collision_shapes = { properties = ["support"], values = { "true" = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375], [0.0, -0.0625, 0.0, 1.0, 0.0, 1.0]] }, default = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375]] }
+item = false
+block_item = "farmersdelight:skillet"

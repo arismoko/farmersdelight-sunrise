@@ -54,6 +54,11 @@ impl Hooks for FarmersDelight {
         }
     }
 
+    fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
+        items::skillet::on_attack(host, event);
+        Flow::Continue
+    }
+
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
         self.recipes.clear();
     }

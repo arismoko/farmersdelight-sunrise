@@ -1,0 +1,46 @@
+{
+  "template": "minecraft:stick",
+  "max_stack_size": 1,
+  "components": {
+    "minecraft:max_damage": 250,
+    "minecraft:damage": 0,
+    "minecraft:enchantable": {
+      "value": 14
+    },
+    "minecraft:repairable": {
+      "items": "#minecraft:iron_tool_materials"
+    },
+    "minecraft:attribute_modifiers": [
+      {
+        "type": "minecraft:attack_damage",
+        "id": "minecraft:base_attack_damage",
+        "amount": 7.0,
+        "operation": "add_value",
+        "slot": "mainhand"
+      },
+      {
+        "type": "minecraft:attack_speed",
+        "id": "minecraft:base_attack_speed",
+        "amount": -3.1,
+        "operation": "add_value",
+        "slot": "mainhand"
+      },
+      {
+        "type": "minecraft:attack_knockback",
+        "id": "farmersdelight:base_attack_knockback",
+        "amount": 1.0,
+        "operation": "add_value",
+        "slot": "mainhand"
+      }
+    ],
+    "minecraft:tool": {
+      "rules": [],
+      "default_mining_speed": 1.0,
+      "damage_per_block": 1,
+      "can_destroy_blocks_in_creative": false
+    },
+    "minecraft:weapon": {
+      "item_damage_per_attack": 1
+    }
+  }
+}

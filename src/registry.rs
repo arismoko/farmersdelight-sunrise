@@ -56,6 +56,8 @@ pub fn register(
             },
         )
         .expect("stove block entity type");
+    let skillet = registrar.item_key(crate::items::skillet::ITEM);
+    registrar.item_part(skillet, crate::items::skillet::SkilletItem);
 }
 
 /// Item storage of the mod's block entities (`ModContainer`).

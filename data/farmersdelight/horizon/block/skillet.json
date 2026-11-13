@@ -1,0 +1,68 @@
+{
+  "template": "minecraft:stone_stairs",
+  "properties": {
+    "hardness": 0.5,
+    "explosion_resistance": 6.0,
+    "requires_tool": false,
+    "sounds": "minecraft:lantern",
+    "map_color": 6,
+    "occludes": false
+  },
+  "state_properties": {
+    "support": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "support": "false"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.0625,
+        0.0,
+        0.0625,
+        0.9375,
+        0.25,
+        0.9375
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "properties": [
+      "support"
+    ],
+    "values": {
+      "true": [
+        [
+          0.0625,
+          0.0,
+          0.0625,
+          0.9375,
+          0.25,
+          0.9375
+        ],
+        [
+          0.0,
+          -0.0625,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "default": [
+      [
+        0.0625,
+        0.0,
+        0.0625,
+        0.9375,
+        0.25,
+        0.9375
+      ]
+    ]
+  },
+  "item": false,
+  "block_item": "farmersdelight:skillet"
+}
