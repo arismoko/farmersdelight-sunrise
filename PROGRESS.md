@@ -228,3 +228,33 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - engine observation: `/damage` with `generic` or `hot_floor` (both in `#no_knockback`) still knocks the player
   ~1 block at the pin → being burned also flings the player off the stove. Not mod code; candidate engine bug report.
 - next: M2-06 (skillet item)
+
+## M2-06 Skillet item — PASS (player-victim sound pending LAN) — 2026-11-13
+- mod commit: b4af55b | item `farmersdelight:skillet` declared as a plain item (stack 1, 250 durability, repair
+  `#minecraft:iron_tool_materials`, enchantable 14, damage +7, speed −3.1, knockback +1, Tool([],1,1),
+  Weapon(1)); block `farmersdelight:skillet` (template `minecraft:stone_stairs`: native facing = look
+  direction and native waterlogged, as SkilletBlock; `item=false`, `block_item` = the skillet).
+- in game: 250 durability; each zombie hit costs **2** (250→248→246): vanilla runs `Item.postHurtEnemy`
+  (FD: −1) and then `Weapon` (−1) — new quirk **Q17** (plan said 1). Normal right-click on the ground places
+  nothing; sneak-right-click places the skillet facing the look direction (`m2-skillet-placed.png`).
+- attack sound only when the victim is a player (Q2): implemented in `attack_entity` (charge read before the
+  swing resets it); needs a second player → M2-10 LAN.
+
+## M2-07 Held cooking — PASS — 2026-11-13
+- the engine only lets the client enter an item use itself: the skillet answers a use duration always and
+  `living_entity_use_item_start` (both sides) checks heat (3×3×3, tag only, or on fire), the off-hand campfire
+  recipe and water, sets FD's `getSkilletCookingTime` (Mth.clamp = min(max(v,60),orig)) or cancels; the server
+  stores one unit in `farmersdelight:skillet_ingredient` + `cooking_time_length` (component types registered).
+- in game next to a campfire: early release (3 s) returns the beef (off hand back to 3); full hold → cooked beef.
+  Quirk **Q18** (kept, from source): FD Refabricated consumes 2 raw items per cooked one (the start leaves the
+  other hand at count−1, `finishUsingItem` shrinks it again).
+- not checked in game: underwater refusal, Fire Aspect times (unit table: 120/80/60), bar colour.
+
+## M2-08 Skillet visuals — PARTIAL (degraded A12) — 2026-11-13
+- FD's item definition uses a custom node with an animated Java renderer. Horizon mod nodes only choose among
+  named child models, ids `<mod id>:<path>` → carry **override** rule (approved exception) restates
+  `items/skillet.json` with `ported_farmersdelight:skillet_flip` + `models.cooking`; `is_cooking` property
+  = has ingredient. Skillet now renders held (`m2-skillet-held-*.png`); no "unknown item model type" warning.
+- omitted (delta **A12**, engine task **E-16** animated mod item renderer): the flip animation; hence the
+  `flip_skillet` payload/arm pose are not implemented yet (cosmetic only). Sizzle sounds: not yet.
+- next: M2-09 (placed skillet block entity)
