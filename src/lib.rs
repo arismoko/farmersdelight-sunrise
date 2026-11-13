@@ -1,0 +1,79 @@
+//! Farmer's Delight — native Horizon port. `Hooks` only dispatches; logic lives in modules.
+#![allow(dead_code)] // skeleton: modules are filled in by later milestones
+
+mod blocks;
+mod client;
+mod config;
+mod effects;
+mod enchant;
+mod heat;
+mod ids;
+mod inventory;
+mod items;
+mod loot;
+mod net;
+mod recipes;
+mod registry;
+mod world;
+
+use mod_api::*;
+
+#[derive(Default)]
+struct FarmersDelight {
+    recipes: std::sync::Arc<recipes::RecipeTables>,
+}
+
+#[mod_api::horizon_mod]
+impl Hooks for FarmersDelight {
+    fn register_load_conditions(
+        &self,
+        _: &RegistrationContext,
+        event: &mut RegisterLoadConditionsEvent<'_>,
+    ) {
+        registry::register_load_conditions(event);
+    }
+
+    fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
+        self.recipes.clear();
+    }
+
+    fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
+        self.recipes.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Arc;
+
+    fn with_mod(recipes: Arc<recipes::RecipeTables>, f: impl FnOnce()) {
+        let fd = FarmersDelight { recipes };
+        testing::with_mods(vec![ModEntry::new(ids::MOD_ID, Box::new(fd))].into(), f);
+    }
+
+    #[test]
+    fn lifecycle_hooks_clear_published_recipes() {
+        let tables = Arc::new(recipes::RecipeTables::default());
+        let mut host = testing::FakeHost::new();
+        with_mod(tables.clone(), || {
+            tables
+                .cutting
+                .publish(vec!["farmersdelight:cutting/beef".into()]);
+            dispatch_server_stopped(&mut host, false);
+            assert!(tables.cutting.snapshot().is_empty());
+            tables
+                .cutting
+                .publish(vec!["farmersdelight:cutting/beef".into()]);
+            dispatch_server_about_to_start(&mut host, true);
+            assert!(tables.cutting.snapshot().is_empty());
+        });
+    }
+
+    #[test]
+    fn crate_condition_follows_config_default() {
+        let result = registry::VanillaCratesEnabled.test(&serde_json::json!({}));
+        assert_eq!(result.ok(), Some(config::vanilla_crop_crates_enabled()));
+        assert!(config::vanilla_crop_crates_enabled());
+    }
+}

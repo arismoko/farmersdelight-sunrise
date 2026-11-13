@@ -1,0 +1,36 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  standalone:
+    runs-on: ubuntu-latest
+    env:
+      # Matches the pinned Horizon launcher's native-build toolchain.
+      RUSTUP_TOOLCHAIN: '1.99.1'
+      FD_SHA: 1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install native build dependencies
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy
+      - name: Farmer's Delight reference (read only, never built)
+        run: |
+          git clone --filter=blob:none --branch fabric/latest/26.3 https://github.com/MehVahdJukaar/FarmersDelightRefabricated ../fd
+          git -C ../fd checkout "$FD_SHA"
+      - run: python3 tools/test_carry.py
+      - run: python3 tools/test_gen_decls.py
+      - run: python3 tools/test_fixtures.py
+      - run: python3 tools/carry_fd.py --fd ../fd --check
+      - run: python3 tools/gen_decls.py --check
+      - run: python3 tools/extract_fixtures.py --fd ../fd --check
+      - run: cargo fetch --locked
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked --offline -- -D warnings
+      - run: cargo test --workspace --locked --offline

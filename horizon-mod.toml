@@ -1,0 +1,16 @@
+id = "ported_farmersdelight"
+name = "Farmer's Delight (Horizon port)"
+version = "0.1.0"
+description = "Native Horizon port of Farmer's Delight Refabricated 3.6.30 (Minecraft 26.3)"
+authors = []
+license = "MIT"
+credits = "Farmer's Delight © 2020 vectorwing; Fabric port Refabricated by MehVahdJukaar, cassiancc et al."
+api = "0.2"
+side = "both"
+capabilities = ["registries"]
+namespaces = ["farmersdelight"]
+
+[native]
+game = "26.3"
+horizon = "afe471cf15df56439f23cd991d0d4b85563a14fc"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"

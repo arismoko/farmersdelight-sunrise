@@ -1,0 +1,27 @@
+Farmer's Delight (Horizon port)
+===============================
+
+This port's own code is MIT licensed (see LICENSE).
+
+Farmer's Delight
+----------------
+Data, assets and behaviour are carried or adapted from Farmer's Delight
+Refabricated (https://github.com/MehVahdJukaar/FarmersDelightRefabricated,
+branch fabric/latest/26.3, commit 1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3,
+version 26.3-3.6.30+refabricated), MIT License, Copyright (c) 2020 vectorwing.
+Full licence text: third_party/farmersdelight/LICENSE.
+
+Credits: vectorwing (Farmer's Delight); MehVahdJukaar, cassiancc and the
+Refabricated contributors (Fabric port). Courtesy credits as named by the
+reference: the Create team (ChanceResult), Commoble, TheGridExpert / JTK222,
+AppleSkin, Vazkii.
+
+Two files of the reference (refabricated/inventory/ItemStackHandler.java and
+InvWrapper.java) are LGPL-2.1-only. They were never opened, read or used;
+inventory handling in this port is written independently.
+
+Canvas-sign GUI textures (textures/gui/signs, textures/gui/hanging_signs) are
+shipped as Farmer's Delight ships them under MIT, but may derive from Mojang
+assets.
+
+No vanilla Minecraft assets are extracted or redistributed.

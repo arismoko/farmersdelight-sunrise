@@ -1,0 +1,555 @@
+# re-pin check c26fe59 -> afe471cf (ancestor; D2 route 2) 2026-11-13T17:05:31Z
+## diffstat (afe..c26fe59)
+ crates/horizon-mod-api/src/parts/block_entities.rs |   7 +-
+ crates/horizon-mod-api/src/parts/dimensions.rs     |  54 ++++-
+ .../src/parts/registration_refusal.rs              |   1 +
+ crates/horizon-mod-api/src/parts/shared.rs         |   5 +-
+ crates/horizon-mod-vocab/src/block/item_place.rs   |  22 ++
+ crates/horizon-mod-vocab/src/block/types.rs        |  61 +++++-
+ .../horizon-mod-vocab/src/client/entity_layers.rs  |  88 ++++++++
+ crates/horizon-mod-vocab/src/client/mod.rs         |   1 +
+ crates/horizon-mod-vocab/src/client/types.rs       |  33 +++
+ crates/horizon-mod-vocab/src/entity/types.rs       |  24 +++
+ .../horizon-mod-vocab/src/exports/biome_source.rs  |   6 +
+ crates/horizon-mod-vocab/src/exports/domains.rs    |  38 ++--
+ .../horizon-mod-vocab/src/exports/entity_layers.rs |   1 +
+ .../src/exports/structure_type.rs                  |   3 +-
+ .../src/hooks/block_entity_tick.rs                 |   9 +
+ .../src/hooks/can_drop_from_explosion.rs           |  26 +++
+ .../src/hooks/enchant_power_bonus.rs               |  16 +-
+ .../src/hooks/explosion_resistance.rs              |  28 +++
+ crates/horizon-mod-vocab/src/hooks/mob_layer.rs    |   7 +-
+ crates/horizon-mod-vocab/src/hooks/notes.rs        |   6 +-
+ .../src/hooks/on_block_placed_by.rs                |  40 ++++
+ .../src/hooks/on_destroyed_by_push_reaction.rs     |  28 +++
+ .../src/hooks/register_entity_layers.rs            |  79 ++++++++
+ .../src/hooks/standalone_models.rs                 |  20 +-
+ crates/horizon-mod-vocab/src/hooks_tests.rs        |   4 +
+ crates/horizon-mod-vocab/src/host/config.rs        |  11 +
+ crates/horizon-mod-vocab/src/host/entities.rs      |  18 ++
+ crates/horizon-mod-vocab/src/host/levels.rs        |  27 +++
+ crates/horizon-mod-vocab/src/host/players.rs       |  10 +
+ crates/horizon-mod-vocab/src/item/item_stack.rs    | 148 +++++++-------
+ .../src/item/item_stack_component_tests.rs         | 225 +++++++++++++++++++++
+ crates/horizon-mod-vocab/src/parts/dimensions.rs   |  32 +++
+ .../src/parts/shared/registration_state.rs         |   1 +
+ crates/horizon-mod-vocab/src/runtime.rs            |   3 +
+ .../src/wire/traits/EntityLayers.import            |   1 +
+ .../src/wire/traits/EntityRenderLayer.export       |   1 +
+ .../src/wire/wire_layout_tests.rs                  |   1 +
+ crates/horizon-mod-vocab/src/world/biome_source.rs |  53 +++++
+ crates/horizon-mod-vocab/src/world/dimension.rs    |  14 +-
+ crates/horizon-mod-vocab/src/world/mod.rs          |   1 +
+ .../horizon-mod-vocab/src/world/structure_type.rs  |  48 +++++
+ crates/horizon-mod-vocab/src/world/types.rs        |  38 ++++
+ docs/modding/examples/src/worldgen.rs              |  37 ++++
+ docs/modding/src/SUMMARY.md                        |   1 +
+ .../capabilities/item-places-and-components.md     |  14 +-
+ docs/modding/src/concepts/load-phases.md           |   3 +
+ docs/modding/src/concepts/registry-keys.md         |   9 +
+ docs/modding/src/how-to/client/entity-layers.md    |  99 +++++++++
+ docs/modding/src/how-to/client/entity-renderers.md |   3 +
+ docs/modding/src/how-to/client/model-drawing.md    |  42 ++++
+ docs/modding/src/how-to/items/item-stack-values.md |  12 ++
+ .../how-to/native-mods/062-collision-exclusions.md |  35 ++++
+ docs/modding/src/how-to/wasm-mods.md               |   9 +-
+ .../world/block-experience-and-explosions.md       |  40 +++-
+ docs/modding/src/how-to/world/dimension-shape.md   |  66 +++++-
+ docs/modding/src/how-to/world/machine-menu-data.md |  16 ++
+ docs/modding/src/how-to/world/structure-types.md   |   9 +
+ docs/modding/src/reference/fml-loader-apis.md      |  18 ++
+ 58 files changed, 1511 insertions(+), 141 deletions(-)
+## hook catalog diff (< afe, > c26fe59)
+87a88
+> crates/horizon-mod-vocab/src/hooks/can_drop_from_explosion.rs
+220a222
+> crates/horizon-mod-vocab/src/hooks/explosion_resistance.rs
+399a402
+> crates/horizon-mod-vocab/src/hooks/on_block_placed_by.rs
+402a406
+> crates/horizon-mod-vocab/src/hooks/on_destroyed_by_push_reaction.rs
+551a556
+> crates/horizon-mod-vocab/src/hooks/register_entity_layers.rs
+## hooks+host diff
+diff --git a/crates/horizon-mod-vocab/src/hooks/block_entity_tick.rs b/crates/horizon-mod-vocab/src/hooks/block_entity_tick.rs
+index 546feae939..75ff384925 100644
+--- a/crates/horizon-mod-vocab/src/hooks/block_entity_tick.rs
++++ b/crates/horizon-mod-vocab/src/hooks/block_entity_tick.rs
+@@ -12,6 +12,15 @@ pub trait Hooks {
+     /// dropped. Clients, the window's own in single player included, get
+     /// what `block_entity_update_tag` gives when its chunk is sent or
+     /// its block changes.
++    /// Each Part starts with `Changed` and sees the preceding accepted payload.
++    /// `*event.reply = BlockEntityTickReply::Unchanged` discards only this Part's
++    /// payload edits: no reply snapshot is encoded, decoded or applied. Earlier
++    /// Parts' `Changed` edits survive later `Unchanged` replies.
++    /// If all Parts answer `Unchanged`, ticking alone does not dirty the chunk,
++    /// advance its revision or notify containers/comparators. The original
++    /// placeholder must still exist; independent Host writes keep their own effects,
++    /// including accepted item writes, while aborted Host transactions stay aborted.
++    /// The default `Changed` retains full checked write-back.
+     #[hook(
+         side = "server",
+         contract = "listen",
+diff --git a/crates/horizon-mod-vocab/src/hooks/can_drop_from_explosion.rs b/crates/horizon-mod-vocab/src/hooks/can_drop_from_explosion.rs
+new file mode 100644
+index 0000000000..d976471096
+--- /dev/null
++++ b/crates/horizon-mod-vocab/src/hooks/can_drop_from_explosion.rs
+@@ -0,0 +1,26 @@
++//! The `can_drop_from_explosion` hook: declarations the mod API generator reads (see `hooks/mod.rs`).
++
++pub trait Hooks {
++    /// On an authoritative server, whether the block `state` at `pos`, destroyed by
++    /// `explosion`, drops (`IBlockExtension.canDropFromExplosion`), asked where
++    /// `BlockBehaviour.onExplosionHit` asks `Block.dropFromExplosion`. `Some(false)` skips
++    /// what the drop runs: the block's `spawnAfterBreak` (an infested block's silverfish, an
++    /// ore's experience) and its loot; `Some(true)` runs them, even for TNT; `None` keeps
++    /// vanilla's answer, where only TNT drops nothing. The block is removed either way, and a
++    /// TNT still primes (`TntBlock.wasExploded` is not part of the answer). A panicking part
++    /// is contained and vanilla's answer is used. The level is read-only. With no part
++    /// attached to the state, the cost is one table lookup. Diverges from upstream: new hook.
++    #[notes = r#"## Block drops from explosions
++
++- **`BlockPart::can_drop_from_explosion(level, event)`** (`CanDropFromExplosionEvent { pos, state, explosion }`): whether the block an explosion destroys drops (NeoForge's `IBlockExtension.canDropFromExplosion`), asked once per destroyed block where `BlockBehaviour.onExplosionHit` asks `Block.dropFromExplosion`, before anything drops. `Some(false)` skips the drop: no loot, and none of the block's `spawnAfterBreak` (an infested block's silverfish, an ore's or a spawner's experience). `Some(true)` drops, even for TNT, which vanilla keeps from dropping. `None` leaves it to another part and then vanilla. The block is removed either way, `on_block_exploded` still hears it, and a TNT still primes: `TntBlock.wasExploded` is a separate moment. A panicking part is contained with a warning and vanilla's answer is used. Authoritative servers only; the level is read-only. With no part attached to the state, one table lookup per destroyed block. Diverges from upstream: new hook."#]
++    #[hook(
++        side = "server",
++        contract = "replace",
++        out = "drops",
++        scope = "block",
++        key = "state",
++        target = "horizon_client::game::native_hooks::can_drop_from_explosion::GameLevel<'_>::native_can_drop_from_explosion",
++        neoforge = "IBlockExtension.canDropFromExplosion"
++    )]
++    fn can_drop_from_explosion();
++}
+diff --git a/crates/horizon-mod-vocab/src/hooks/enchant_power_bonus.rs b/crates/horizon-mod-vocab/src/hooks/enchant_power_bonus.rs
+index 724bba744e..941b68c5d5 100644
+--- a/crates/horizon-mod-vocab/src/hooks/enchant_power_bonus.rs
++++ b/crates/horizon-mod-vocab/src/hooks/enchant_power_bonus.rs
+@@ -10,13 +10,17 @@ pub trait Hooks {
+     /// answers, truncates the sum to a whole number as NeoForge does and caps it at 15 for the
+     /// offers; a negative sum counts as 0, where NeoForge would throw, and a non-finite answer is
+     /// ignored. Asked as the offers are made, in a single-player world and on a LAN host for each
+-    /// guest's table, with the level read-only. Diverges from NeoForge: the table's enchant
+-    /// particles still read the provider tag, as they are drawn inside the particle pass where
+-    /// no host can be lent; they are not asked of this hook. With no part attached to the state,
+-    /// the game checks the hook subscription and the block key before any event conversion, so
+-    /// the cost is one table lookup per offset. Diverges from upstream: new hook.
++    /// guest's table, with the level read-only. Client particles use the same answer, queried once
++    /// per state at world entry, parts reload and received-server-tag publication, with `pos`
++    /// and `table_pos` both at the origin. Server tags and their tag-update listeners are
++    /// published before the client snapshot. Any nonzero answer emits particles when the
++    /// intervening block transmits. Particle answers must be state-only; changing a mod's
++    /// answer requires a parts/tag reload.
++    /// No hook is called per tick or frame. With no part attached, the only dispatch cost is one
++    /// block subscription lookup before event conversion. Diverges from upstream: new hook.
+     #[hook(
+-        side = "server",
++        side = "both",
++        version = 2,
+         contract = "collect",
+         out = "power",
+         scope = "block",
+diff --git a/crates/horizon-mod-vocab/src/hooks/explosion_resistance.rs b/crates/horizon-mod-vocab/src/hooks/explosion_resistance.rs
+new file mode 100644
+index 0000000000..9d3c13ec9f
+--- /dev/null
++++ b/crates/horizon-mod-vocab/src/hooks/explosion_resistance.rs
+@@ -0,0 +1,28 @@
++//! The `explosion_resistance` hook: declarations the mod API generator reads (see `hooks/mod.rs`).
++
++pub trait Hooks {
++    /// On an authoritative server, the explosion resistance of the block `state` at `pos`
++    /// against `explosion` (`IBlockExtension.getExplosionResistance`), asked as a ray of the
++    /// blast enters the block (`ExplosionDamageCalculator.getBlockExplosionResistance`). The
++    /// answer replaces only the block's own value (`BlockProperties.explosion_resistance`);
++    /// a fluid in the cell still raises it to the fluid's 100. What vanilla applies after the
++    /// block's value keeps winning: a respawn anchor's water cell, a TNT minecart's rails and
++    /// the blocks under them (never asked) and a dangerous wither skull's 0.8 cap. A negative
++    /// or non-finite answer is refused and the block's own value is used; a panicking part is
++    /// contained and the block's own value is used. A ray asks once per block it enters, so
++    /// keep the answer a pure function of the inputs. The level is read-only. With no part
++    /// attached to the state, the cost is one table lookup. Diverges from upstream: new hook.
++    #[notes = r#"## Block explosion resistance
++
++- **`BlockPart::explosion_resistance(level, event)`** (`ExplosionResistanceEvent { pos, state, explosion }`): answer `Some(resistance)` to replace the block's own explosion resistance (NeoForge's `IBlockExtension.getExplosionResistance`) against the blast `event.explosion` describes, the same `ExplosionStart` the global `explosion_start` hears. A ray of the blast asks as it enters the block; its next steps in the same block reuse the answer, so keep it a pure function of the inputs. The answer replaces only the block's static value: a fluid in the cell still raises it to 100, and the overrides vanilla applies after the block's value keep winning (a respawn anchor's water cell, a TNT minecart's rails and the blocks under them, which are never asked, and a dangerous wither skull's 0.8 cap on a block that is not `#wither_immune`). `None` leaves it to another part and then the block's value. A negative or non-finite answer is refused with a warning, and a panicking part is contained; the block's own value is used for both. Authoritative servers only; the level is read-only. With no part attached to the state, one table lookup. Diverges from upstream: new hook."#]
++    #[hook(
++        side = "server",
++        contract = "replace",
++        out = "resistance",
++        scope = "block",
++        key = "state",
++        target = "horizon_client::game::native_hooks::explosion_resistance::GameLevel<'_>::native_explosion_resistance",
++        neoforge = "IBlockExtension.getExplosionResistance"
++    )]
++    fn explosion_resistance();
++}
+diff --git a/crates/horizon-mod-vocab/src/hooks/mob_layer.rs b/crates/horizon-mod-vocab/src/hooks/mob_layer.rs
+index fa3db4c31e..deeb743a19 100644
+--- a/crates/horizon-mod-vocab/src/hooks/mob_layer.rs
++++ b/crates/horizon-mod-vocab/src/hooks/mob_layer.rs
+@@ -3,8 +3,9 @@
+ 
+ pub trait Hooks {
+     /// A layer on every mob and player in view, once a frame after its
+-    /// vanilla model and layers (`EntityRenderersEvent.AddLayers`, with
+-    /// `RenderLivingEvent.Post` and `RenderPlayerEvent.Post`): add geometry
++    /// vanilla model and layers (`RenderLivingEvent.Post` and
++    /// `RenderPlayerEvent.Post`; a layer of one type's renderer is
++    /// `register_entity_layers`): add geometry
+     /// in the entity's frame, which starts at its feet turned with the body
+     /// (`mob.head_yaw`, `mob.pitch` and the walk cycle place a part, the eyes
+     /// being at the entity type's eye height). `who` is set for a player.
+@@ -17,7 +18,7 @@ pub trait Hooks {
+     #[hook(
+         side = "client",
+         contract = "listen",
+-        neoforge = "EntityRenderersEvent.AddLayers",
++        neoforge = ["RenderLivingEvent.Post", "RenderPlayerEvent.Post"],
+         cancellable = false
+     )]
+     fn mob_layer();
+diff --git a/crates/horizon-mod-vocab/src/hooks/notes.rs b/crates/horizon-mod-vocab/src/hooks/notes.rs
+index 097f5c99af..156d655eef 100644
+--- a/crates/horizon-mod-vocab/src/hooks/notes.rs
++++ b/crates/horizon-mod-vocab/src/hooks/notes.rs
+@@ -1088,7 +1088,7 @@ items are left out (NeoForge's `RenderLivingEvent.Pre`, cancelled); its name tag
+ - Players have their own hook, `player_submit(player, who, draw, drawn)` (`RenderPlayerEvent.Pre`): once a frame for
+   each other player in view and for this window's player in third person, with the same frame and `who` (the profile name,
+   and `local`). `drawn` leaves out the vanilla model, armour, held items, cape and other layers.
+-- `mob_layer(mob, who, draw)` (`EntityRenderersEvent.AddLayers`, `RenderLivingEvent.Post`) adds to every mob and player
++- `mob_layer(mob, who, draw)` (`RenderLivingEvent.Post`; one type's renderer takes layers through `register_entity_layers`, `EntityRenderersEvent.AddLayers`) adds to every mob and player
+   after its vanilla model and layers, in the same frame (not for one a mod drew itself); `who` is set for a player. The
+   geometry hangs from the entity's frame, not from a model bone: place a hat from `head_yaw`, `pitch` and the entity type's
+   eye height.
+@@ -2300,11 +2300,11 @@ registration path.
+ 
+ - A mob's, an armor stand's or a player's equipment changing, on the single player server thread and on a dedicated server: `living_equipment_change(entity, kind, slot, from, to)` once for each slot (`mainhand`, `offhand`, `feet`, `legs`, `chest`, `head`, `body`, `saddle`) that holds another stack than the mods last heard (NeoForge's `LivingEquipmentChangeEvent`, vanilla's `LivingEntity.collectEquipmentChanges`). A mob new to the level counts from empty on its first tick. A mod that hooks it also hooks `living_equipment_listened(listened)` and sets `*listened = true`: otherwise the game does not read every mob's and connected player's equipment each tick, and only armor stands are told. Players connected to the server (a dedicated server's, a published world's guests) are told the same way with `kind` `minecraft:player`, for their six slots `mainhand` (the selected hotbar slot, so a hotbar selection counts), `offhand`, `feet`, `legs`, `chest` and `head`; their `body` and `saddle` are never told. The world host's own player isn't told here: `on_equip` hears it. It only hears.
+ 
+-- `player_submit(player, who, draw, drawn)` fires once a frame for each other player in view and for this window's player in third person (not while invisible), with the `mob_submit` frame (`MobRender`, a `BlockEntityDraw` at the feet turned with the body) and `who` (profile name, whether it is the local player); set `drawn` to leave out the vanilla model, armour, held items, cape and other layers (`RenderPlayerEvent.Pre`). `mob_layer(mob, who, draw)` fires once a frame after the vanilla model and layers of every mob and player in view that a mod did not draw itself, and what the mod adds in that frame is drawn with it (`EntityRenderersEvent.AddLayers`, `RenderLivingEvent.Post`); `who` is set for a player. Geometry attaches to the entity's frame, not to the model's bones: head yaw, pitch and the walk cycle are in `MobRender`. A mod that hooks either also hooks `player_render_listened(listened)` and sets `*listened = true`: otherwise neither is asked.
++- `player_submit(player, who, draw, drawn)` fires once a frame for each other player in view and for this window's player in third person (not while invisible), with the `mob_submit` frame (`MobRender`, a `BlockEntityDraw` at the feet turned with the body) and `who` (profile name, whether it is the local player); set `drawn` to leave out the vanilla model, armour, held items, cape and other layers (`RenderPlayerEvent.Pre`). `mob_layer(mob, who, draw)` fires once a frame after the vanilla model and layers of every mob and player in view that a mod did not draw itself, and what the mod adds in that frame is drawn with it (`RenderLivingEvent.Post`; layers of one type's renderer are `register_entity_layers`, `EntityRenderersEvent.AddLayers`); `who` is set for a player. Geometry attaches to the entity's frame, not to the model's bones: head yaw, pitch and the walk cycle are in `MobRender`. A mod that hooks either also hooks `player_render_listened(listened)` and sets `*listened = true`: otherwise neither is asked.
+ 
+ - A player finishing a sign: `native_sign_changed(player, name, dimension, pos, front, lines, cancel)` is heard when a player sends the text they wrote on a sign they were editing, right before it goes on the sign, once the checks have passed, on a server, with the player's state swapped in (`PlayerRef::tell` reaches them). A mod may rewrite `lines` (four lines of plain text) or set `cancel` so the sign keeps its old text; a waxed sign is not told.
+ 
+-- Models no blockstate names, as NeoForge's `ModelEvent.RegisterStandalone`: `standalone_models(context, models)`, asked once at client startup (not on integrated or dedicated servers), takes the ids of models a block entity or a mob draws as parts (`mymod:block/shaft_half`, from `assets/mymod/models/block/shaft_half.json`), and every resource load, a pack reload included, bakes them beside the block models. Resolve its `Identifier` once through `host.render_assets().model(&id)` in `client_setup` and again in `client_resources_reloaded`, retaining the opaque `ModelRef` between frames. `BlockEntityDrawContext::model(model, tint)` consumes that handle under `draw`'s pose in `block_entity_submit` or `mob_submit`, as `native_draw_block` draws a block's model, with `tint` (`0xAARRGGBB`) on its tinted faces, alpha included. A bare `0xRRGGBB` is alpha 0, so those faces are transparent; pass `0xFFRRGGBB`, and `0xFFFFFFFF` for no tint. Faces with no tint index stay opaque. Missing or unbaked names return `ModelError::UnknownModel`. Every successful resource replacement, including model-only edits, invalidates old handles with `ModelError::StaleModel`; failed reloads keep them usable. A drawing error appends no geometry. Models use the shared pack stack, including overrides and other namespaces; lookup never reads files or bakes. No block has to be registered just to bake a part's model.
++- Models no blockstate names, as NeoForge's `ModelEvent.RegisterStandalone`: `standalone_models(context, event)` contract version 2, asked once at client startup (not on integrated or dedicated servers), retains plain ids in `event.models` and adds `event.forms: Vec<StandaloneModelForm>`. `Rotated { id, model, turns, uvlock }` bakes a source using centered negative XYZ quarter-turns and real inverse-face UV locking; `Combined { id, parts }` concatenates dependencies' baked quads into one result. Missing dependencies drop the entire form and log the registering mod, not the source namespace. Result ids follow the plain-id namespace rule. Every resource load rebakes both from current files. Resolve each result's `Identifier` through `host.render_assets().model(&id)` in `model_baking_completed`, retaining its opaque `ModelRef` between frames. `BlockEntityDrawContext::model(model, tint)` consumes that handle under the draw pose in `block_entity_submit` or `mob_submit`, with `tint` (`0xAARRGGBB`) on tinted faces, alpha included; use `0xFFFFFFFF` for no tint. Missing or unbaked names return `ModelError::UnknownModel`. Successful resource replacement invalidates old handles with `ModelError::StaleModel`; failed reloads keep them usable. Drawing errors append no geometry. Native and wasm share this contract; lookup never reads or bakes files, and results are quads rather than arbitrary mod-defined baked types.
+ 
+ - A player opening and closing any menu on a server, on the single player server thread and on a dedicated server: `player_container_open(player, name, dimension, menu, pos)` and `player_container_close(...)` (NeoForge's `PlayerContainerEvent.Open` and `.Close`), with the menu type's name and, for a block's menu, its position. They run with the player's state swapped in. Unlike the viewer count of a mod container (`mod_container_viewers`) they name the player and cover every menu: chests, furnaces, crafting tables, trades, a mod's own. A menu is heard once a tick, so one opened and closed inside a tick is not; each open has one close, also when the player leaves.
+ 
+diff --git a/crates/horizon-mod-vocab/src/hooks/on_block_placed_by.rs b/crates/horizon-mod-vocab/src/hooks/on_block_placed_by.rs
+new file mode 100644
+index 0000000000..1bbac27ed0
+--- /dev/null
++++ b/crates/horizon-mod-vocab/src/hooks/on_block_placed_by.rs
+@@ -0,0 +1,40 @@
++//! The `on_block_placed_by` hook: declarations the mod API generator reads (see `hooks/mod.rs`).
++
++pub trait Hooks {
++    /// `BlockItemExtension.onBlockPlacedBy`: this item's block has been placed,
++    /// its final block state and stack block-entity data applied, and
++    /// `Block.setPlacedBy` completed (including companion blocks). Runs once,
++    /// at the primary position, before sounds, level events and stack consumption.
++    /// `stack` is the pre-shrink stack; `placer` is the placing player, or None
++    /// for a dispenser. `face` and `click` are the placement context's clicked
++    /// face and world-space hit point. Failed, refused and canceled placements
++    /// never notify. Only Parts attached to the stack's item hear this server notice.
++    #[notes = r##"### After a block item places its block
++
++`ItemPart::on_block_placed_by` is the server-side `BlockItemExtension.onBlockPlacedBy`
++notice (hook version 1). It runs once after the final state, stack block-entity data
++and `Block.setPlacedBy` work exist, including a bed's head, at the primary position
++(the bed's foot). The event carries the pre-shrink `stack`, optional `placer`, `pos`,
++final `state`, clicked `face` and world-space `click`. A dispenser has no placer.
++Use the `ServerHost` and block-entity handles to copy stack data or link companions;
++writes are not overwritten by the placement's stack-data application. The notice
++precedes level events and consumption and cannot cancel the placement. A refusal,
++placement failure or `entity_place` cancellation never fires it. Items without a
++subscribed Part cost one `item_listens` lookup and no stack conversion.
++"##]
++    #[hook(
++        side = "server",
++        contract = "listen",
++        scope = "item",
++        key = "stack",
++        neoforge = "BlockItemExtension.onBlockPlacedBy"
++    )]
++    fn on_block_placed_by(
++        stack: &ItemStack,
++        placer: Option<PlayerRef>,
++        pos: [i32; 3],
++        state: BlockState,
++        face: BlockFace,
++        click: [f64; 3],
++    );
++}
+diff --git a/crates/horizon-mod-vocab/src/hooks/on_destroyed_by_push_reaction.rs b/crates/horizon-mod-vocab/src/hooks/on_destroyed_by_push_reaction.rs
+new file mode 100644
+index 0000000000..223e4b9ce6
+--- /dev/null
++++ b/crates/horizon-mod-vocab/src/hooks/on_destroyed_by_push_reaction.rs
+@@ -0,0 +1,28 @@
++//! The `on_destroyed_by_push_reaction` hook: declarations the mod API generator reads (see `hooks/mod.rs`).
++
++pub trait Hooks {
++    /// On an authoritative server, a piston's move destroys the block `state` at `pos`
++    /// (`IBlockExtension.onDestroyedByPushReaction`), `direction` the way the blocks move and
++    /// `fluid` the fluid state the cell holds.
++    /// It is heard in `PistonBaseBlock.moveBlocks` after the block dropped its resources and
++    /// while it is still in its cell, before the cell becomes air. The removal still happens:
++    /// a write to `pos` is overwritten, and so is a write to any other cell of the move (the
++    /// other destroyed cells, the pushed blocks and the cells they move into, the arm), since
++    /// the pushed blocks were read before the destroy loop. Writes elsewhere stay; `ticks`
++    /// is the move's, so scheduled ticks stay too. A cancelled move (`piston_pre`) and a
++    /// client's replay of the move are not heard. A panicking part is contained. With no part
++    /// attached to the state, the cost is one table lookup per destroyed block. Diverges from
++    /// upstream: new hook; the removal is not replaceable here.
++    #[notes = r#"## Blocks destroyed by pistons
++
++- **`BlockPart::on_destroyed_by_push_reaction(level, event)`** (`OnDestroyedByPushReactionEvent { dimension, pos, state, direction, fluid }`): a piston's move destroys the block (a `Destroy` push reaction such as a torch's), heard in `PistonBaseBlock.moveBlocks` after the block dropped its resources and while it is still in its cell, before the engine sets air there (flags 18). `direction` is the way the blocks move: the piston's facing as it extends, the opposite as a sticky piston pulls. It is a notice (NeoForge's `IBlockExtension.onDestroyedByPushReaction`): the removal still happens. The level host writes and schedules ticks (`&mut dyn LevelWriteHost`), but a write to any cell of the move is lost: its own cell and the other destroyed cells turn to air, and the pushed blocks were read before the destroy loop, so each of them moves as it was and the cells they leave and enter end as air or a moving block, as does the arm. Writes outside the move stay. `piston_pre` is the veto for the whole move; a cancelled move and a client's replay of a move are not heard. A panicking part is contained with a warning and the move goes on. `fluid` is the fluid state the cell holds, as NeoForge passes it; the removal itself always happens, and a mod cannot replace it here. Authoritative servers only. With no part attached to the state, one table lookup per destroyed block. Diverges from upstream: new hook."#]
++    #[hook(
++        side = "server",
++        contract = "listen",
++        scope = "block",
++        key = "state",
++        target = "horizon_client::game::native_hooks::on_destroyed_by_push_reaction::GameLevel<'_>::native_on_destroyed_by_push_reaction",
++        neoforge = "IBlockExtension.onDestroyedByPushReaction"
++    )]
++    fn on_destroyed_by_push_reaction();
++}
+diff --git a/crates/horizon-mod-vocab/src/hooks/register_entity_layers.rs b/crates/horizon-mod-vocab/src/hooks/register_entity_layers.rs
+new file mode 100644
+index 0000000000..d2254fd116
+--- /dev/null
++++ b/crates/horizon-mod-vocab/src/hooks/register_entity_layers.rs
+@@ -0,0 +1,79 @@
++//! The `register_entity_layers` hook: declarations the mod API generator reads (see `hooks/mod.rs`).
++
++pub trait Hooks {
++    /// The layers a mod adds to living entity renderers (NeoForge's
++    /// `EntityRenderersEvent.AddLayers`): `add(target, layer)`, and every living entity of the
++    /// type, or every player of the player model, in view draws `EntityRenderLayer::submit` after
++    /// its model and the layers added before. `entity_types`, `is_living`, `player_models` and
++    /// `has_mod_renderer` tell what renderers this load built. A target that is no living entity
++    /// type is refused by name. Asked on the client on every resource load, the first one and each
++    /// reload, after the renderers resolve (`register_entity_renderers`): layers don't carry over
++    /// from one load to the next, so add them again each time.
++    #[notes = r#"## Entity layers
++
++An entity layer (NeoForge's `EntityRenderersEvent.AddLayers` and `RenderLayer`) draws over a living entity
++renderer: armour of a mod's own, a glow, something held or worn. `Hooks::register_entity_layers` is asked on
++every resource load, after the entity renderers resolve, since a reload builds the renderers again and the
++layers don't carry over; the game resolves each target's layers to the slot its draw reads, so a frame
++hands an entity to its target's layers only.
++
++```rust,ignore
++struct Halo;
++impl EntityRenderLayer for Halo {
++    fn submit(
++        &self,
++        _entity: &EntityRenderState,
++        _parts: Option<&PosedParts>,
++        draw: &mut dyn BlockEntityDrawContext,
++    ) -> Result<(), String> {
++        // In the entity's frame: at its feet, turned with its body. Any atlas sprite will do:
++        // a vanilla one, as here, or one of the mod's own assets.
++        let face = Some(CubeFace::new("block/gold_block"));
++        draw.cube([-4.0, 34.0, -4.0], [4.0, 35.0, 4.0], [face; 6], 0xFFFFFF);
++        Ok(())
++    }
++}
++
++fn register_entity_layers(
++    &self,
++    _context: &RegistrationContext,
++    event: &mut RegisterEntityLayersEvent<'_>,
++) {
++    let halo = Arc::new(Halo);
++    for target in [
++        LayerTarget::Entity("minecraft:zombie".into()),
++        LayerTarget::Player(PlayerModel::Wide),
++        LayerTarget::Player(PlayerModel::Slim),
++    ] {
++        event.layers.add(target, halo.clone()).unwrap();
++    }
++}
++```
++
++The event tells what renderers this load built: `entity_types()` lists every entity type with a renderer,
++`is_living(type)` says whether it is a living entity's, `player_models()` lists `Wide` and `Slim`, and
++`has_mod_renderer(type)` whether a mod registered the type's renderer. No renderer object crosses the API.
++
++A layer attaches only to a living renderer, a mod's own included: `add` refuses a target that is no entity
++type, a type whose renderer isn't a living one (a boat, a display, a projectile), `minecraft:player`,
++whose layers go to a player model, and a living type that draws through a route of its own which doesn't
++run layers yet (the armour stand, the ender dragon); the `Err` names the target, and the game logs it. An
++entity a mod draws itself (`mob_submit` or `player_submit` setting `drawn`) draws none of its layers, as
++NeoForge's cancelled `RenderLivingEvent.Pre` skips them. Several mods may add to one target: their layers
++draw in the order they were added, after the entity's model and its vanilla layers, each from the entity's
++frame (at its feet, turned with its body, as `mob_submit` draws). `entity.yaw` is the body's turn and
++`entity.pitch` the head's; `parts` has a humanoid model's posed parts, to attach to an arm or the head;
++they are kept from the model's draw only for a type or player model with a layer (or while a `mob_layer`
++listener exists). A layer that returns an `Err`, panics, or (in a wasm mod) has its call refused or
++trapped is logged once with the error and asked no more until the next resource load adds it again; what
++it drew that frame is dropped. The layers draw on the mobs (vanilla's and the content mods' living types)
++and the players; the armour stand and the ender dragon take them once their own draws run layers, in a
++follow-up of #860, which lifts their refusal."#]
++    #[hook(
++        side = "client",
++        contract = "listen",
++        context = "registration",
++        neoforge = "EntityRenderersEvent.AddLayers"
++    )]
++    fn register_entity_layers();
++}
+diff --git a/crates/horizon-mod-vocab/src/hooks/standalone_models.rs b/crates/horizon-mod-vocab/src/hooks/standalone_models.rs
+index 6a530b7b24..21848d167c 100644
+--- a/crates/horizon-mod-vocab/src/hooks/standalone_models.rs
++++ b/crates/horizon-mod-vocab/src/hooks/standalone_models.rs
+@@ -33,20 +33,18 @@ pub trait Hooks {
+         lines: &mut Vec<String>,
+         cancel: &mut bool,
+     );
+-    /// Models no blockstate names that this client bakes beside the block
+-    /// models (NeoForge's `ModelEvent.RegisterStandalone`): push their ids
+-    /// (`mymod:block/shaft_half`, the model at
+-    /// `assets/mymod/models/block/shaft_half.json`). Parts a block entity or
+-    /// a mob draws, with `native_draw_model`, so that no block is registered
+-    /// only to bake its model. Asked once at start, before the resources
+-    /// load; every resource load, a pack reload included, bakes them again
+-    /// from that pack's files. A model that doesn't read is logged and left
+-    /// out; an id without a namespace is dropped. Only the client asks it,
+-    /// as NeoForge's ModelEvent.RegisterStandalone is a client mod-bus event.
++    /// Models no blockstate names, registered once on the client before resources load.
++    /// `models` collects plain namespaced file ids, baked unturned. `forms` collects
++    /// rotated/UV-locked or combined dependencies under a namespaced result id.
++    /// Every resource load rebakes both from the active pack files. A missing dependency
++    /// drops the entire form and logs its registering mod. Resolve the results through
++    /// `RenderAssets::model` after `model_baking_completed`, just like plain ids.
+     #[hook(
+         side = "client",
+         contract = "collect",
+-        out = "models",
++        out = "forms",
++        answered_by = "mod",
++        version = 2,
+         context = "registration",
+         neoforge = "ModelEvent.RegisterStandalone"
+     )]
+diff --git a/crates/horizon-mod-vocab/src/host/config.rs b/crates/horizon-mod-vocab/src/host/config.rs
+index 333e293d31..b391bb6338 100644
+--- a/crates/horizon-mod-vocab/src/host/config.rs
++++ b/crates/horizon-mod-vocab/src/host/config.rs
+@@ -102,6 +102,17 @@ pub trait ConfigServerHost {
+     #[access(WorldOnly)]
+     fn world_dir(&self) -> Option<PathBuf>;
+     /// Side: server.
++    /// Every current rule in the one server-wide store, by namespaced id.
++    /// Readable from `server_about_to_start`, before any level exists.
++    /// Level game-rule reads use this same store once their level exists.
++    #[access(WorldOnly)]
++    fn game_rules(&self) -> Vec<(String, GameRuleValue)>;
++    /// Side: server.
++    /// Read the server-wide rule from the first server hook onward.
++    /// Returns `UnknownRule` for an unknown id; level reads use the same store.
++    #[access(WorldOnly)]
++    fn game_rule(&self, id: &str) -> Result<GameRuleValue, GameRuleReadError>;
++    /// Side: server.
+     /// The retained server reload listeners of the last successful reload.
+     #[access(WorldOnly)]
+     fn reload_resources(&self) -> &dyn ServerReloadResources;
+diff --git a/crates/horizon-mod-vocab/src/host/entities.rs b/crates/horizon-mod-vocab/src/host/entities.rs
+index 07ef3a704a..5009bb7ae7 100644
+--- a/crates/horizon-mod-vocab/src/host/entities.rs
++++ b/crates/horizon-mod-vocab/src/host/entities.rs
+@@ -683,6 +683,24 @@ pub trait EntitiesBackendMut {
+     #[access(WorldOnly)]
+     fn entity_push(&mut self, entity: EntityRef, delta: [f64; 3]) -> bool;
+     /// Side: server.
++    /// Sets the player's collision exclusions, boxes of its own level
++    /// (`[min_x, min_y, min_z, max_x, max_y, max_z]`) in which that level's blocks don't stop it:
++    /// the part of a block's collision shape inside a box doesn't collide, a block sharing volume
++    /// with one is no wall to suffocate in and doesn't act on the player inside it (cobwebs, powder
++    /// snow, damaging blocks), and the server's check of the player's moves reads
++    /// the same boxes. Entity colliders and the world border still stop it. Each call replaces
++    /// the last set; an empty slice clears it, and so do a change of level, a respawn and
++    /// leaving. Nothing is saved, and nothing reaches the player's client: its own half sets the
++    /// same boxes with `ClientHost::set_collision_exclusions`. Refused, keeping the set there
++    /// was: more than 64 boxes, a value that isn't finite, a minimum above its maximum, an
++    /// entity that isn't a player, a stale handle.
++    #[access(WorldOnly)]
++    fn entity_set_collision_exclusions(
++        &mut self,
++        entity: EntityRef,
++        boxes: &[[f64; 6]],
++    ) -> Result<(), CollisionExclusionsError>;
++    /// Side: server.
+     /// Removes the entity with no death and no loot (`Entity.discard`): a
+     /// chest boat or a minecart with a chest still drops what it holds, and
+     /// a boat its lead, as vanilla's `remove` does. False for a player, a dragon
+diff --git a/crates/horizon-mod-vocab/src/host/levels.rs b/crates/horizon-mod-vocab/src/host/levels.rs
+index f4b3e40b6f..3270ddec78 100644
+--- a/crates/horizon-mod-vocab/src/host/levels.rs
++++ b/crates/horizon-mod-vocab/src/host/levels.rs
+@@ -21,6 +21,12 @@ pub trait LevelsHost {
+ #[doc(hidden)]
+ #[horizon_mod_api_macros::host_area]
+ pub trait LevelsBackend {
++    /// Side: server.
++    /// Whether any watered-area ticket covers this block. Minimum bounds are inclusive and
++    /// maximum bounds exclusive on all three axes. Reads active and parked levels, loads no
++    /// chunks, and calls no mod predicates. False on clients or for a stale/unavailable level.
++    #[access(WorldOnly)]
++    fn level_has_water_ticket(&self, level: LevelRef, pos: [i32; 3]) -> bool;
+     /// Side: server.
+     /// `ServerLevel.findClosestBiome3d`: search this level's generator for an id or `#tag`.
+     /// The result follows vanilla's sampled spiral and vertical order; it is not a search
+@@ -745,6 +751,27 @@ pub trait LevelsBackend {
+ #[doc(hidden)]
+ #[horizon_mod_api_macros::host_area]
+ pub trait LevelsBackendMut {
++    /// Side: server.
++    /// Mark the half-open box `min <= pos < max` as watered (`FarmlandWaterManager.addAABBTicket`).
++    /// For 5x1x5 farmland starting at [0, 64, 0], use min [0, 64, 0], max [5, 65, 5].
++    /// Farmland checks tickets before its vanilla water scan; rain and water still hydrate it.
++    /// The calling mod owns this ticket; overlaps are independent. Remove it when the sprinkler
++    /// stops. It is also removed on owner disable and level unload, never saved: re-add in
++    /// `level_load` or the block entity's load listener. Reads/writes reach parked server levels.
++    /// None outside an enabled mod call, on clients, for stale/unavailable levels, empty or
++    /// reversed bounds, or a box spanning more than 65,536 x/z chunks. Does not load chunks.
++    #[access(WorldOnly)]
++    fn level_add_water_ticket(
++        &mut self,
++        level: LevelRef,
++        min: [i32; 3],
++        max: [i32; 3],
++    ) -> Option<WaterTicket>;
++    /// Side: server.
++    /// Remove this watered area, leaving overlapping tickets intact. Only the owning enabled
++    /// mod can remove it. False if already removed, stale, unloaded, or called on a client.
++    #[access(WorldOnly)]
++    fn water_ticket_remove(&mut self, water_ticket: WaterTicket) -> bool;
+     /// Side: server.
+     /// Spawns a mob of `kind` (`minecraft:zombie`) at `pos` in the level as
+     /// `EntityType.spawn` does with `reason`: the entity type creates it (its
+diff --git a/crates/horizon-mod-vocab/src/host/players.rs b/crates/horizon-mod-vocab/src/host/players.rs
+index a207a95b58..7e95c6ebe2 100644
+--- a/crates/horizon-mod-vocab/src/host/players.rs
++++ b/crates/horizon-mod-vocab/src/host/players.rs
+@@ -34,6 +34,16 @@ pub trait PlayersClientHost {
+     /// clamped to -4..4; a spectator, or a value that is not a number, is left alone.
+     #[access(WorldOnly)]
+     fn push_player(&mut self, kick: [f32; 3]);
++    /// Side: client.
++    /// For a client mod: the local player's collision exclusions, the client half of
++    /// `EntityRef::set_collision_exclusions`, with the same boxes, rules and refusals (a client
++    /// with no player of its own answers `Stale`). The client moves its player itself, so a mod
++    /// sets the same boxes on both sides: the engine sends neither set to the other.
++    #[access(WorldOnly)]
++    fn set_collision_exclusions(
++        &mut self,
++        boxes: &[[f64; 6]],
++    ) -> Result<(), CollisionExclusionsError>;
+ }
+ /// The handles' reads of the `players` area, implemented by the game and reached through [`Backend`].
+ // hidden: a handle's backend, reached through `Backend`; mods call the handle, never this trait
