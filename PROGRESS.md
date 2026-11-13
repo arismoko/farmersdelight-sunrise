@@ -258,3 +258,18 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - omitted (delta **A12**, engine task **E-16** animated mod item renderer): the flip animation; hence the
   `flip_skillet` payload/arm pose are not implemented yet (cosmetic only). Sizzle sounds: not yet.
 - next: M2-09 (placed skillet block entity)
+
+## M2-09 Placed skillet — PASS — 2026-11-13
+- mod commit: e92ec37 | block entity: one slot (whole stack), `CookTime`/`CookTimeTotal`/`Skillet`, `Inventory`
+  mirrored; heated (conductors count) +1/tick, result toward `facing.getClockWise()`, one unit used; cold −2/tick;
+  waterlogged → contents drop; `support` recomputed on vertical neighbour change (tray heat sources).
+- in game: sneak-placed on a campfire → `support=true`; 8 beef in (whole stack, "Skillet hisses" add-food sound,
+  steam particles) → 8 cooked beef after 8 × 80 ticks with Fire Aspect I (`m2-skillet-8-beef.png`); an
+  enchanted, damaged skillet broken → drops with `damage 10` + Fire Aspect I; water bucket → waterlogged
+  (native, stairs template) and the beef drops out.
+- engine notes: (1) the client predicts block clicks with the template and also sends an off-hand round, which
+  emptied the pan right after filling it; FD's main-hand `useItemOn` never passes, so the part ignores the off
+  hand (parity). (2) Horizon's loot context has no block-entity data and the block entity is gone when
+  `loot_drops` runs: `farmersdelight:copy_skillet` is a no-op loot function and the placed stack is recorded in
+  `pre_remove_side_effects` and applied in `loot_drops`.
+- next: M2-10 (demo incl. save/restart mid-cook and LAN second client)
