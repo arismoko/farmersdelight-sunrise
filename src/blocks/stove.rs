@@ -85,7 +85,12 @@ pub fn write_ints(nbt: &mut Compound, key: &str, values: &[i32; SLOTS]) {
 
 // ---------------------------------------------------------------- the Part
 
-pub struct Stove;
+pub struct Stove {
+    pub smoke: ParticleKey,
+    pub flame: ParticleKey,
+    /// Client tick counter, a seed for effect randomness.
+    pub client_ticks: std::sync::atomic::AtomicU64,
+}
 
 fn level_of(host: &dyn Host, dimension: &str) -> Option<LevelRef> {
     host.level(dimension)
@@ -348,12 +353,19 @@ impl BlockEntityPart for Stove {
     fn block_entity_tick(&self, host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
         let pos = event.pos;
         let entity = &mut event.entity;
-        if entity.items.iter().all(Option::is_none) {
-            return;
-        }
         let Some(level) = level_of(&*host, host.dimension()) else {
             return;
         };
+        let lit = level
+            .block_state(&*host, pos)
+            .and_then(|s| host.block_state_string(s))
+            .is_some_and(|n| lit_of(&n));
+        if lit {
+            burn_standing(host, level, pos);
+        }
+        if entity.items.iter().all(Option::is_none) {
+            return;
+        }
         if top_covered(&*host, level, pos) {
             for slot in entity.items.iter_mut() {
                 if let Some(stack) = slot.take() {
@@ -365,10 +377,6 @@ impl BlockEntityPart for Stove {
             host.block_entity_sync(pos);
             return;
         }
-        let lit = level
-            .block_state(&*host, pos)
-            .and_then(|s| host.block_state_string(s))
-            .is_some_and(|n| lit_of(&n));
         let totals = read_ints(&entity.nbt, TOTALS);
         let mut progress = read_ints(&entity.nbt, PROGRESS);
         if lit {
@@ -406,6 +414,70 @@ impl BlockEntityPart for Stove {
         }
     }
 
+    fn block_entity_client_ticks(
+        &self,
+        _: &dyn ClientHost,
+        event: &mut BlockEntityClientTicksEvent<'_>,
+    ) {
+        event.ticks = true;
+    }
+
+    /// `StoveBlock#animateTick` (crackle 1 in 10, smoke and flame at the front) and
+    /// `StoveBlockEntity#addSmokeParticles` (each cooking item steams 20% of ticks, 3 puffs); lit only.
+    fn block_entity_client_tick(
+        &self,
+        host: &mut dyn ClientHost,
+        event: &mut BlockEntityClientTickEvent<'_>,
+    ) {
+        let name = host.block_state_string(event.state).unwrap_or_default();
+        if !lit_of(&name) {
+            return;
+        }
+        let pos = event.pos;
+        let tick = self
+            .client_ticks
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let mut rng = ClientRng::new(pos, tick as i64);
+        let (x, y, z) = (pos[0] as f64 + 0.5, pos[1] as f64, pos[2] as f64 + 0.5);
+        if rng.next() < 0.1 {
+            let mut sound = SoundPlay::ui("farmersdelight:block.stove.crackle");
+            sound.source = SoundSource::Blocks;
+            sound.position = [x, y, z];
+            sound.relative = false;
+            sound.attenuation = SoundAttenuation::Linear;
+            let _ = host.play_local_sound(&sound, 0);
+        }
+        let facing = state_value(&name, "facing").unwrap_or("north");
+        let [sx, sz] = step(facing);
+        let horizontal = rng.next() * 0.6 - 0.3;
+        let ox = if sx != 0.0 { sx * 0.52 } else { horizontal };
+        let oz = if sz != 0.0 { sz * 0.52 } else { horizontal };
+        let oy = rng.next() * 6.0 / 16.0;
+        let at = [x + ox, y + oy, z + oz];
+        let _ = host.add_particle(&ParticleOptions::simple(self.smoke), at, [0.0; 3]);
+        let _ = host.add_particle(&ParticleOptions::simple(self.flame), at, [0.0; 3]);
+        let stacks = inventory_from_tag(&*host, &event.entity.nbt);
+        let [cx, cz] = step(clockwise(facing));
+        for (i, stack) in stacks.iter().enumerate() {
+            if stack.is_none() || rng.next() >= 0.2 {
+                continue;
+            }
+            let [mut a, mut b] = crate::client::render::STOVE_OFFSETS[i].map(f64::from);
+            if matches!(facing, "west" | "east") {
+                std::mem::swap(&mut a, &mut b);
+            }
+            let px = x - sx * a + cx * a;
+            let pz = z - sz * b + cz * b;
+            for _ in 0..3 {
+                let _ = host.add_particle(
+                    &ParticleOptions::simple(self.smoke),
+                    [px, y + 1.0, pz],
+                    [0.0, 5.0e-4, 0.0],
+                );
+            }
+        }
+    }
+
     fn block_entity_submit(&self, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
         let stacks = inventory_from_tag(host, &event.entity.nbt);
         if stacks.iter().all(Option::is_none) {
@@ -428,7 +500,66 @@ impl BlockEntityPart for Stove {
     }
 }
 
+/// `AbstractStoveBlock#burnEntitySteppingOnStove`, run from the stove's tick: Horizon's
+/// `block_step_on` gets no host to hurt with, so the lit stove looks for living entities on the
+/// ground whose box meets the grilling area one block up and that are not stepping carefully
+/// (sneaking). Same condition, checked every tick as `stepOn` is.
+fn burn_standing(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3]) {
+    let g = GRILLING_AREA;
+    let base = [pos[0] as f64, pos[1] as f64 + 1.0, pos[2] as f64];
+    let min = [base[0] + g[0], base[1] + g[1], base[2] + g[2]];
+    let max = [base[0] + g[3], base[1] + g[4], base[2] + g[5]];
+    let Some(found) = level.entities_in(&*host, min, max) else {
+        return;
+    };
+    for e in found {
+        if host.living(e).is_none()
+            || e.on_ground(&*host) != Some(true)
+            || e.is_shift_key_down(&*host) == Some(true)
+        {
+            continue;
+        }
+        let _ = e.hurt(host, "farmersdelight:stove_burn", 1.0, None, None);
+    }
+}
+
 // ---------------------------------------------------------------- helpers
+
+fn step(facing: &str) -> [f64; 2] {
+    match facing {
+        "north" => [0.0, -1.0],
+        "south" => [0.0, 1.0],
+        "west" => [-1.0, 0.0],
+        _ => [1.0, 0.0],
+    }
+}
+
+fn clockwise(facing: &str) -> &'static str {
+    match facing {
+        "north" => "east",
+        "east" => "south",
+        "south" => "west",
+        _ => "north",
+    }
+}
+
+/// Client-only effect randomness (no gameplay depends on it).
+struct ClientRng(u64);
+impl ClientRng {
+    fn new(pos: [i32; 3], time: i64) -> Self {
+        let seed = (pos[0] as i64).wrapping_mul(3_129_871)
+            ^ (pos[2] as i64).wrapping_mul(116_129_781)
+            ^ (pos[1] as i64)
+            ^ time.wrapping_mul(0x9E37_79B9);
+        Self(seed as u64 | 1)
+    }
+    fn next(&mut self) -> f64 {
+        self.0 ^= self.0 << 13;
+        self.0 ^= self.0 >> 7;
+        self.0 ^= self.0 << 17;
+        (self.0 >> 11) as f64 / (1u64 << 53) as f64
+    }
+}
 
 fn centre(pos: [i32; 3]) -> [f64; 3] {
     [

@@ -44,8 +44,17 @@ pub fn register(
         .block_entity_type(crate::blocks::stove::ID)
         .blocks(&[crate::blocks::stove::ID])
         .build();
+    let smoke = registrar.particle_key("minecraft:smoke");
+    let flame = registrar.particle_key("minecraft:flame");
     registrar
-        .block_entity_part(&stove, crate::blocks::stove::Stove)
+        .block_entity_part(
+            &stove,
+            crate::blocks::stove::Stove {
+                smoke,
+                flame,
+                client_ticks: Default::default(),
+            },
+        )
         .expect("stove block entity type");
 }
 
