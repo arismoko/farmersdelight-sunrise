@@ -24,6 +24,7 @@ pub fn register_load_conditions(event: &mut RegisterLoadConditionsEvent<'_>) {
 pub fn register(
     registrar: &mut dyn Registrar,
     recipes: &std::sync::Arc<crate::recipes::RecipeTables>,
+    removed_skillets: &crate::blocks::skillet::Removed,
 ) {
     use crate::blocks::cutting_board;
     let board = registrar
@@ -61,7 +62,12 @@ pub fn register(
         .blocks(&[crate::blocks::skillet::ID])
         .build();
     registrar
-        .block_entity_part(&skillet_block, crate::blocks::skillet::Skillet)
+        .block_entity_part(
+            &skillet_block,
+            crate::blocks::skillet::Skillet {
+                removed: removed_skillets.clone(),
+            },
+        )
         .expect("skillet block entity type");
     let skillet = registrar.item_key(crate::items::skillet::ITEM);
     registrar.item_part(skillet, crate::items::skillet::SkilletItem);

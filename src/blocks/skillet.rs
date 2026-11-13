@@ -95,7 +95,14 @@ fn stored_on_client(host: &dyn Host, nbt: &Compound) -> Option<ItemStack> {
     }
 }
 
-pub struct Skillet;
+/// Placed stacks (NBT) of skillets being removed, by position: recorded while the block entity is
+/// still readable (`pre_remove_side_effects`, which has no full host and no dimension) and taken by
+/// `loot_drops`, which runs after the removal at the pin.
+pub type Removed = std::sync::Arc<std::sync::Mutex<std::collections::HashMap<[i32; 3], Compound>>>;
+
+pub struct Skillet {
+    pub removed: Removed,
+}
 
 #[mod_api::horizon_part]
 impl BlockPart for Skillet {
@@ -359,23 +366,21 @@ impl BlockEntityPart for Skillet {
 // the block entity still stands, and the function itself keeps the rolled stack.
 
 /// The block's drop is the skillet it was placed with (enchantments, damage, name).
-pub fn on_loot_drops(host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
+pub fn on_loot_drops(removed: &Removed, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
     if event.context.table != "farmersdelight:blocks/skillet" {
         return;
     }
     let Some((pos, _)) = event.context.block else {
         return;
     };
-    let Some(level) = host.level(event.context.dimension) else {
+    let Some(c) = removed
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(&pos)
+    else {
         return;
     };
-    let Some(data) = host.block_entity(level, pos).and_then(|be| be.data(&*host)) else {
-        return;
-    };
-    let Some(Tag::Compound(c)) = data.get(&SKILLET.into()) else {
-        return;
-    };
-    let Some(placed) = ItemStack::from_nbt(&*host, c) else {
+    let Some(placed) = ItemStack::from_nbt(&*host, &c) else {
         return;
     };
     for drop in event.drops.iter_mut() {

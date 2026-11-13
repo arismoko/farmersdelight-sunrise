@@ -21,6 +21,7 @@ use mod_api::*;
 #[derive(Default)]
 struct FarmersDelight {
     recipes: std::sync::Arc<recipes::RecipeTables>,
+    removed_skillets: blocks::skillet::Removed,
 }
 
 #[mod_api::horizon_mod]
@@ -34,7 +35,7 @@ impl Hooks for FarmersDelight {
     }
 
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
-        registry::register(registrar, &self.recipes);
+        registry::register(registrar, &self.recipes, &self.removed_skillets);
     }
 
     fn block_entity_container(
@@ -104,7 +105,7 @@ impl Hooks for FarmersDelight {
     fn loot_function(&self, _: &mut LootFunctionEvent<'_>) {}
 
     fn loot_drops(&self, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
-        blocks::skillet::on_loot_drops(host, event);
+        blocks::skillet::on_loot_drops(&self.removed_skillets, host, event);
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
@@ -137,7 +138,10 @@ mod tests {
     }
 
     fn with_mod(recipes: Arc<recipes::RecipeTables>, f: impl FnOnce()) {
-        let fd = FarmersDelight { recipes };
+        let fd = FarmersDelight {
+            recipes,
+            ..Default::default()
+        };
         testing::with_mods(vec![ModEntry::new(ids::MOD_ID, Box::new(fd))].into(), f);
     }
 
