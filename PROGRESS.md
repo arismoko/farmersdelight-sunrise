@@ -84,3 +84,54 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `tools/test_fixtures.py` 4 OK.
 - deltas/probes: plan correction — the reference has **19** common config keys (plan says 18).
 - next: M0-08
+
+## M0-08 Package and load the mod in game — PASS (with notes) — 2026-11-13
+- build pin: afe471cf | mod commit: cf409b3 (native build native-afe471c-85c629c17d21)
+- did: no game release exists at afe471cf (launcher lists only nightlies ≤ 514ecf9; `prebuilt-*` tags are SDK-only), so:
+  launcher built from source at the pin; `horizon-client`/ctl/prepare/server built (dev) at the pin; resources prepared
+  from the user's Prism install + user-supplied server jar (Prism's Java 25); exporters compiled; wasm-std built;
+  `horizon-launcher developer-install`; SHA256-verified `prebuilt-afe471cf` Linux SDK used via
+  `HORIZON_LAUNCHER_DEVELOPER_SDK` for `native-build --trust-native-code` ("Built (optimized, prebuilt)"); played
+  offline with `HORIZON_LAUNCHER_DEVELOPER_OFFLINE=1` (unsigned developer base; no account). All homes are scratch
+  dirs under `../run/` (scripts: `../run/{env.sh,rebuild.sh,launch.sh,ctl,cmd}`).
+- evidence: `../run/shots/latest-session.log` ("content from 1 mod(s)", no `E_NATIVE_*`, no reload refusal);
+  `/give farmersdelight:flint_knife` etc. succeed; baseline `docs/baseline/m0-08-load-warnings.txt` (60 skipped
+  cutting recipes naming undeclared ids; skillet item model type `farmersdelight:skillet_flip` unknown → M2).
+  Mods-screen screenshot NOT taken (admission shown by log + working items instead).
+- deltas/probes: (a) condition `ported_farmersdelight:vanilla_crates_enabled` registers; the client's own content
+  load logs the 3 crate recipes as "unknown load conditions … left out" (client view outside a server reload); server
+  side not yet verified by crafting a crate → open. (b) `backstabbing.json` admitted (no refusal logged). (c) staged
+  carry mode NOT needed: the full carry loads with per-file skips.
+- bug found and fixed: `Host::fluid_key` in `tags_updated` panicked the server thread ("unavailable during
+  Reloading"); water is now read from the water block's fluid state in `state_for_placement`.
+- next: M1-09
+
+## M1-01…M1-08 slice — in-game results — 2026-11-13
+- build pin: afe471cf | mod commit: cf409b3 | world FDTest (survival, seed 42), driven with horizon-ctl
+- M1-01 PASS: `/give` of all four ids works; knife durability 131 (inventory report). Tooltip attribute lines not
+  screenshotted. Unit fixtures for foods/knives exist (M0-09).
+- M1-02 PARTIAL: placement `facing=north` with the player looking south (reference: opposite of placer) ✓; removing
+  the supporting block pops the board, which drops itself and its contents (+1 board, +1 beef picked up, event log
+  tick 6581/6590) ✓. Accepted delta **A9**: survival check approximated (non-air, non-`#minecraft:replaceable`
+  below) — `can_survive`/`update_shape` get a level-only host without face-sturdiness/shape queries at the pin.
+  NOT RUN: other three facings in game (unit-tested), waterlogged placement, bucket-waterlogging probe, fire test.
+- M1-03 PASS: contents survive save & quit and a full process restart (taken back with empty hand after restart;
+  still rendered after restart, `../run/shots/m1-after-restart.png`). One-slot ModContainer.
+- M1-04 PASS (unit, 117 recipes, tool forms 51/25/15/15/6/3/2); in game `cutting/beef` used.
+- M1-05 PASS: 3 beef inserted as a whole stack; knife cut → exactly 2 `minced_beef` dropped on the CCW side
+  (x −1.875 from board centre −1.5 for facing north), knife 131→130, action bar "2 remaining..."/"1 remaining...",
+  advancement "Watch Your Fingers" granted by the mod's `farmersdelight:use_cutting_board` trigger; empty-hand take
+  returns the stack. New quirk **Q16**: reference `matches()` tests input and tool, so a wrong tool also shows
+  "invalid item" (kept). Sounds NOT verified (audio off). Fortune bonus not read yet (M8-03). Block-item break sound
+  path → M8-03.
+- M1-06 PASS (single client): beef drawn flat, 2 layers for 2 items, 1 after a cut
+  (`../run/shots/m1-06-beef-on-board.png`, `m1-cut-one-left.png`). **U-6 resolved: the client copy does NOT receive
+  `items`**; the reference `Inventory` list is mirrored into the BE NBT and sent in the update tag. Upright
+  block-item pose and LAN second client NOT RUN.
+- M1-07 PARTIAL: models/textures/lang resolve (board, knife, beef rendered; English names in chat). Sounds unverified.
+- M1-08 PASS: furnace and smoker turned minced beef into `beef_patty` (NBT-loaded with coal, done by tick 3902 from
+  3685); campfire accepted minced beef by right-click and dropped a patty within its window (finished between ticks
+  4006 and 4430 from 3690). Exact per-tick durations and furnace XP not measured.
+- Eating: beef patty from food 0 / saturation 0 → food 4 / saturation 4.0 (vanilla clamps saturation to the food
+  level). Crafting: flint knife and cutting board crafted from the carried recipes in a crafting table.
+- next: M1-09 remaining items (see CHECKPOINT)

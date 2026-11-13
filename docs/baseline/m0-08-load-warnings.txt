@@ -1,0 +1,72 @@
+# M0-08 load-warning baseline (2026-11-13, build pin afe471cf, mod cf409b3, native-afe471c-85c629c17d21)
+## mod: skipped cutting recipes (undeclared ids)
+farmersdelight:cutting/acacia_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/acacia_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/apple_pie: input resolves to no items
+farmersdelight:cutting/bamboo_basket: input resolves to no items
+farmersdelight:cutting/bamboo_block: unknown result {"id":"farmersdelight:straw"}
+farmersdelight:cutting/birch_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/birch_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/brown_mushroom_colony: input resolves to no items
+farmersdelight:cutting/cabbage: input resolves to no items
+farmersdelight:cutting/cake: unknown result {"count":7,"id":"farmersdelight:cake_slice"}
+farmersdelight:cutting/cherry_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/cherry_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/chicken: unknown result {"count":2,"id":"farmersdelight:chicken_cuts"}
+farmersdelight:cutting/chocolate_pie: input resolves to no items
+farmersdelight:cutting/cod: unknown result {"count":2,"id":"farmersdelight:cod_slice"}
+farmersdelight:cutting/cooked_chicken: unknown result {"count":2,"id":"farmersdelight:cooked_chicken_cuts"}
+farmersdelight:cutting/cooked_cod: unknown result {"count":2,"id":"farmersdelight:cooked_cod_slice"}
+farmersdelight:cutting/cooked_mutton: unknown result {"count":2,"id":"farmersdelight:cooked_mutton_chops"}
+farmersdelight:cutting/cooked_salmon: unknown result {"count":2,"id":"farmersdelight:cooked_salmon_slice"}
+farmersdelight:cutting/crimson_hyphae: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/crimson_stem: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/dark_oak_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/dark_oak_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/ham: input resolves to no items
+farmersdelight:cutting/jungle_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/jungle_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/kelp_roll: input resolves to no items
+farmersdelight:cutting/mangrove_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/mangrove_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/mutton: unknown result {"count":2,"id":"farmersdelight:mutton_chops"}
+farmersdelight:cutting/oak_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/oak_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/pale_oak_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/pale_oak_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/poplar_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/poplar_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/porkchop: unknown result {"count":2,"id":"farmersdelight:bacon"}
+farmersdelight:cutting/pumpkin_pie: unknown result {"count":4,"id":"farmersdelight:pumpkin_pie_slice"}
+farmersdelight:cutting/pumpkin: unknown result {"count":4,"id":"farmersdelight:pumpkin_slice"}
+farmersdelight:cutting/red_mushroom_colony: input resolves to no items
+farmersdelight:cutting/rice_panicle: input resolves to no items
+farmersdelight:cutting/salmon: unknown result {"count":2,"id":"farmersdelight:salmon_slice"}
+farmersdelight:cutting/smoked_ham: input resolves to no items
+farmersdelight:cutting/spruce_log: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/spruce_wood: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/sweet_berry_cheesecake: input resolves to no items
+farmersdelight:cutting/warped_hyphae: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/warped_stem: unknown result {"id":"farmersdelight:tree_bark"}
+farmersdelight:cutting/wild_beetroots: input resolves to no items
+farmersdelight:cutting/wild_cabbages: input resolves to no items
+farmersdelight:cutting/wild_carrots: input resolves to no items
+farmersdelight:cutting/wild_onions: input resolves to no items
+farmersdelight:cutting/wild_potatoes: input resolves to no items
+farmersdelight:cutting/wild_rice: input resolves to no items
+farmersdelight:cutting/wild_tomatoes: input resolves to no items
+farmersdelight:cutting/wooden_basket: input resolves to no items
+farmersdelight:salvaging/leather_armor: tool resolves to no items
+farmersdelight:salvaging/leather_horse_armor: tool resolves to no items
+farmersdelight:salvaging/saddle: tool resolves to no items
+farmersdelight:tag_dough: input resolves to no items
+## engine
+      1 data/farmersdelight/recipe/beetroot_crate.json: unknown load conditions [ported_farmersdelight:vanilla_crates_enabled]; file left out
+      1 data/farmersdelight/recipe/carrot_crate.json: unknown load conditions [ported_farmersdelight:vanilla_crates_enabled]; file left out
+      1 data/farmersdelight/recipe/potato_crate.json: unknown load conditions [ported_farmersdelight:vanilla_crates_enabled]; file left out
+      5 Horizon: damage tag minecraft:burn_from_stepping has unresolved required entries
+      5 Horizon: damage tag minecraft:is_fire has unresolved required entries
+      5 Horizon: damage tag minecraft:no_knockback has unresolved required entries
+      5 Horizon: damage tag minecraft:panic_causes has unresolved required entries
+      5 Horizon: damage tag minecraft:panic_environmental_causes has unresolved required entries
+      1 Horizon: item definition farmersdelight:skillet not loaded: unknown item model type farmersdelight:skillet_flip
