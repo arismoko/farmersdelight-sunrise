@@ -156,3 +156,37 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   Cause: client prediction uses the stonecutter template (no water on removal; no `waterlogged` on placement); the
   server's correct state follows one tick later. **Decision (user, 2026-11-13): accept until E-13/E-14 land**; no
   fork change. Recorded as accepted delta A10.
+
+## M1-02/M1-07 remaining probes — PASS — 2026-11-13
+- four facings: looking north/east/west/south gives facing south/west/east/north (opposite of placer) for boards placed
+  by horizon-ctl with an explicit look; top-down screenshot `../run/shots/m1-four-facings.png`.
+- bucket probe: emptying a water bucket on a board puts the bucket *on the board* (useItemOn runs first and the bucket
+  fits), as in the reference; bucket-waterlogging is therefore not reachable in either. Waterlogging by placing into
+  water works (earlier).
+- upright block item: a pumpkin stands as a small block on the board (`../run/shots/m1-pumpkin-upright.png`).
+- sounds: verified through subtitles (audio on): "Item placed on board", "Knife cuts" (`m1-09/03`, `m1-09/06`).
+- crate load condition, server side: a world datapack recipe gated by
+  `ported_farmersdelight:vanilla_crates_enabled` (9 dirt → diamond) loaded after `/reload` ("Unlocked 1 recipe")
+  and crafted. The FD crate recipes themselves stay out until `farmersdelight:*_crate` items are declared (M7).
+- side note: once, closing a crafting table right after scripted clicks lost its 9 grid items (not reproduced; engine
+  or scripting race, not mod code).
+
+## M1-09 M1 in-game demonstration — PASS — 2026-11-13
+- build pin: afe471cf | mod commit: d2db874 | native-afe471c-f016ff3649f3 | fresh survival world "M1Demo" (seed 1234,
+  peaceful), driven with horizon-ctl; recordings `../run/horizon-home/instances/fd-port/recordings/*m1-09-demo*`;
+  screenshots + logs `../run/shots/m1-09/`.
+- (1) knife and board crafted in a crafting table from carried recipes (01, 02); materials given with /give.
+- (2) cutting: each raw beef → exactly 2 minced_beef, knife 131→130→129 (1 per cut), action bar "1 remaining...",
+  "Knife cuts" subtitle, "Watch Your Fingers" toast (06).
+- (3) beef visibly rendered on the board before cutting (03), "Item placed on board" subtitle.
+- (4) minced beef → beef_patty in a placed furnace and smoker (loaded via their menus with coal) and on a campfire;
+  furnace/smoker output gave XP (XpP 0 → 0.286) (07).
+- (5) eating: food 8 → 16 and saturation 0 → 12.8 for two patties (+4 / +6.4 each) on Easy (peaceful refills food).
+- (6) board contents survive save & quit to title + reopen (04) and a full process restart (05), still rendered.
+- (7) real single-player path (Horizon client at the build pin, packaged mod, integrated server); mod server hooks
+  run on the integrated server thread (recipe tables built there; the earlier fluid_key panic was reported on
+  'Server thread'). Log warnings only from the M0-08 baseline.
+- not covered: LAN second client (optional for M1), measured per-tick cook durations.
+- env: `run/play.sh` added for the user to play with a captured mouse; `run/launch.sh` (agent, `--control`) never
+  captures the pointer at afe471cf (`unclaimed_window` is never cleared, also on main 2026-11-13).
+- next: M2-01
