@@ -1,0 +1,132 @@
+{
+ "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
+ "generated_by": "tools/extract_fixtures.py",
+ "config_defaults": {
+  "common": [
+   {
+    "key": "settings.enableRopeReeling",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableRopeReeling"
+   },
+   {
+    "key": "settings.canvasSignDarkBackgroundList",
+    "default": [
+     "gray",
+     "purple",
+     "blue",
+     "brown",
+     "green",
+     "red",
+     "black"
+    ],
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:canvasSignDarkBackgroundList"
+   },
+   {
+    "key": "farming.richSoilBoostChance",
+    "default": 0.2,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:richSoilBoostChance"
+   },
+   {
+    "key": "farming.enableTomatoVineClimbingTaggedRopes",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableTomatoVineClimbingTaggedRopes"
+   },
+   {
+    "key": "farming.defaultTomatoVineRope",
+    "default": "farmersdelight:rope",
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:defaultTomatoVineRope"
+   },
+   {
+    "key": "crafting.enableCookingPotRecipeBook",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableCookingPotRecipeBook"
+   },
+   {
+    "key": "crafting.enableVanillaCropCrates",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableVanillaCropCrates"
+   },
+   {
+    "key": "crafting.cuttingBoardFortuneBonus",
+    "default": 0.1,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:cuttingBoardFortuneBonus"
+   },
+   {
+    "key": "overrides.enableVanillaStrawBedRename",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableVanillaStrawBedRename"
+   },
+   {
+    "key": "overrides.enableVanillaSoupExtraEffects",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableVanillaSoupExtraEffects"
+   },
+   {
+    "key": "overrides.enableRabbitStewBuff",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableRabbitStewBuff"
+   },
+   {
+    "key": "overrides.enablePumpkinPieSneakToPlace",
+    "default": false,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enablePumpkinPieSneakToPlace"
+   },
+   {
+    "key": "overrides.enableCuttingBoardDispenserBehavior",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableCuttingBoardDispenserBehavior"
+   },
+   {
+    "key": "overrides.stack_size.enableStackableSoupItems",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableStackableSoupItems"
+   },
+   {
+    "key": "overrides.stack_size.soupItemList",
+    "default": [
+     "minecraft:mushroom_stew",
+     "minecraft:beetroot_soup",
+     "minecraft:rabbit_stew"
+    ],
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:soupItemList"
+   },
+   {
+    "key": "world.generateFDChestLoot",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:generateFDChestLoot"
+   },
+   {
+    "key": "world.generateVillageCompostHeaps",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:generateVillageCompostHeaps"
+   },
+   {
+    "key": "world.generateFDCropsOnVillageFarms",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:generateFDCropsOnVillageFarms"
+   },
+   {
+    "key": "debug.enableTomatoRopePermanence",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableTomatoRopePermanence"
+   }
+  ],
+  "client": [
+   {
+    "key": "client.enableNourishmentHungerOverlay",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableNourishmentHungerOverlay"
+   },
+   {
+    "key": "client.enableComfortHealthOverlay",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableComfortHealthOverlay"
+   },
+   {
+    "key": "client.enableFoodEffectTooltip",
+    "default": true,
+    "source": "src/main/java/vectorwing/farmersdelight/common/Configuration.java:enableFoodEffectTooltip"
+   }
+  ]
+ }
+}

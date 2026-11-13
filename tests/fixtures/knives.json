@@ -1,0 +1,44 @@
+{
+ "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
+ "generated_by": "tools/extract_fixtures.py",
+ "knives": {
+  "flint_knife": {
+   "source": "J/common/registry/ModToolMaterials.java:FLINT; J/common/registry/ModItems.java:FLINT_KNIFE",
+   "material": "farmersdelight:flint",
+   "durability": 131,
+   "speed": 4.0,
+   "attack_damage_bonus": 1.0,
+   "enchantability": 5,
+   "incorrect_for_drops": "#minecraft:incorrect_for_wooden_tool",
+   "repair": "#farmersdelight:flint_tool_materials",
+   "attack_damage": 1.5,
+   "attack_speed": -2.0,
+   "fire_resistant": false
+  },
+  "copper_knife": {
+   "source": "J/common/registry/ModItems.java:COPPER_KNIFE",
+   "material": "minecraft:copper",
+   "fire_resistant": false
+  },
+  "iron_knife": {
+   "source": "J/common/registry/ModItems.java:IRON_KNIFE",
+   "material": "minecraft:iron",
+   "fire_resistant": false
+  },
+  "diamond_knife": {
+   "source": "J/common/registry/ModItems.java:DIAMOND_KNIFE",
+   "material": "minecraft:diamond",
+   "fire_resistant": false
+  },
+  "netherite_knife": {
+   "source": "J/common/registry/ModItems.java:NETHERITE_KNIFE (.fireResistant())",
+   "material": "minecraft:netherite",
+   "fire_resistant": true
+  },
+  "golden_knife": {
+   "source": "J/common/registry/ModItems.java:GOLDEN_KNIFE",
+   "material": "minecraft:gold",
+   "fire_resistant": false
+  }
+ }
+}

@@ -1,0 +1,534 @@
+{
+ "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
+ "generated_by": "tools/extract_fixtures.py",
+ "cooking_recipes": [
+  {
+   "id": "farmersdelight:cooking/apple_cider",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/apple_cider.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "minecraft:apple",
+     "minecraft:apple",
+     "minecraft:sugar"
+    ],
+    "recipe_book_tab": "drinks",
+    "result": {
+     "id": "farmersdelight:apple_cider"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/baked_cod_stew",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/baked_cod_stew.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/raw_cod",
+     "#c:crops/potato",
+     "#minecraft:eggs",
+     "#c:crops/tomato"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:baked_cod_stew"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/beef_stew",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/beef_stew.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/raw_beef",
+     "#c:crops/carrot",
+     "#c:crops/potato"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:beef_stew"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/beetroot_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/beetroot_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "container": {
+     "id": "minecraft:bowl"
+    },
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/beetroot",
+     "#c:crops/beetroot",
+     "#c:crops/beetroot"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "minecraft:beetroot_soup"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/bone_broth",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/bone_broth.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 0.35,
+    "ingredients": [
+     "#c:bones",
+     {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+       "minecraft:glow_berries",
+       "#c:mushrooms",
+       "minecraft:hanging_roots",
+       "minecraft:glow_lichen"
+      ]
+     }
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:bone_broth"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/cabbage_rolls",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/cabbage_rolls.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "cookingtime": 100,
+    "experience": 0.35,
+    "ingredients": [
+     "#c:crops/cabbage",
+     {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+       "#c:foods/raw_meat",
+       "#c:foods/safe_raw_fish",
+       "#c:foods/vegetable",
+       "#c:mushrooms"
+      ]
+     }
+    ],
+    "result": {
+     "id": "farmersdelight:cabbage_rolls"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/chicken_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/chicken_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/raw_chicken",
+     "#c:crops/carrot",
+     "#c:foods/leafy_green",
+     "#c:foods/vegetable"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:chicken_soup"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/cooked_rice",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/cooked_rice.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "cookingtime": 100,
+    "experience": 0.35,
+    "ingredients": [
+     "#c:crops/rice"
+    ],
+    "result": {
+     "id": "farmersdelight:cooked_rice"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/dog_food",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/dog_food.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "minecraft:rotten_flesh",
+     "minecraft:bone_meal",
+     "#c:foods/raw_meat",
+     "#c:crops/rice"
+    ],
+    "result": {
+     "id": "farmersdelight:dog_food"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/dumplings",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/dumplings.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/dough",
+     "#c:crops/cabbage",
+     "#c:crops/onion",
+     {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+       "#c:foods/raw_chicken",
+       "#c:foods/raw_pork",
+       "#c:foods/raw_beef",
+       "minecraft:brown_mushroom"
+      ]
+     }
+    ],
+    "result": {
+     "count": 2,
+     "id": "farmersdelight:dumplings"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/fish_stew",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/fish_stew.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/safe_raw_fish",
+     "farmersdelight:tomato_sauce",
+     "#c:crops/onion"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:fish_stew"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/fried_rice",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/fried_rice.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/rice",
+     "#minecraft:eggs",
+     "#c:crops/carrot",
+     "#c:crops/onion"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:fried_rice"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/glow_berry_custard",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/glow_berry_custard.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "minecraft:glow_berries",
+     "#c:drinks/milk",
+     "#minecraft:eggs",
+     "minecraft:sugar"
+    ],
+    "result": {
+     "id": "farmersdelight:glow_berry_custard"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/hot_cocoa",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/hot_cocoa.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:drinks/milk",
+     "minecraft:sugar",
+     "minecraft:cocoa_beans",
+     "minecraft:cocoa_beans"
+    ],
+    "recipe_book_tab": "drinks",
+    "result": {
+     "id": "farmersdelight:hot_cocoa"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/mushroom_rice",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/mushroom_rice.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#minecraft:mushrooms",
+     "#minecraft:mushrooms",
+     "#c:crops/rice",
+     [
+      "minecraft:carrot",
+      "minecraft:potato"
+     ]
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:mushroom_rice"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/mushroom_stew",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/mushroom_stew.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "container": {
+     "id": "minecraft:bowl"
+    },
+    "experience": 1.0,
+    "ingredients": [
+     "#minecraft:mushrooms",
+     "#minecraft:mushrooms"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "minecraft:mushroom_stew"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/noodle_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/noodle_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/pasta",
+     "#minecraft:eggs",
+     "minecraft:dried_kelp",
+     "#c:foods/raw_pork"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:noodle_soup"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/onion_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/onion_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/onion",
+     "#c:crops/onion",
+     "#c:foods/bread",
+     "#c:drinks/milk"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:onion_soup"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/pasta_with_meatballs",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/pasta_with_meatballs.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "farmersdelight:minced_beef",
+     "#c:foods/pasta",
+     "farmersdelight:tomato_sauce"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:pasta_with_meatballs"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/pasta_with_mutton_chop",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/pasta_with_mutton_chop.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/raw_mutton",
+     "#c:foods/pasta",
+     "farmersdelight:tomato_sauce"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:pasta_with_mutton_chop"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/pumpkin_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/pumpkin_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "farmersdelight:pumpkin_slice",
+     "#c:foods/leafy_green",
+     "#c:foods/raw_pork",
+     "#c:drinks/milk"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:pumpkin_soup"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/rabbit_stew",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/rabbit_stew.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "container": {
+     "id": "minecraft:bowl"
+    },
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/potato",
+     "minecraft:rabbit",
+     "#c:crops/carrot",
+     "#minecraft:mushrooms"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "minecraft:rabbit_stew"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/ratatouille",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/ratatouille.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/tomato",
+     "#c:crops/onion",
+     "#c:crops/beetroot",
+     "#c:foods/vegetable"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:ratatouille"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/squid_ink_pasta",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/squid_ink_pasta.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:foods/safe_raw_fish",
+     "#c:foods/pasta",
+     "#c:crops/tomato",
+     "minecraft:ink_sac"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:squid_ink_pasta"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/stuffed_pumpkin_block",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/stuffed_pumpkin_block.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "container": {
+     "id": "minecraft:pumpkin"
+    },
+    "cookingtime": 400,
+    "experience": 2.0,
+    "ingredients": [
+     "#c:crops/rice",
+     "#c:crops/onion",
+     "minecraft:brown_mushroom",
+     "#c:crops/potato",
+     "#c:foods/berry",
+     "#c:foods/vegetable"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:stuffed_pumpkin_block"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/tomato_sauce",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/tomato_sauce.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "cookingtime": 100,
+    "experience": 0.35,
+    "ingredients": [
+     "#c:crops/tomato",
+     "#c:crops/tomato"
+    ],
+    "result": {
+     "id": "farmersdelight:tomato_sauce"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/vegetable_noodles",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/vegetable_noodles.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/carrot",
+     "#c:mushrooms",
+     "#c:foods/pasta",
+     "#c:foods/leafy_green",
+     "#c:foods/vegetable"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:vegetable_noodles"
+    }
+   }
+  },
+  {
+   "id": "farmersdelight:cooking/vegetable_soup",
+   "source": "src/generated/resources/data/farmersdelight/recipe/cooking/vegetable_soup.json",
+   "json": {
+    "type": "farmersdelight:cooking",
+    "experience": 1.0,
+    "ingredients": [
+     "#c:crops/carrot",
+     "#c:crops/potato",
+     "#c:crops/beetroot",
+     "#c:foods/leafy_green"
+    ],
+    "recipe_book_tab": "meals",
+    "result": {
+     "id": "farmersdelight:vegetable_soup"
+    }
+   }
+  }
+ ]
+}

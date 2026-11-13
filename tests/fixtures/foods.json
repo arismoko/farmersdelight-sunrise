@@ -1,0 +1,590 @@
+{
+ "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
+ "generated_by": "tools/extract_fixtures.py",
+ "foods": [
+  {
+   "constant": "CABBAGE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CABBAGE",
+   "nutrition": 2,
+   "saturation_modifier": 0.4,
+   "saturation": 1.6,
+   "always_edible": false
+  },
+  {
+   "constant": "TOMATO",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:TOMATO",
+   "nutrition": 1,
+   "saturation_modifier": 0.3,
+   "saturation": 0.6,
+   "always_edible": false
+  },
+  {
+   "constant": "ONION",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:ONION",
+   "nutrition": 2,
+   "saturation_modifier": 0.4,
+   "saturation": 1.6,
+   "always_edible": false
+  },
+  {
+   "constant": "APPLE_CIDER",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:APPLE_CIDER",
+   "nutrition": 0,
+   "saturation_modifier": 0.0,
+   "saturation": 0.0,
+   "always_edible": true
+  },
+  {
+   "constant": "FRIED_EGG",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:FRIED_EGG",
+   "nutrition": 4,
+   "saturation_modifier": 0.4,
+   "saturation": 3.2,
+   "always_edible": false
+  },
+  {
+   "constant": "TOMATO_SAUCE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:TOMATO_SAUCE",
+   "nutrition": 4,
+   "saturation_modifier": 0.4,
+   "saturation": 3.2,
+   "always_edible": false
+  },
+  {
+   "constant": "WHEAT_DOUGH",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:WHEAT_DOUGH",
+   "nutrition": 2,
+   "saturation_modifier": 0.3,
+   "saturation": 1.2,
+   "always_edible": false
+  },
+  {
+   "constant": "RAW_PASTA",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:RAW_PASTA",
+   "nutrition": 2,
+   "saturation_modifier": 0.0,
+   "saturation": 0.0,
+   "always_edible": false
+  },
+  {
+   "constant": "PIE_CRUST",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PIE_CRUST",
+   "nutrition": 2,
+   "saturation_modifier": 0.2,
+   "saturation": 0.8,
+   "always_edible": false
+  },
+  {
+   "constant": "PUMPKIN_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PUMPKIN_SLICE",
+   "nutrition": 3,
+   "saturation_modifier": 0.3,
+   "saturation": 1.8,
+   "always_edible": false
+  },
+  {
+   "constant": "CABBAGE_LEAF",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CABBAGE_LEAF",
+   "nutrition": 1,
+   "saturation_modifier": 0.4,
+   "saturation": 0.8,
+   "always_edible": false
+  },
+  {
+   "constant": "MINCED_BEEF",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:MINCED_BEEF",
+   "nutrition": 2,
+   "saturation_modifier": 0.3,
+   "saturation": 1.2,
+   "always_edible": false
+  },
+  {
+   "constant": "BEEF_PATTY",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BEEF_PATTY",
+   "nutrition": 4,
+   "saturation_modifier": 0.8,
+   "saturation": 6.4,
+   "always_edible": false
+  },
+  {
+   "constant": "CHICKEN_CUTS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CHICKEN_CUTS",
+   "nutrition": 1,
+   "saturation_modifier": 0.3,
+   "saturation": 0.6,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_CHICKEN_CUTS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_CHICKEN_CUTS",
+   "nutrition": 3,
+   "saturation_modifier": 0.6,
+   "saturation": 3.6,
+   "always_edible": false
+  },
+  {
+   "constant": "BACON",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BACON",
+   "nutrition": 2,
+   "saturation_modifier": 0.3,
+   "saturation": 1.2,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_BACON",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_BACON",
+   "nutrition": 4,
+   "saturation_modifier": 0.8,
+   "saturation": 6.4,
+   "always_edible": false
+  },
+  {
+   "constant": "COD_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COD_SLICE",
+   "nutrition": 1,
+   "saturation_modifier": 0.1,
+   "saturation": 0.2,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_COD_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_COD_SLICE",
+   "nutrition": 3,
+   "saturation_modifier": 0.5,
+   "saturation": 3.0,
+   "always_edible": false
+  },
+  {
+   "constant": "SALMON_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:SALMON_SLICE",
+   "nutrition": 1,
+   "saturation_modifier": 0.1,
+   "saturation": 0.2,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_SALMON_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_SALMON_SLICE",
+   "nutrition": 3,
+   "saturation_modifier": 0.8,
+   "saturation": 4.8,
+   "always_edible": false
+  },
+  {
+   "constant": "MUTTON_CHOPS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:MUTTON_CHOPS",
+   "nutrition": 1,
+   "saturation_modifier": 0.3,
+   "saturation": 0.6,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_MUTTON_CHOPS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_MUTTON_CHOPS",
+   "nutrition": 3,
+   "saturation_modifier": 0.8,
+   "saturation": 4.8,
+   "always_edible": false
+  },
+  {
+   "constant": "HAM",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:HAM",
+   "nutrition": 5,
+   "saturation_modifier": 0.3,
+   "saturation": 3.0,
+   "always_edible": false
+  },
+  {
+   "constant": "SMOKED_HAM",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:SMOKED_HAM",
+   "nutrition": 10,
+   "saturation_modifier": 0.8,
+   "saturation": 16.0,
+   "always_edible": false
+  },
+  {
+   "constant": "POPSICLE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:POPSICLE",
+   "nutrition": 3,
+   "saturation_modifier": 0.2,
+   "saturation": 1.2,
+   "always_edible": true
+  },
+  {
+   "constant": "COOKIES",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKIES",
+   "nutrition": 2,
+   "saturation_modifier": 0.1,
+   "saturation": 0.4,
+   "always_edible": false
+  },
+  {
+   "constant": "CAKE_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CAKE_SLICE",
+   "nutrition": 2,
+   "saturation_modifier": 0.1,
+   "saturation": 0.4,
+   "always_edible": false
+  },
+  {
+   "constant": "PIE_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PIE_SLICE",
+   "nutrition": 3,
+   "saturation_modifier": 0.3,
+   "saturation": 1.8,
+   "always_edible": false
+  },
+  {
+   "constant": "FRUIT_SALAD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:FRUIT_SALAD",
+   "nutrition": 6,
+   "saturation_modifier": 0.6,
+   "saturation": 7.2,
+   "always_edible": false
+  },
+  {
+   "constant": "GLOW_BERRY_CUSTARD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:GLOW_BERRY_CUSTARD",
+   "nutrition": 7,
+   "saturation_modifier": 0.6,
+   "saturation": 8.4,
+   "always_edible": true
+  },
+  {
+   "constant": "MIXED_SALAD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:MIXED_SALAD",
+   "nutrition": 6,
+   "saturation_modifier": 0.6,
+   "saturation": 7.2,
+   "always_edible": false
+  },
+  {
+   "constant": "NETHER_SALAD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:NETHER_SALAD",
+   "nutrition": 5,
+   "saturation_modifier": 0.4,
+   "saturation": 4.0,
+   "always_edible": false
+  },
+  {
+   "constant": "BARBECUE_STICK",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BARBECUE_STICK",
+   "nutrition": 8,
+   "saturation_modifier": 0.9,
+   "saturation": 14.4,
+   "always_edible": false
+  },
+  {
+   "constant": "EGG_SANDWICH",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:EGG_SANDWICH",
+   "nutrition": 8,
+   "saturation_modifier": 0.8,
+   "saturation": 12.8,
+   "always_edible": false
+  },
+  {
+   "constant": "CHICKEN_SANDWICH",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CHICKEN_SANDWICH",
+   "nutrition": 10,
+   "saturation_modifier": 0.8,
+   "saturation": 16.0,
+   "always_edible": false
+  },
+  {
+   "constant": "HAMBURGER",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:HAMBURGER",
+   "nutrition": 11,
+   "saturation_modifier": 0.8,
+   "saturation": 17.6,
+   "always_edible": false
+  },
+  {
+   "constant": "BACON_SANDWICH",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BACON_SANDWICH",
+   "nutrition": 10,
+   "saturation_modifier": 0.8,
+   "saturation": 16.0,
+   "always_edible": false
+  },
+  {
+   "constant": "MUTTON_WRAP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:MUTTON_WRAP",
+   "nutrition": 10,
+   "saturation_modifier": 0.8,
+   "saturation": 16.0,
+   "always_edible": false
+  },
+  {
+   "constant": "DUMPLINGS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:DUMPLINGS",
+   "nutrition": 8,
+   "saturation_modifier": 0.8,
+   "saturation": 12.8,
+   "always_edible": false
+  },
+  {
+   "constant": "STUFFED_POTATO",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:STUFFED_POTATO",
+   "nutrition": 10,
+   "saturation_modifier": 0.7,
+   "saturation": 14.0,
+   "always_edible": false
+  },
+  {
+   "constant": "CABBAGE_ROLLS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CABBAGE_ROLLS",
+   "nutrition": 5,
+   "saturation_modifier": 0.5,
+   "saturation": 5.0,
+   "always_edible": false
+  },
+  {
+   "constant": "SALMON_ROLL",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:SALMON_ROLL",
+   "nutrition": 7,
+   "saturation_modifier": 0.6,
+   "saturation": 8.4,
+   "always_edible": false
+  },
+  {
+   "constant": "COD_ROLL",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COD_ROLL",
+   "nutrition": 7,
+   "saturation_modifier": 0.6,
+   "saturation": 8.4,
+   "always_edible": false
+  },
+  {
+   "constant": "KELP_ROLL",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:KELP_ROLL",
+   "nutrition": 12,
+   "saturation_modifier": 0.5,
+   "saturation": 12.0,
+   "always_edible": false
+  },
+  {
+   "constant": "KELP_ROLL_SLICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:KELP_ROLL_SLICE",
+   "nutrition": 6,
+   "saturation_modifier": 0.5,
+   "saturation": 6.0,
+   "always_edible": false
+  },
+  {
+   "constant": "COOKED_RICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:COOKED_RICE",
+   "nutrition": 6,
+   "saturation_modifier": 0.4,
+   "saturation": 4.8,
+   "always_edible": false
+  },
+  {
+   "constant": "BONE_BROTH",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BONE_BROTH",
+   "nutrition": 8,
+   "saturation_modifier": 0.7,
+   "saturation": 11.2,
+   "always_edible": false
+  },
+  {
+   "constant": "BEEF_STEW",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BEEF_STEW",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "VEGETABLE_SOUP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:VEGETABLE_SOUP",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "FISH_STEW",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:FISH_STEW",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "CHICKEN_SOUP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:CHICKEN_SOUP",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "FRIED_RICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:FRIED_RICE",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "PUMPKIN_SOUP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PUMPKIN_SOUP",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "BAKED_COD_STEW",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BAKED_COD_STEW",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "NOODLE_SOUP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:NOODLE_SOUP",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "BACON_AND_EGGS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:BACON_AND_EGGS",
+   "nutrition": 10,
+   "saturation_modifier": 0.6,
+   "saturation": 12.0,
+   "always_edible": false
+  },
+  {
+   "constant": "RATATOUILLE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:RATATOUILLE",
+   "nutrition": 10,
+   "saturation_modifier": 0.6,
+   "saturation": 12.0,
+   "always_edible": false
+  },
+  {
+   "constant": "STEAK_AND_POTATOES",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:STEAK_AND_POTATOES",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "PASTA_WITH_MEATBALLS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PASTA_WITH_MEATBALLS",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "PASTA_WITH_MUTTON_CHOP",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:PASTA_WITH_MUTTON_CHOP",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "MUSHROOM_RICE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:MUSHROOM_RICE",
+   "nutrition": 12,
+   "saturation_modifier": 0.8,
+   "saturation": 19.2,
+   "always_edible": false
+  },
+  {
+   "constant": "ROASTED_MUTTON_CHOPS",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:ROASTED_MUTTON_CHOPS",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "VEGETABLE_NOODLES",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:VEGETABLE_NOODLES",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "SQUID_INK_PASTA",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:SQUID_INK_PASTA",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "GRILLED_SALMON",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:GRILLED_SALMON",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "ROAST_CHICKEN",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:ROAST_CHICKEN",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "STUFFED_PUMPKIN",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:STUFFED_PUMPKIN",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "HONEY_GLAZED_HAM",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:HONEY_GLAZED_HAM",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "SHEPHERDS_PIE",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:SHEPHERDS_PIE",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "GLEAMING_SALAD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:GLEAMING_SALAD",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  },
+  {
+   "constant": "DOG_FOOD",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:DOG_FOOD",
+   "nutrition": 4,
+   "saturation_modifier": 0.2,
+   "saturation": 1.6,
+   "always_edible": false
+  },
+  {
+   "constant": "RABBIT_STEW_BUFF",
+   "source": "src/main/java/vectorwing/farmersdelight/common/FoodValues.java:RABBIT_STEW_BUFF",
+   "nutrition": 14,
+   "saturation_modifier": 0.75,
+   "saturation": 21.0,
+   "always_edible": false
+  }
+ ]
+}
