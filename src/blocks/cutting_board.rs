@@ -156,9 +156,23 @@ impl BlockPart for CuttingBoard {
             level.schedule_fluid_tick(pos, "minecraft:water", 5);
         }
         if event.direction == Direction::Down && !supported(&*level, pos) {
-            return level.block_state_id("minecraft:air");
+            return left_behind(&*level, event.state);
         }
         None
+    }
+
+    /// Water stays where a waterlogged board is removed (`Level.removeBlock` leaves the fluid's
+    /// block). The engine at the pin reads the fluid from the template (stone cutter: none), not
+    /// from the declared `waterlogged` property, so the board says it itself (E-13).
+    fn remove_block(
+        &self,
+        level: &dyn LevelHost,
+        event: &mut RemoveBlockEvent,
+    ) -> Option<BlockState> {
+        let name = level.state_string(event.state)?;
+        (state_value(&name, "waterlogged") == Some("true"))
+            .then(|| level.block_state_id("minecraft:water"))
+            .flatten()
     }
 
     fn use_item_on(
@@ -175,6 +189,17 @@ impl BlockPart for CuttingBoard {
                 .unwrap_or(InteractionResult::Consume),
         )
     }
+}
+
+/// What a board leaves when it goes: water if it was waterlogged, else air.
+fn left_behind(level: &dyn LevelHost, state: BlockState) -> Option<BlockState> {
+    let name = level.state_string(state).unwrap_or_default();
+    let block = if state_value(&name, "waterlogged") == Some("true") {
+        "minecraft:water"
+    } else {
+        "minecraft:air"
+    };
+    level.block_state_id(block)
 }
 
 /// `Block.canSupportRigidBlock(below) || Block.canSupportCenter(below, UP)`, approximated: the

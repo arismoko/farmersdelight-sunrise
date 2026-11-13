@@ -1,20 +1,14 @@
 {
-  "template": "minecraft:oak_planks",
+  "template": "minecraft:stonecutter",
   "properties": {
     "hardness": 2.0,
     "explosion_resistance": 2.0,
-    "occludes": false
+    "occludes": false,
+    "requires_tool": false,
+    "sounds": "minecraft:oak_planks",
+    "map_color": 13
   },
   "state_properties": {
-    "facing": {
-      "type": "enum",
-      "values": [
-        "north",
-        "south",
-        "west",
-        "east"
-      ]
-    },
     "waterlogged": {
       "type": "boolean"
     }

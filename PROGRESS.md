@@ -135,3 +135,20 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - Eating: beef patty from food 0 / saturation 0 → food 4 / saturation 4.0 (vanilla clamps saturation to the food
   level). Crafting: flint knife and cutting board crafted from the carried recipes in a crafting table.
 - next: M1-09 remaining items (see CHECKPOINT)
+
+## M1-02 fixes from user play-testing — PASS (in game) — 2026-11-13
+- reported: (1) placed board visibly rotates from the default facing to the right one; (2) breaking a waterlogged
+  board removes the water; (3) beef stays in hand when put on the board.
+- (1) cause: the client predicts placement from the block's template and never asks mods (`before_state_for_placement`
+  only when `native_authoritative`). Fix: template `minecraft:stonecutter` (vanilla placement = opposite of placer,
+  no BE, not flammable like FD's board); `facing` now comes from the template; `requires_tool=false`, oak-plank
+  sounds, wood map colour. Its menu never opens (use_item_on answers every main-hand use; checked). Engine gap → E-14.
+- (2) cause: engine removal reads the fluid from the template's facts, not the declared `waterlogged`. Fix:
+  `remove_block` answers water for a waterlogged board; `update_shape` pop-off returns water. In game: player break →
+  `minecraft:water[level=0]` + board dropped; support removed → water. Not covered: `destroyBlock` paths (explosion,
+  `/setblock … destroy`). Engine gap → E-13.
+- (3) not a bug: the player was in creative (`playerGameType` 1); FD keeps the hand stack in creative
+  (`addItem(instabuild ? copy : stack)`, hand changed only `if (!player.isCreative())`). Survival removes it (checked).
+- also: sound now on in the test env (`HORIZON_NO_AUDIO` removed from `run/launch.sh`; vanilla sounds imported from
+  the user's Prism asset store with Mojang's 26.3 version JSON, sha1 11f1aefe… verified).
+- note: boards placed before this change in the FDTest world kept loading (16 found after rebuild).
