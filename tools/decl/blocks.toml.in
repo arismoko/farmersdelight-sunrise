@@ -14,3 +14,14 @@ default_state = { facing = "north", waterlogged = "false" }
 shapes = { default = [[0.0625, 0.0, 0.0625, 0.9375, 0.0625, 0.9375]] }
 [cutting_board.components]
 "minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }
+
+[stove]
+source = "J/common/registry/ModBlocks.java:STOVE (ofFullCopy(BRICKS).lightLevel(litBlockEmission(13))); J/common/block/AbstractStoveBlock.java:FACING,LIT,getStateForPlacement"
+# Template minecraft:stonecutter for its native `facing` placed opposite the placer and no block
+# entity (see cutting_board); full cube, bricks' properties; `lit` declared, placed lit (Q7).
+template = "minecraft:stonecutter"
+properties = { hardness = 2.0, explosion_resistance = 6.0, requires_tool = true, sounds = "minecraft:bricks", map_color = 28 }
+state_properties = { lit = { type = "boolean" } }
+default_state = { lit = "true" }
+state_light = { properties = ["lit"], values = { "true" = 13 }, default = 0 }
+shapes = { default = [[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] }

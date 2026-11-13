@@ -40,6 +40,13 @@ pub fn register(
             },
         )
         .expect("cutting board block entity type");
+    let stove = registrar
+        .block_entity_type(crate::blocks::stove::ID)
+        .blocks(&[crate::blocks::stove::ID])
+        .build();
+    registrar
+        .block_entity_part(&stove, crate::blocks::stove::Stove)
+        .expect("stove block entity type");
 }
 
 /// Item storage of the mod's block entities (`ModContainer`).
@@ -51,6 +58,14 @@ pub fn container(block: &str) -> Option<ModContainer> {
             faces: std::array::from_fn(|_| vec![0]),
             inputs: vec![0],
             outputs: vec![0],
+            menu: None,
+        }),
+        // Six one-item slots; the reference exposes them to automation on every side.
+        crate::blocks::stove::ID => Some(ModContainer {
+            slots: crate::blocks::stove::SLOTS,
+            faces: std::array::from_fn(|_| (0..crate::blocks::stove::SLOTS).collect()),
+            inputs: (0..crate::blocks::stove::SLOTS).collect(),
+            outputs: (0..crate::blocks::stove::SLOTS).collect(),
             menu: None,
         }),
         _ => None,

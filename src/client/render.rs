@@ -73,6 +73,37 @@ pub fn draw_board(
     }
 }
 
+/// `DefaultStoveRenderer#getStoveItemOffset`.
+pub const STOVE_OFFSETS: [[f32; 2]; 6] = [
+    [0.3, 0.2],
+    [0.0, 0.2],
+    [-0.3, 0.2],
+    [0.3, -0.2],
+    [0.0, -0.2],
+    [-0.3, -0.2],
+];
+
+/// `AbstractStoveRenderer#submit`: each stack flat on top, rotated by facing, at its slot offset.
+pub fn draw_stove(
+    draw: &mut dyn BlockEntityDrawContext,
+    stacks: &[Option<ItemStack>],
+    facing: &str,
+) {
+    let y_rot = board_y_rot(facing);
+    for (i, stack) in stacks.iter().enumerate().take(STOVE_OFFSETS.len()) {
+        let Some(stack) = stack else { continue };
+        let [ox, oy] = STOVE_OFFSETS[i];
+        draw.push();
+        draw.translate([0.5, 1.02, 0.5]);
+        draw.rotate_about([0.0, 1.0, 0.0], -y_rot, [0.0; 3]);
+        draw.rotate_about([1.0, 0.0, 0.0], 90.0, [0.0; 3]);
+        draw.translate([ox, oy, 0.0]);
+        draw.scale([0.375; 3]);
+        draw.item(stack, ItemDisplayContext::Fixed, None, 0);
+        draw.pop();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
