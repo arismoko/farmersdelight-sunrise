@@ -61,7 +61,12 @@ pub fn register(
         .blocks(&[crate::blocks::skillet::ID])
         .build();
     registrar
-        .block_entity_part(&skillet_block, crate::blocks::skillet::Skillet)
+        .block_entity_part(
+            &skillet_block,
+            crate::blocks::skillet::Skillet {
+                last_main: Default::default(),
+            },
+        )
         .expect("skillet block entity type");
     let skillet = registrar.item_key(crate::items::skillet::ITEM);
     registrar.item_part(skillet, crate::items::skillet::SkilletItem);
