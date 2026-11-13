@@ -95,12 +95,7 @@ fn stored_on_client(host: &dyn Host, nbt: &Compound) -> Option<ItemStack> {
     }
 }
 
-pub struct Skillet {
-    /// (player, game time) of the last main-hand use this part handled. The client predicts the
-    /// click with the template (which does nothing) and goes on to the off hand; in vanilla the
-    /// main hand's success ends the click, so that off-hand round is ignored.
-    pub last_main: std::sync::Mutex<Option<(u128, i64)>>,
-}
+pub struct Skillet;
 
 #[mod_api::horizon_part]
 impl BlockPart for Skillet {
@@ -147,25 +142,19 @@ impl BlockPart for Skillet {
 }
 
 impl Skillet {
+    /// Main hand only: the reference's main-hand `useItemOn` never passes (SUCCESS or CONSUME),
+    /// so vanilla never tries the off hand on a skillet. The client predicts the click with the
+    /// template and sends an off-hand round anyway; it is ignored.
     fn click(
         &self,
         host: &mut dyn ServerHost,
         click: &BlockClick<'_>,
         state: BlockState,
     ) -> InteractionResult {
-        let now = host
-            .level(click.dimension.key().id())
-            .and_then(|l| l.game_time(&*host))
-            .unwrap_or(0);
-        let mut last = self.last_main.lock().unwrap_or_else(|e| e.into_inner());
-        if click.hand == Hand::Off && *last == Some((click.player, now)) {
+        if click.hand == Hand::Off {
             return InteractionResult::Pass;
         }
-        let result = interact(host, click, state);
-        if click.hand == Hand::Main && result.consumes_action() {
-            *last = Some((click.player, now));
-        }
-        result
+        interact(host, click, state)
     }
 }
 
