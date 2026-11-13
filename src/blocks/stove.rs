@@ -16,6 +16,10 @@ pub const TOTALS: &str = "CookingTimes";
 pub const PROGRESS: &str = "CookingTotalTimes";
 pub const INVENTORY: &str = "Inventory";
 const CAMPFIRE: &str = "minecraft:campfire_cooking";
+/// FD burns with `farmersdelight:stove_burn`, but Horizon at the pin loads no mod damage types
+/// (the damage catalog takes no mod pack, E-15). `minecraft:hot_floor` is in the same tags
+/// (`is_fire`, `burn_from_stepping`); only the death message differs (accepted delta A11).
+const BURN_DAMAGE: &str = "minecraft:hot_floor";
 /// `AbstractStoveBlock.GRILLING_AREA` in the block above, in blocks.
 const GRILLING_AREA: [f64; 6] = [
     3.0 / 16.0,
@@ -519,7 +523,7 @@ fn burn_standing(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3]) {
         {
             continue;
         }
-        let _ = e.hurt(host, "farmersdelight:stove_burn", 1.0, None, None);
+        let _ = e.hurt(host, BURN_DAMAGE, 1.0, None, None);
     }
 }
 
