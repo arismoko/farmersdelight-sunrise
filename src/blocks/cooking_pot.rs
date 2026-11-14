@@ -29,12 +29,24 @@ pub const COOK_TIME_TOTAL: &str = "CookTimeTotal";
 pub const CONTAINER_KEY: &str = "Container";
 pub const RECIPES_USED: &str = "RecipesUsed";
 pub const INVENTORY: &str = "Inventory";
+/// The meal display, kept in the saved data rather than container slot 6: the game drops a mod
+/// container's slots when the block goes, and the meal must ride on the pot item instead.
+pub const MEAL_KEY: &str = "Meal";
 /// Item components of the pot's item form (`ModDataComponents.MEAL`, `CONTAINER`).
 pub const MEAL_COMPONENT: &str = "farmersdelight:meal";
 pub const CONTAINER_COMPONENT: &str = "farmersdelight:container";
 pub const COMPONENT_TYPES: [&str; 2] = [MEAL_COMPONENT, CONTAINER_COMPONENT];
 const TRAY_HEAT_SOURCES: &str = "farmersdelight:tray_heat_sources";
 const SERVING_CONTAINERS: &str = "farmersdelight:serving_containers";
+/// A recipe property set holding `#farmersdelight:serving_containers`' items, so the menu's slot
+/// rules (which get no tag queries) can keep them out of the ingredient slots. The values are the
+/// tag's as carried; the data-load context has no item tags to read them from.
+pub const SERVING_SET: &str = "farmersdelight:serving_containers";
+pub const SERVING_ITEMS: [&str; 3] = [
+    "minecraft:bowl",
+    "minecraft:glass_bottle",
+    "minecraft:bucket",
+];
 const GUI: &str = "farmersdelight:gui/cooking_pot";
 
 /// `CookingPotBlockEntity.INGREDIENT_REMAINDER_OVERRIDES`.
@@ -143,6 +155,16 @@ fn stack_tag(host: &dyn Host, nbt: &Compound, key: &str) -> Option<ItemStack> {
     }
 }
 
+fn meal_of(host: &dyn Host, nbt: &Compound) -> Option<ItemStack> {
+    stack_tag(host, nbt, MEAL_KEY)
+}
+
+/// The meal as saved: its stack, or an empty list for none (a merge cannot remove a key).
+fn meal_tag(host: &dyn Host, meal: Option<&ItemStack>) -> Tag {
+    meal.and_then(|m| m.to_nbt(host))
+        .map_or(Tag::List(Vec::new()), Tag::Compound)
+}
+
 fn recipes_used(nbt: &Compound) -> BTreeMap<String, i32> {
     match nbt.get(&RECIPES_USED.into()) {
         Some(Tag::Compound(c)) => c
@@ -206,7 +228,7 @@ pub fn inventory_from_tag(host: &dyn Host, nbt: &Compound) -> [Option<ItemStack>
 #[derive(Clone, Debug)]
 pub struct RemovedPot {
     pub recipes_used: BTreeMap<String, i32>,
-    pub meal: Option<ItemStack>,
+    pub meal: Option<Compound>,
     pub container: Option<Compound>,
 }
 
@@ -362,6 +384,11 @@ impl CookingPot {
         };
         let held = click.stack.cloned();
         let sneaking = player.entity().is_shift_key_down(&*host).unwrap_or(false);
+        eprintln!(
+            "[fd-debug] pot use hand={:?} held={} sneaking={sneaking}",
+            click.hand,
+            held.is_some()
+        );
         if held.is_none() && sneaking {
             let name = host.block_state_string(state).unwrap_or_default();
             let next = if state_value(&name, "support") == Some("handle") {
@@ -401,8 +428,8 @@ impl CookingPot {
             return InteractionResult::Success;
         };
         // `useHeldItemOnMeal`: a valid container in hand takes one serving.
-        let meal = be.item_slot(&*host, MEAL as u32).ok().flatten();
         let data = be.data(&*host).unwrap_or_default();
+        let meal = meal_of(&*host, &data);
         let container = stack_tag(&*host, &data, CONTAINER_KEY);
         if let (Some(held), Some(meal), Some(container)) = (&held, &meal, &container)
             && held.same_item(container)
@@ -410,14 +437,15 @@ impl CookingPot {
             let split = meal.clone().split(1);
             let serving = split.taken.expect("meal is not empty");
             let creative = player.is_creative(&*host).unwrap_or(false);
-            let ok = host
-                .transaction(|host, tx| {
-                    be.set_item_slot(host, tx, MEAL as u32, split.remainder.clone())
-                        .map_err(|_| ())?;
-                    crate::inventory::give_or_drop(host, tx, player, serving.clone());
-                    Ok::<_, ()>(())
-                })
-                .is_ok();
+            let mut merge = BTreeMap::new();
+            merge.insert(MEAL_KEY.into(), meal_tag(&*host, split.remainder.as_ref()));
+            let ok = be.merge_data(host, merge).unwrap_or(false)
+                && host
+                    .transaction(|host, tx| {
+                        crate::inventory::give_or_drop(host, tx, player, serving.clone());
+                        Ok::<_, ()>(())
+                    })
+                    .is_ok();
             if ok {
                 if !creative && let Some(living) = host.living(player.entity()) {
                     let _ = living.set_hand_item(host, Hand::Main, held.clone().shrink(1));
@@ -439,7 +467,8 @@ impl CookingPot {
             }
             return InteractionResult::Success;
         }
-        if player.open_menu(host, be).unwrap_or(false) {
+        let _ = player.open_menu(host, be);
+        {
             let mut s = lock(&self.shared);
             s.opener.insert(pos, player.uuid());
             let out = be
@@ -454,9 +483,10 @@ impl CookingPot {
 
     /// Sends the client the slots and the container (`getUpdateTag`).
     fn mirror(&self, host: &mut dyn ServerHost, be: BlockEntityRef) {
-        let items: Vec<_> = (0..SLOTS)
+        let mut items: Vec<_> = (0..SLOTS)
             .map(|i| be.item_slot(&*host, i as u32).ok().flatten())
             .collect();
+        items[MEAL] = be.data(&*host).and_then(|d| meal_of(&*host, &d));
         let mut merge = BTreeMap::new();
         merge.insert(INVENTORY.into(), inventory_tag(&*host, &items));
         let _ = be.merge_data(host, merge);
@@ -526,6 +556,14 @@ impl BlockEntityPart for CookingPot {
         if entity.items.len() < SLOTS {
             entity.items.resize(SLOTS, None);
         }
+        // The meal works in slot 6 for the tick and goes back to the saved data at its end.
+        let saved_meal = meal_of(&*host, &entity.nbt);
+        if let Some(stray) = entity.items[MEAL].take() {
+            entity.items[MEAL] = Some(stray);
+        } else {
+            entity.items[MEAL] = saved_meal;
+        }
+        let out_start = entity.items[OUTPUT].as_ref().map_or(0, |s| s.count());
         let mut cook_time = int(&entity.nbt, COOK_TIME);
         let mut total = int(&entity.nbt, COOK_TIME_TOTAL);
         let mut changed = false;
@@ -598,7 +636,7 @@ impl BlockEntityPart for CookingPot {
         let taken_by = {
             let mut s = lock(&self.shared);
             let seen = s.output_seen.insert(pos, out_now).unwrap_or(out_now);
-            (out_now < seen)
+            (out_start < seen)
                 .then(|| s.opener.get(&pos).copied())
                 .flatten()
         };
@@ -631,32 +669,31 @@ impl BlockEntityPart for CookingPot {
             let tag = inventory_tag(&*host, &entity.items);
             entity.nbt.insert(INVENTORY.into(), tag);
             host.block_entity_sync(pos);
-            lock(&self.shared).output_seen.insert(pos, out_now);
         }
+        let meal = entity.items[MEAL].take();
+        let tag = meal_tag(&*host, meal.as_ref());
+        entity.nbt.insert(MEAL_KEY.into(), tag);
     }
 
-    /// Contents but the meal drop; the meal, its container and the pending experience go to
+    /// The meal, its container and the pending experience go to
     /// `loot_drops` (the block entity is gone by then).
     fn pre_remove_side_effects(
         &self,
         _: &mut dyn LevelRandomHost,
         event: &mut PreRemoveSideEffectsEvent<'_>,
     ) {
+        // The game drops the container's own slots; the meal is not one of them.
         let pos = [event.pos.x, event.pos.y, event.pos.z];
-        for (i, stack) in event.entity.items.iter().enumerate() {
-            if i != MEAL
-                && let Some(s) = stack
-            {
-                event.drops.push(s.clone());
-            }
-        }
         let container = match event.entity.nbt.get(&CONTAINER_KEY.into()) {
             Some(Tag::Compound(c)) => Some(c.clone()),
             _ => None,
         };
         let removed = RemovedPot {
             recipes_used: recipes_used(&event.entity.nbt),
-            meal: event.entity.items.get(MEAL).cloned().flatten(),
+            meal: match event.entity.nbt.get(&MEAL_KEY.into()) {
+                Some(Tag::Compound(c)) => Some(c.clone()),
+                _ => None,
+            },
             container,
         };
         let mut s = lock(&self.shared);
@@ -1034,8 +1071,14 @@ pub struct CookingPotMenu;
 
 #[mod_api::horizon_part]
 impl MenuPart for CookingPotMenu {
-    fn menu_slot_rules(&self, _: &dyn LoopContext, event: &mut MenuSlotRulesEvent<'_>) {
-        if event.slot == MEAL {
+    /// Serving containers stay out of the ingredient slots (accepted delta A13): no recipe uses
+    /// one, and the game's routing then sends a whole shift-clicked stack of them to the container
+    /// slot, as `quickMoveStack` does (E-17).
+    fn menu_slot_rules(&self, context: &dyn LoopContext, event: &mut MenuSlotRulesEvent<'_>) {
+        if event.slot == MEAL
+            || (event.slot < INPUTS
+                && context.mod_recipe_property_contains(SERVING_SET, event.stack.item()))
+        {
             event.may_place = false;
         }
     }
@@ -1067,16 +1110,15 @@ pub fn on_loot_drops(
         ];
         award(recipes, host, level, at, None, &removed.recipes_used);
     }
-    let Some(meal) = removed.meal else {
+    let Some(meal_nbt) = removed.meal else {
         return;
     };
     // `getContainer`: the stored container, else the meal's crafting remainder.
-    let container = removed
-        .container
-        .or_else(|| remainder(&*host, &meal).and_then(|c| c.to_nbt(&*host)));
-    let Some(mut meal_nbt) = meal.to_nbt(&*host) else {
-        return;
-    };
+    let container = removed.container.or_else(|| {
+        ItemStack::from_nbt(&*host, &meal_nbt)
+            .and_then(|m| remainder(&*host, &m))
+            .and_then(|c| c.to_nbt(&*host))
+    });
     for drop in event.drops.iter_mut() {
         if drop.item().id(&*host) != ID {
             continue;
@@ -1087,15 +1129,11 @@ pub fn on_loot_drops(
         // into the new block entity (`applyImplicitComponents`' job at the pin).
         let mut data = Compound::new();
         data.insert("id".into(), Tag::String(ID.into()));
+        data.insert(MEAL_KEY.into(), Tag::Compound(meal_nbt.clone()));
         if let Some(c) = &container {
             patch.insert(CONTAINER_COMPONENT.into(), Tag::Compound(c.clone()));
             data.insert(CONTAINER_KEY.into(), Tag::Compound(c.clone()));
         }
-        meal_nbt.insert("Slot".into(), Tag::Byte(MEAL as i8));
-        data.insert(
-            "Items".into(),
-            Tag::List(vec![Tag::Compound(meal_nbt.clone())]),
-        );
         patch.insert("minecraft:block_entity_data".into(), Tag::Compound(data));
         let _ = drop.set_components(patch);
     }

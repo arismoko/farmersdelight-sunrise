@@ -47,6 +47,18 @@ impl Hooks for FarmersDelight {
         registry::container(event.block)
     }
 
+    fn recipe_property_sets(
+        &self,
+        _: &dyn DataLoadContext,
+        event: &mut RecipePropertySetsEvent<'_>,
+    ) {
+        use blocks::cooking_pot::{SERVING_ITEMS, SERVING_SET};
+        event.additions.push(RecipePropertyAddition::new(
+            SERVING_SET,
+            SERVING_ITEMS.iter().map(|s| s.to_string()).collect(),
+        ));
+    }
+
     fn tags_updated(&self, host: HostSide<'_>, event: &mut TagsUpdatedEvent) {
         // The server's data tables were (re)built: rebuild the recipe tables from them.
         if let (HostSide::Server(host), TagsUpdateCause::ServerDataLoad { .. }) =
