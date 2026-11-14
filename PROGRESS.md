@@ -514,3 +514,28 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   face sturdiness, so side-face placement is the template's own; tie-to-bell is visual — ringing searches up regardless).
   LAN check of the gate sound for other players: M5-08.
 - next: M5-03
+
+## M5-03 Tomatoes — PASS — 2026-11-14
+- build pin: afe471cf | mod commit: 53c2022
+- did: `budding_tomatoes` (template wheat, FD age 0-4 inside the template's 0-7, FD SHAPE_BY_AGE), `tomatoes`
+  (template beetroots = CropBlock age 0-3, + `ropelogged`, always random-ticking), `tomatoes_on_rope` (beetroots,
+  PUSH_PULL, picks tomato seeds); items `tomato_seeds` (places the budding bush; also the vine's item) and
+  `rotten_tomato` (plain, stack 16; throwing is M8-06). `src/blocks/tomato.rs`: BuddingBush random growth (raw light ≥ 9,
+  1 in 25/speed+1, FD's speed rule) and growth past max into `tomatoes`; budding bonemeal +1..4 carrying into the vine;
+  vine growth with vanilla CropBlock.getGrowthSpeed (`#minecraft:grows_crops`, as 26.3), rope climbing (tagged
+  `#farmersdelight:ropes`, ≤ 3 hanging), FD's bonemeal validity/recursion, harvest on use (1-2 + 5% rotten, pick sound,
+  age 0), bone meal passes only on an unripe vine, survival above another vine by light only, mayPlaceOn
+  `#minecraft:supports_crops`, rope permanence (`remove_block` for the hanging vine and legacy ropelogged vines),
+  legacy ropelogged → hanging conversion. `rope_state_for_vine` = RopeBlock.getStateWithConnections(UP).
+- evidence (FDTest farmland plot y=149):
+  - seeds → `budding_tomatoes[age=0]` ×3; bone meal: budding age 2 → `tomatoes[age=2]` (carry-over) → 3.
+  - bone meal on a ripe vine harvests it (as FD: useItemOn passes only for unripe vines) — 5 tomatoes on the ground.
+  - with rope ×4 above: bone meal climbed one (`tomatoes_on_rope[age=3]` at 151); random_tick_speed 200 for 20 s: vine
+    151-153 hanging, rope 154 left (≤ 3 cap); the other two buds grew into vines unaided.
+  - empty-hand click on a ripe hanging vine → 2 tomatoes, age 0. Breaking a hanging vine (survival) → rope left;
+    the unsupported vine above it → rope. Breaking the ripe base → tomato 2 + seeds 1 + rotten 1 (first break's
+    reported drops), the hanging vine above → rope.
+- delta **A20**: a ripe hanging vine knocked down by losing its support turns into rope without dropping its 1-2
+  tomatoes (the shape update cannot destroy with drops; FD ticks and `destroyBlock`s it). Breaking it drops normally.
+  Ravager trampling comes from the crop templates' own entityInside.
+- next: M5-04
