@@ -1,0 +1,81 @@
+{
+  "template": "minecraft:kelp",
+  "properties": {
+    "hardness": 0.2,
+    "explosion_resistance": 0.2,
+    "sounds": "minecraft:wheat",
+    "map_color": 7,
+    "random_ticks": true
+  },
+  "state_properties": {
+    "supporting": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "age": "0",
+    "supporting": "false"
+  },
+  "shapes": {
+    "properties": [
+      "age"
+    ],
+    "values": {
+      "0": [
+        [
+          0.1875,
+          0.0,
+          0.1875,
+          0.8125,
+          0.5,
+          0.8125
+        ]
+      ],
+      "1": [
+        [
+          0.1875,
+          0.0,
+          0.1875,
+          0.8125,
+          0.625,
+          0.8125
+        ]
+      ],
+      "2": [
+        [
+          0.125,
+          0.0,
+          0.125,
+          0.875,
+          0.75,
+          0.875
+        ]
+      ],
+      "3": [
+        [
+          0.0625,
+          0.0,
+          0.0625,
+          0.9375,
+          1.0,
+          0.9375
+        ]
+      ]
+    },
+    "default": [
+      [
+        0.0625,
+        0.0,
+        0.0625,
+        0.9375,
+        1.0,
+        0.9375
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "default": []
+  },
+  "item": false,
+  "block_item": "farmersdelight:rice"
+}

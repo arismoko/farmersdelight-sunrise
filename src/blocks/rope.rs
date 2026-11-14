@@ -34,7 +34,7 @@ fn ties_to_rope_and_walls(level: &dyn LevelHost, state: BlockState) -> bool {
 }
 
 /// Whether `fluid` is water, source or flowing (`FluidTags.WATER`'s vanilla members).
-fn is_water(level: &dyn LevelHost, fluid: FluidState) -> bool {
+pub(crate) fn is_water(level: &dyn LevelHost, fluid: FluidState) -> bool {
     ["minecraft:water", "minecraft:water[level=1]"]
         .iter()
         .any(|n| {

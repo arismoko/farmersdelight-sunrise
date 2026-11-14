@@ -19,27 +19,27 @@ const BUDDING_MAX: i32 = 3;
 /// TomatoBlock#getMaxAge.
 const VINE_MAX: i32 = 3;
 
-fn age(level: &dyn LevelHost, state: BlockState) -> i32 {
+pub(crate) fn age(level: &dyn LevelHost, state: BlockState) -> i32 {
     level
         .state_string(state)
         .and_then(|s| state_value(&s, "age").and_then(|v| v.parse().ok()))
         .unwrap_or(0)
 }
 
-fn block_name(level: &dyn LevelHost, state: BlockState) -> &str {
+pub(crate) fn block_name(level: &dyn LevelHost, state: BlockState) -> &str {
     level.state_block(state).unwrap_or("")
 }
 
-fn at(pos: BlockPos) -> [i32; 3] {
+pub(crate) fn at(pos: BlockPos) -> [i32; 3] {
     [pos.x, pos.y, pos.z]
 }
 
-fn up(pos: [i32; 3], n: i32) -> [i32; 3] {
+pub(crate) fn up(pos: [i32; 3], n: i32) -> [i32; 3] {
     [pos[0], pos[1] + n, pos[2]]
 }
 
 /// A state of `block` with `age`, from its default (`getStateForAge`).
-fn with_age(level: &dyn LevelHost, block: &str, age: i32) -> Option<BlockState> {
+pub(crate) fn with_age(level: &dyn LevelHost, block: &str, age: i32) -> Option<BlockState> {
     let base = level.block_state_id(block)?;
     level.state_with_property(base, "age", &age.to_string())
 }
@@ -49,7 +49,10 @@ fn is_vine(name: &str) -> bool {
 }
 
 /// Draws from the level's random and stores the stream back, so draws move the level's own.
-fn draw<T>(level: &mut dyn LevelRandomHost, f: impl FnOnce(&mut LegacyRandom) -> T) -> Option<T> {
+pub(crate) fn draw<T>(
+    level: &mut dyn LevelRandomHost,
+    f: impl FnOnce(&mut LegacyRandom) -> T,
+) -> Option<T> {
     let mut random = level.random()?;
     let out = f(&mut random);
     level.set_random(random);
@@ -60,7 +63,12 @@ fn draw<T>(level: &mut dyn LevelRandomHost, f: impl FnOnce(&mut LegacyRandom) ->
 /// `#minecraft:grows_crops` counts 1, moist 3), FD's BuddingBushBlock version counts every block
 /// below as 1 and any with `moisture` > 0 as 3. Neighbours of the same block in both rows, or on a
 /// diagonal, halve it.
-fn growth_speed(level: &dyn LevelHost, state: BlockState, pos: [i32; 3], vanilla: bool) -> f32 {
+pub(crate) fn growth_speed(
+    level: &dyn LevelHost,
+    state: BlockState,
+    pos: [i32; 3],
+    vanilla: bool,
+) -> f32 {
     let mut speed = 1.0f32;
     for dx in -1..=1 {
         for dz in -1..=1 {
@@ -103,11 +111,11 @@ fn growth_speed(level: &dyn LevelHost, state: BlockState, pos: [i32; 3], vanilla
     speed
 }
 
-fn on_supports_crops(level: &dyn LevelHost, ground: BlockState) -> bool {
+pub(crate) fn on_supports_crops(level: &dyn LevelHost, ground: BlockState) -> bool {
     level.block_in_tag(ground.block(), "minecraft:supports_crops") == Some(true)
 }
 
-fn bright_enough(level: &dyn LevelHost, pos: [i32; 3], min: i32) -> bool {
+pub(crate) fn bright_enough(level: &dyn LevelHost, pos: [i32; 3], min: i32) -> bool {
     level.raw_brightness(pos, 0) >= min
 }
 
@@ -505,15 +513,24 @@ impl BlockPart for Tomato {
 }
 
 /// A read-only `LevelHost` view over a `Host` (for helpers shared with the level-host hooks).
-struct LevelOf<'a>(&'a dyn Host);
+pub(crate) struct LevelOf<'a>(pub(crate) &'a dyn Host);
 
 impl LevelHost for LevelOf<'_> {
     fn state_string(&self, state: BlockState) -> Option<String> {
         self.0.block_state_string(state)
     }
+    fn block_state_id(&self, name: &str) -> Option<BlockState> {
+        self.0.block_state_id(name)
+    }
+    fn state_fluid_state(&self, state: BlockState) -> Option<FluidState> {
+        self.0.state_fluid_state(state)
+    }
+    fn block_in_tag(&self, block: BlockKey, tag: &str) -> Option<bool> {
+        self.0.block_in_tag(block, tag)
+    }
 }
 
-fn item_stack(host: &dyn Host, id: &str, count: u32) -> Option<ItemStack> {
+pub(crate) fn item_stack(host: &dyn Host, id: &str, count: u32) -> Option<ItemStack> {
     let key = host.item_key(&Identifier::parse(id).ok()?)?;
     ItemStack::new(key, count)
 }

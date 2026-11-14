@@ -1,0 +1,12 @@
+{
+  "template": "minecraft:wheat_seeds",
+  "block": "farmersdelight:rice",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/low"
+    },
+    "minecraft:villager_food": {
+      "value": 2
+    }
+  }
+}

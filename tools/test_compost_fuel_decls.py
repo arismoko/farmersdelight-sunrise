@@ -16,6 +16,8 @@ FUELS = {"straw": 100, "canvas": 400, "tree_bark": 200, "cutting_board": 200}
 def rows():
     for kind in ("items", "blocks"):
         for name, row in tomllib.loads((REPO / f"tools/decl/{kind}.toml.in").read_text()).items():
+            if kind == "blocks" and row.get("item") is False:
+                continue  # no item of its own: its item (if any) is a separate items row
             yield name, row.get("components", {})
 
 

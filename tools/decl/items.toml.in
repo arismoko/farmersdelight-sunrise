@@ -779,3 +779,19 @@ template = "minecraft:stick"
 max_stack_size = 16
 [rotten_tomato.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+
+# --- M5-04 rice ---
+
+[rice]
+source = "J/common/registry/ModItems.java:RICE (RiceItem, BlockItem of RICE_CROP, villager food 2)"
+template = "minecraft:wheat_seeds"
+block = "farmersdelight:rice"
+[rice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+"minecraft:villager_food" = { value = 2 }
+
+[rice_panicle]
+source = "J/common/registry/ModItems.java:RICE_PANICLE (Item::new)"
+template = "minecraft:stick"
+[rice_panicle.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3

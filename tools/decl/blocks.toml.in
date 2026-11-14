@@ -149,3 +149,30 @@ shapes = { default = [[0.125, 0.0, 0.125, 0.875, 1.0, 0.875]] }
 collision_shapes = { default = [] }
 item = false
 pick_item = "farmersdelight:tomato_seeds"
+
+# --- M5-04 rice ---
+
+[rice]
+source = "J/common/registry/ModBlocks.java:RICE_CROP (ofFullCopy(WHEAT).mapColor(PLANT).strength(0.2)); J/common/block/RiceBlock.java:AGE(AGE_3),SUPPORTING,SHAPE_BY_AGE,getFluidState"
+# Template minecraft:kelp: a plant that always holds a water source (RiceBlock#getFluidState), takes no
+# other liquid, places only into a full water source and is not replaceable. Its `age` (0-25) carries
+# FD's AGE 0-3. Growth, placement age, survival, bone meal and `supporting` are code (src/blocks/rice.rs).
+template = "minecraft:kelp"
+properties = { hardness = 0.2, explosion_resistance = 0.2, sounds = "minecraft:wheat", map_color = 7, random_ticks = true }
+state_properties = { supporting = { type = "boolean" } }
+default_state = { age = "0", supporting = "false" }
+shapes = { properties = ["age"], values = { "0" = [[0.1875, 0.0, 0.1875, 0.8125, 0.5, 0.8125]], "1" = [[0.1875, 0.0, 0.1875, 0.8125, 0.625, 0.8125]], "2" = [[0.125, 0.0, 0.125, 0.875, 0.75, 0.875]], "3" = [[0.0625, 0.0, 0.0625, 0.9375, 1.0, 0.9375]] }, default = [[0.0625, 0.0, 0.0625, 0.9375, 1.0, 0.9375]] }
+collision_shapes = { default = [] }
+item = false
+block_item = "farmersdelight:rice"
+
+[rice_panicles]
+source = "J/common/registry/ModBlocks.java:RICE_CROP_PANICLES (ofFullCopy(WHEAT).mapColor(PLANT)); J/common/block/RicePaniclesBlock.java:RICE_AGE(AGE_3),SHAPE_BY_AGE,mayPlaceOn"
+# Template minecraft:beetroots (CropBlock, age 0-3). Growth runs as a plain CropBlock (beetroots' own
+# one-in-three slowdown is not FD's), on rice only; picks rice.
+template = "minecraft:beetroots"
+properties = { map_color = 7 }
+shapes = { properties = ["age"], values = { "0" = [[0.1875, 0.0, 0.1875, 0.8125, 0.5, 0.8125]], "1" = [[0.1875, 0.0, 0.1875, 0.8125, 0.625, 0.8125]], "2" = [[0.125, 0.0, 0.125, 0.875, 0.75, 0.875]], "3" = [[0.0625, 0.0, 0.0625, 0.9375, 1.0, 0.9375]] } }
+collision_shapes = { default = [] }
+item = false
+pick_item = "farmersdelight:rice"

@@ -1,0 +1,8 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/low"
+    }
+  }
+}
