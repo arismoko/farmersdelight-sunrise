@@ -107,12 +107,7 @@ pub fn consume_effect(host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<
     match event.kind {
         HEAL => {
             let amount = match event.data {
-                Tag::Compound(c) => match c.get(&"amount".into()) {
-                    Some(Tag::Float(f)) => f32::from_bits(*f),
-                    Some(Tag::Double(d)) => *d as f32,
-                    Some(Tag::Int(i)) => *i as f32,
-                    _ => 0.0,
-                },
+                Tag::Compound(c) => c.get(&"amount".into()).and_then(number).unwrap_or(0.0),
                 _ => 0.0,
             };
             let _ = living.heal(host, amount);
@@ -148,9 +143,31 @@ pub fn consume_effect(host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<
     }
 }
 
+/// A numeric tag as f32: data-driven payloads keep JSON numbers in the narrowest NBT type
+/// (`2.0` arrives as a byte).
+fn number(tag: &Tag) -> Option<f32> {
+    Some(match tag {
+        Tag::Byte(v) => *v as f32,
+        Tag::Short(v) => *v as f32,
+        Tag::Int(v) => *v as f32,
+        Tag::Long(v) => *v as f32,
+        Tag::Float(bits) => f32::from_bits(*bits),
+        Tag::Double(bits) => f64::from_bits(*bits) as f32,
+        _ => return None,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn numbers_of_any_width() {
+        assert_eq!(number(&Tag::Byte(2)), Some(2.0));
+        assert_eq!(number(&Tag::Float(2.5f32.to_bits())), Some(2.5));
+        assert_eq!(number(&Tag::Double(0.5f64.to_bits())), Some(0.5));
+        assert_eq!(number(&Tag::String("2".into())), None);
+    }
 
     #[test]
     fn nourishment_cuts_up_to_four() {
