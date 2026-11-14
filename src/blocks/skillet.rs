@@ -136,7 +136,7 @@ impl BlockPart for Skillet {
         host: &mut dyn ServerHost,
         event: &mut UseItemOnEvent<'_>,
     ) -> Option<InteractionResult> {
-        Some(interact(host, event.click, event.state))
+        Some(self.click(host, event.click, event.state))
     }
 
     fn use_without_item(
@@ -144,7 +144,7 @@ impl BlockPart for Skillet {
         host: &mut dyn ServerHost,
         event: &mut UseWithoutItemEvent<'_>,
     ) -> Option<InteractionResult> {
-        Some(interact(host, event.click, event.state))
+        Some(self.click(host, event.click, event.state))
     }
 }
 

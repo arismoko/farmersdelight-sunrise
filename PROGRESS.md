@@ -283,3 +283,15 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   contents (beef in the pan, steam) (`run/shots/m2-10-bob-view*.png`).
 - NOT RUN yet: skillet attack sound with a player victim (FD's attack sounds have no subtitle, so it needs a
   listen check), save/restart mid-cook on the server, single-player recorded demo run.
+
+## M2-10 multiplayer part 2 — PASS — 2026-11-14
+- skillet attack sound, player victim (Q2): Bob's clientbound packets recorded (`studio record`) while Alice
+  hit him: 2 full-charge hits → 2 × `farmersdelight:item.skillet.attack.strong`; 3 rapid hits → 1 strong +
+  2 `…attack.weak` (charge read before the swing). Evidence: `run/mp/B/game/recordings/skillet{pvp,weak2}_*.mcpr`.
+- save/restart mid-cook on the dedicated server (`tick freeze` → `data get block` → `horizon-server stop` → run
+  → reconnect): stove `CookingTotalTimes` [305,283,261] and later [472,450,428] identical after restart (two
+  restarts); placed skillet `CookTime 40/120`, 7 beef identical. After unfreeze both advance at the normal rate
+  (+6 ticks each), no instant cook. Bob sees the stove's beef after the restart (`run/shots/m2-10-bob-after-restart.png`).
+- tool note: `horizon-ctl interact` refuses the placed skillet ("no face visible") from a standing eye height;
+  `look-at` + `mouse right click` works (ctl visibility check, not mod behaviour).
+- left for M2-10: recorded single-player demo run. Flip pose not checkable (A12 / E-16).
