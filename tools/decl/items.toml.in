@@ -763,3 +763,19 @@ template = "minecraft:wheat_seeds"
 block = "farmersdelight:cabbages"
 [cabbage_seeds.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+
+# --- M5-03 tomato seeds, rotten tomato ---
+
+[tomato_seeds]
+source = "J/common/registry/ModItems.java:TOMATO_SEEDS (BlockItem of BUDDING_TOMATO_CROP, also TOMATO_CROP's item)"
+template = "minecraft:wheat_seeds"
+block = "farmersdelight:budding_tomatoes"
+[tomato_seeds.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+
+[rotten_tomato]
+source = "J/common/registry/ModItems.java:ROTTEN_TOMATO (basicItem().stacksTo(16)); throwing is M8-06"
+template = "minecraft:stick"
+max_stack_size = 16
+[rotten_tomato.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85

@@ -1,0 +1,25 @@
+{
+  "template": "minecraft:beetroots",
+  "properties": {
+    "map_color": 7,
+    "random_ticks": true,
+    "push_reaction": "PUSH_PULL"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.125,
+        0.0,
+        0.125,
+        0.875,
+        1.0,
+        0.875
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "default": []
+  },
+  "item": false,
+  "pick_item": "farmersdelight:tomato_seeds"
+}

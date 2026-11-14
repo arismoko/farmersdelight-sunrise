@@ -48,3 +48,13 @@ pub fn vanilla_straw_bed_rename_enabled() -> bool {
 pub fn rope_reeling_enabled() -> bool {
     true
 }
+
+/// `settings.enableTomatoVineClimbingTaggedRopes` (Configuration.java), default true.
+pub fn tomato_vine_climbing_tagged_ropes() -> bool {
+    true
+}
+
+/// `crafting.enableTomatoRopePermanence` (Configuration.java), default true.
+pub fn tomato_rope_permanence() -> bool {
+    true
+}

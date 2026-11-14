@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:wheat_seeds",
+  "block": "farmersdelight:budding_tomatoes",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/low"
+    }
+  }
+}

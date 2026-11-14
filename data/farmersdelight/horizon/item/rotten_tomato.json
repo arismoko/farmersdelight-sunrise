@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:stick",
+  "max_stack_size": 16,
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium_high"
+    }
+  }
+}

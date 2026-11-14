@@ -67,6 +67,44 @@ fn bool_str(b: bool) -> &'static str {
     if b { "true" } else { "false" }
 }
 
+/// RopeBlock#getStateWithConnections for a top/bottom face: sides tie only to rope, bars,
+/// panes and walls; `tied_to_bell` from the block above; waterlogged in source water.
+fn vertical_state(
+    level: &dyn LevelHost,
+    base: BlockState,
+    pos: [i32; 3],
+    water: bool,
+) -> Option<BlockState> {
+    let mut state = base;
+    for (name, d) in [
+        ("north", [0, 0, -1]),
+        ("south", [0, 0, 1]),
+        ("west", [-1, 0, 0]),
+        ("east", [1, 0, 0]),
+    ] {
+        let tie = level
+            .block_state(offset(pos, d))
+            .is_some_and(|s| ties_to_rope_and_walls(level, s));
+        state = level.state_with_property(state, name, bool_str(tie))?;
+    }
+    let bell = level
+        .block_state(offset(pos, [0, 1, 0]))
+        .and_then(|s| name_of(level, s))
+        == Some(BELL);
+    state = level.state_with_property(state, "tied_to_bell", bool_str(bell))?;
+    level.state_with_property(state, "waterlogged", bool_str(water))
+}
+
+/// The rope a tomato vine leaves (HangingTomatoBlock#placeRope with the default
+/// `defaultTomatoVineRope`, farmersdelight:rope): `getStateWithConnections(…, Direction.UP)`.
+pub fn rope_state_for_vine(level: &dyn LevelHost, pos: [i32; 3]) -> Option<BlockState> {
+    let base = level.block_state_id(ROPE)?;
+    let water = level
+        .fluid_state(pos)
+        .is_some_and(|f| f.source && is_water(level, f));
+    vertical_state(level, base, pos, water)
+}
+
 pub struct Rope {
     /// `minecraft:bell`, resolved at registration for its block event.
     pub bell: BlockKey,
@@ -87,28 +125,9 @@ impl BlockPart for Rope {
             return None;
         }
         let p = event.context.pos;
-        let pos = [p.x, p.y, p.z];
-        let mut state = event.state;
-        for (name, d) in [
-            ("north", [0, 0, -1]),
-            ("south", [0, 0, 1]),
-            ("west", [-1, 0, 0]),
-            ("east", [1, 0, 0]),
-        ] {
-            let tie = level
-                .block_state(offset(pos, d))
-                .is_some_and(|s| ties_to_rope_and_walls(level, s));
-            state = level.state_with_property(state, name, bool_str(tie))?;
-        }
-        let bell = level
-            .block_state(offset(pos, [0, 1, 0]))
-            .and_then(|s| name_of(level, s))
-            == Some(BELL);
-        state = level.state_with_property(state, "tied_to_bell", bool_str(bell))?;
         // `fluidState.getType() == Fluids.WATER`: source water only.
         let water = event.fluid.source && is_water(level, event.fluid);
-        state = level.state_with_property(state, "waterlogged", bool_str(water))?;
-        Some(Some(state))
+        Some(vertical_state(level, event.state, [p.x, p.y, p.z], water))
     }
 
     /// RopeBlock#updateShape: the block above sets `tied_to_bell`; the sides stay the template's.

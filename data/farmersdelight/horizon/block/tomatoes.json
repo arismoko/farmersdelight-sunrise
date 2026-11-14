@@ -1,0 +1,32 @@
+{
+  "template": "minecraft:beetroots",
+  "properties": {
+    "map_color": 7,
+    "random_ticks": true
+  },
+  "state_properties": {
+    "ropelogged": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "ropelogged": "false"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.125,
+        0.0,
+        0.125,
+        0.875,
+        1.0,
+        0.875
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "default": []
+  },
+  "item": false,
+  "block_item": "farmersdelight:tomato_seeds"
+}

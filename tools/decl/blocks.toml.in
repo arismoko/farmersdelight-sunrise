@@ -111,3 +111,41 @@ open_sound = "farmersdelight:block.rope_fence_gate.open"
 close_sound = "farmersdelight:block.rope_fence_gate.close"
 shapes = { properties = ["facing"], values = { "north" = [[0.0, 0.0, 0.4375, 1.0, 0.875, 0.5625]], "south" = [[0.0, 0.0, 0.4375, 1.0, 0.875, 0.5625]], "east" = [[0.4375, 0.0, 0.0, 0.5625, 0.875, 1.0]], "west" = [[0.4375, 0.0, 0.0, 0.5625, 0.875, 1.0]] } }
 collision_shapes = { properties = ["facing", "open"], values = { "north,false" = [[0.0, 0.0, 0.4375, 1.0, 1.5, 0.5625]], "south,false" = [[0.0, 0.0, 0.4375, 1.0, 1.5, 0.5625]], "east,false" = [[0.4375, 0.0, 0.0, 0.5625, 1.5, 1.0]], "west,false" = [[0.4375, 0.0, 0.0, 0.5625, 1.5, 1.0]] }, default = [] }
+
+# --- M5-03 tomatoes ---
+
+[budding_tomatoes]
+source = "J/common/registry/ModBlocks.java:BUDDING_TOMATO_CROP (ofFullCopy(WHEAT).mapColor(PLANT)); J/common/block/BuddingBushBlock.java:SHAPE_BY_AGE; J/common/block/BuddingTomatoBlock.java"
+# Template minecraft:wheat for a crop's properties, survival (light >= 8 or sky, mayPlaceOn answered as
+# #minecraft:supports_crops in code) and bone meal routing. FD's AGE is 0-4; the template's `age` runs
+# 0-7 and only 0-4 are reached. Growth, bone meal and the turn into `tomatoes` are code (src/blocks/tomato.rs).
+template = "minecraft:wheat"
+properties = { map_color = 7 }
+shapes = { properties = ["age"], values = { "0" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0]], "1" = [[0.0, 0.0, 0.0, 1.0, 0.375, 1.0]], "2" = [[0.0, 0.0, 0.0, 1.0, 0.625, 1.0]], "3" = [[0.0, 0.0, 0.0, 1.0, 0.875, 1.0]], "4" = [[0.0, 0.0, 0.0, 1.0, 0.875, 1.0]] }, default = [[0.0, 0.0, 0.0, 1.0, 0.875, 1.0]] }
+collision_shapes = { default = [] }
+item = false
+block_item = "farmersdelight:tomato_seeds"
+
+[tomatoes]
+source = "J/common/registry/ModBlocks.java:TOMATO_CROP (ofFullCopy(WHEAT).mapColor(PLANT)); J/common/block/TomatoBlock.java:VINE_AGE(AGE_3),ROPELOGGED,SHAPE,isRandomlyTicking"
+# Template minecraft:beetroots: a CropBlock with `age` 0-3 (= VINE_AGE). Ticks randomly at every age
+# (it climbs rope when mature). Harvest, growth, climbing and bone meal are code.
+template = "minecraft:beetroots"
+properties = { map_color = 7, random_ticks = true }
+state_properties = { ropelogged = { type = "boolean" } }
+default_state = { ropelogged = "false" }
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 1.0, 0.875]] }
+collision_shapes = { default = [] }
+item = false
+block_item = "farmersdelight:tomato_seeds"
+
+[tomatoes_on_rope]
+source = "J/common/registry/ModBlocks.java:TOMATO_CROP_ON_ROPE (ofFullCopy(TOMATO_CROP).pushReaction(PUSH_PULL)); J/common/block/HangingTomatoBlock.java"
+# As tomatoes, hanging on rope: leaves a rope when removed (ReplaceOnRemoval, `remove_block` in code);
+# climbable through the carried #minecraft:climbable tag. No item of its own; picks tomato seeds.
+template = "minecraft:beetroots"
+properties = { map_color = 7, random_ticks = true, push_reaction = "PUSH_PULL" }
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 1.0, 0.875]] }
+collision_shapes = { default = [] }
+item = false
+pick_item = "farmersdelight:tomato_seeds"
