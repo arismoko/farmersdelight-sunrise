@@ -50,7 +50,7 @@ pub fn skillet_cooking_time(original: i32, fire_aspect: i32) -> i32 {
     }
 }
 
-fn patch_of(stack: &ItemStack) -> Compound {
+pub(crate) fn patch_of(stack: &ItemStack) -> Compound {
     stack
         .components()
         .map(|c| c.as_nbt().clone())

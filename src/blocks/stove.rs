@@ -548,16 +548,16 @@ fn clockwise(facing: &str) -> &'static str {
 }
 
 /// Client-only effect randomness (no gameplay depends on it).
-struct ClientRng(u64);
+pub(crate) struct ClientRng(u64);
 impl ClientRng {
-    fn new(pos: [i32; 3], time: i64) -> Self {
+    pub(crate) fn new(pos: [i32; 3], time: i64) -> Self {
         let seed = (pos[0] as i64).wrapping_mul(3_129_871)
             ^ (pos[2] as i64).wrapping_mul(116_129_781)
             ^ (pos[1] as i64)
             ^ time.wrapping_mul(0x9E37_79B9);
         Self(seed as u64 | 1)
     }
-    fn next(&mut self) -> f64 {
+    pub(crate) fn next(&mut self) -> f64 {
         self.0 ^= self.0 << 13;
         self.0 ^= self.0 >> 7;
         self.0 ^= self.0 << 17;

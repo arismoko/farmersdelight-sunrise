@@ -39,3 +39,17 @@ shapes = { default = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375]] }
 collision_shapes = { properties = ["support"], values = { "true" = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375], [0.0, -0.0625, 0.0, 1.0, 0.0, 1.0]] }, default = [[0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375]] }
 item = false
 block_item = "farmersdelight:skillet"
+
+[cooking_pot]
+source = "J/common/registry/ModBlocks.java:COOKING_POT (mapColor METAL, strength 0.5/6.0, sound LANTERN); J/common/block/CookingPotBlock.java:FACING,SUPPORT,WATERLOGGED,SHAPE,SHAPE_WITH_TRAY; J/common/registry/ModItems.java:COOKING_POT (stacksTo 1)"
+# Template minecraft:stonecutter: native `facing` opposite the placer, as CookingPotBlock places it,
+# and no menu of its own that opens (use_item_on answers every main-hand use). `waterlogged` and
+# `support` (none/tray/handle) are declared; placement and shape updates set them in code.
+template = "minecraft:stonecutter"
+properties = { hardness = 0.5, explosion_resistance = 6.0, requires_tool = false, sounds = "minecraft:lantern", map_color = 6, occludes = false }
+state_properties = { support = { type = "enum", values = ["none", "handle", "tray"] }, waterlogged = { type = "boolean" } }
+default_state = { facing = "north", support = "none", waterlogged = "false" }
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875]] }
+collision_shapes = { properties = ["support"], values = { "tray" = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875], [0.0, -0.0625, 0.0, 1.0, 0.0, 1.0]] }, default = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875]] }
+[cooking_pot.components]
+"minecraft:max_stack_size" = 1

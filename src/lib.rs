@@ -22,6 +22,7 @@ use mod_api::*;
 struct FarmersDelight {
     recipes: std::sync::Arc<recipes::RecipeTables>,
     removed_skillets: blocks::skillet::Removed,
+    pots: blocks::cooking_pot::SharedRef,
 }
 
 #[mod_api::horizon_mod]
@@ -35,7 +36,7 @@ impl Hooks for FarmersDelight {
     }
 
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
-        registry::register(registrar, &self.recipes, &self.removed_skillets);
+        registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
     }
 
     fn block_entity_container(
@@ -59,6 +60,7 @@ impl Hooks for FarmersDelight {
         event.types.extend(
             items::skillet::COMPONENT_TYPES
                 .iter()
+                .chain(blocks::cooking_pot::COMPONENT_TYPES.iter())
                 .map(|t| t.to_string()),
         );
     }
@@ -106,6 +108,7 @@ impl Hooks for FarmersDelight {
 
     fn loot_drops(&self, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
         blocks::skillet::on_loot_drops(&self.removed_skillets, host, event);
+        blocks::cooking_pot::on_loot_drops(&self.recipes, &self.pots, host, event);
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {

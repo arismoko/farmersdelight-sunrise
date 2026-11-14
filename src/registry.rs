@@ -25,6 +25,7 @@ pub fn register(
     registrar: &mut dyn Registrar,
     recipes: &std::sync::Arc<crate::recipes::RecipeTables>,
     removed_skillets: &crate::blocks::skillet::Removed,
+    pots: &crate::blocks::cooking_pot::SharedRef,
 ) {
     use crate::blocks::cutting_board;
     let board = registrar
@@ -69,6 +70,29 @@ pub fn register(
             },
         )
         .expect("skillet block entity type");
+    use crate::blocks::cooking_pot;
+    let pot = registrar
+        .block_entity_type(cooking_pot::ID)
+        .blocks(&[cooking_pot::ID])
+        .build();
+    // FD's three particle types, registered at their first use (M3-09); providers are carried.
+    let steam = registrar.particle_key("farmersdelight:steam");
+    let _ = registrar.particle_key("farmersdelight:star");
+    let _ = registrar.particle_key("farmersdelight:sparkle");
+    let bubble_pop = registrar.particle_key("minecraft:bubble_pop");
+    registrar
+        .block_entity_part(
+            &pot,
+            cooking_pot::CookingPot {
+                recipes: recipes.clone(),
+                shared: pots.clone(),
+                bubble_pop,
+                steam,
+                client_ticks: Default::default(),
+            },
+        )
+        .expect("cooking pot block entity type");
+    registrar.menu_part(cooking_pot::MENU, cooking_pot::CookingPotMenu);
     let skillet = registrar.item_key(crate::items::skillet::ITEM);
     registrar.item_part(skillet, crate::items::skillet::SkilletItem);
 }
@@ -99,6 +123,26 @@ pub fn container(block: &str) -> Option<ModContainer> {
             outputs: vec![0],
             menu: None,
         }),
+        // CookingPotItemHandler: the top reaches the ingredients (in and out), every other side
+        // puts into the container slot and takes from the output.
+        crate::blocks::cooking_pot::ID => {
+            use crate::blocks::cooking_pot::{CONTAINER, INPUTS, MENU, OUTPUT, SLOTS};
+            let sides = vec![CONTAINER, OUTPUT];
+            Some(ModContainer {
+                slots: SLOTS,
+                faces: [
+                    sides.clone(),
+                    (0..INPUTS).collect(),
+                    sides.clone(),
+                    sides.clone(),
+                    sides.clone(),
+                    sides,
+                ],
+                inputs: (0..INPUTS).chain([CONTAINER]).collect(),
+                outputs: (0..INPUTS).chain([OUTPUT]).collect(),
+                menu: Some(MENU.into()),
+            })
+        }
         _ => None,
     }
 }

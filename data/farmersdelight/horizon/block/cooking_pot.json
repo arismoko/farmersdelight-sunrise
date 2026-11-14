@@ -1,0 +1,79 @@
+{
+  "template": "minecraft:stonecutter",
+  "properties": {
+    "hardness": 0.5,
+    "explosion_resistance": 6.0,
+    "requires_tool": false,
+    "sounds": "minecraft:lantern",
+    "map_color": 6,
+    "occludes": false
+  },
+  "state_properties": {
+    "support": {
+      "type": "enum",
+      "values": [
+        "none",
+        "handle",
+        "tray"
+      ]
+    },
+    "waterlogged": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "support": "none",
+    "waterlogged": "false"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.125,
+        0.0,
+        0.125,
+        0.875,
+        0.625,
+        0.875
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "properties": [
+      "support"
+    ],
+    "values": {
+      "tray": [
+        [
+          0.125,
+          0.0,
+          0.125,
+          0.875,
+          0.625,
+          0.875
+        ],
+        [
+          0.0,
+          -0.0625,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "default": [
+      [
+        0.125,
+        0.0,
+        0.125,
+        0.875,
+        0.625,
+        0.875
+      ]
+    ]
+  },
+  "components": {
+    "minecraft:max_stack_size": 1
+  }
+}
