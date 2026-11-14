@@ -484,3 +484,33 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   FDTest difficulty is Peaceful (food tests need `/difficulty normal`); gamerules restored after the test.
 - crop state persistence across save/restart is checked in the M5-08 demo.
 - next: M5-02
+
+## M5-02 Rope & rope fence — PASS (one engine gap) — 2026-11-14
+- build pin: afe471cf | mod commit: 9bafcaf
+- did: `rope` on template `minecraft:iron_bars` (RopeBlock extends IronBarsBlock: sides, waterlogging, outline and
+  the horizontal side rule = vanilla attachsTo, which FD's tieToAnythingValid equals), + `tied_to_bell`, no collision,
+  0.2 strength, wool sounds; `src/blocks/rope.rs`: placement on a top/bottom face ties only to rope/bars/panes/walls,
+  `update_shape` sets tied_to_bell from the block above, empty-hand use rings a bell up the rope (≤24) via the bell's
+  block event 1 + bell sound + game event, sneak use reels the lowest rope into the inventory (config default on),
+  rope item on rope extends the column down (sneak: out of the clicked face), `is_pathfindable` true.
+  `rope_fence` (template oak_fence, thin post/arms 16 high, collision 24 — 16 declared side tuples) and
+  `rope_fence_gate` (template oak_fence_gate, FD shapes, FD open/close sounds, in_wall only between two walls);
+  one `connects_to` part on `#minecraft:fences` = RopeFenceBlock#connectsTo + RopeFenceConnectionMixin; fire odds 0.
+  Climbing comes from the carried `#minecraft:climbable` tag.
+- evidence (FDTest sky rig, `run/shots/m5-02/`):
+  - rope on a stone side face → `east=true`; on the bell's underside → `tied_to_bell=true`, no side ties.
+  - rope on rope ×3 → column 154…151 (creative); survival extension 65 → 64 ropes.
+  - empty-hand click on the rope → "Bell rings" subtitle (`bell.png`).
+  - survival climb: hold jump in the rope, y 150 → 153.45; holding sneak keeps the player on it.
+  - sneak + empty hand (survival): lowest rope (151) removed, ropes 64 → 65.
+  - fence row (player-placed): oak|rope|rope|gate|rope|oak|oak → oak↛rope fence, rope fences joined, gate joined
+    across its arm by both rope fences, rope fence↛oak, oak–oak joined; oak fence beside a rope fence gate stays
+    unjoined (`fences.png`).
+  - gate by redstone: "Rope Fence Gate unties"/"ties" subtitles (`redstone_close_sub.png`), `/playsound` resolves.
+- engine gap **E-20**: opening the gate by hand plays no sound for the clicking player (vanilla's FenceGateBlock sends
+  it to everyone but the clicker, whose client predicts it; Horizon's client prediction does not play the declared
+  `open_sound`/`close_sound` — a vanilla oak gate creaks through the same path). Delta **A19**: rope placed against a
+  side face directly under a bell shows `tied_to_bell=false` until the block above updates (a placement hook cannot read
+  face sturdiness, so side-face placement is the template's own; tie-to-bell is visual — ringing searches up regardless).
+  LAN check of the gate sound for other players: M5-08.
+- next: M5-03
