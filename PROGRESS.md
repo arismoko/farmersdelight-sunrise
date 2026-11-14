@@ -295,3 +295,25 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - tool note: `horizon-ctl interact` refuses the placed skillet ("no face visible") from a standing eye height;
   `look-at` + `mouse right click` works (ctl visibility check, not mod behaviour).
 - left for M2-10: recorded single-player demo run. Flip pose not checkable (A12 / E-16).
+
+## M2-10 M2 demo (single player) — PASS — 2026-11-14 — **M2 closed**
+- build pin: afe471cf | mod commit: e84a627 | native-afe471c-8f84ec89f8f0 | fresh survival world "M2Demo", horizon-ctl;
+  recordings `../run/horizon-home/instances/fd-port/recordings/*m2-10-demo*`; screenshots + logs `../run/shots/m2-10/`.
+- **bug found and fixed (e84a627):** in survival, beef put into a placed skillet came straight back into the *off*
+  hand. `use_item_on`/`use_without_item` called `interact` directly, bypassing the main-hand-only filter, so the
+  client's off-hand round (main hand now empty) ran the empty-hand take. Creative hid it (hand stack kept), which
+  is why M2-09 and the LAN run passed. After the fix: 9 beef stay in the pan; empty main hand takes the stack back
+  into the main hand, off hand untouched.
+- stove: 6 beef accepted, 7th refused (01); all 6 cook and pop out (12 cooked beef collected over two loads).
+- placed skillet on a campfire (`support=true`), cooks one unit per 120 ticks, result ejected east (facing north).
+- held cooking near the campfire, looking at the sky: off hand 3 → 1 → 0, one cooked beef per 2 raw (Q18), early
+  release returns the unit (03). Note for scripts: with the crosshair on the placed skillet the click goes to the
+  block ("This can't be cooked...").
+- stove burn: hurt 1.0 standing on the lit stove (04), 0 hurts in 3 s sneaking.
+- save & quit to title + reopen mid-cook (`tick freeze` snapshots): stove [251…241] → [267…257], skillet
+  118/120 (8 beef) → 14/120 (7 beef): both +16 ticks, the exact load-to-freeze gap; no reset, no instant cook (05, 06).
+- full process restart: stove [267…257] → [282…272], skillet 14 → 29: both +15 ticks (07); then cooking finished
+  normally (08). Logs `session{1,2}-latest.log`: no panics; only the known crate load-condition client lines.
+- M2 open items carried forward: flip pose / sizzle (A12, E-16), stove other three facings not screenshotted,
+  skillet underwater refusal and Fire Aspect times not checked in game (unit-tested).
+- next: M3-01 (cooking codec)
