@@ -460,3 +460,27 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   carried to the HUD/tooltip work, M9); the recorded eating tour covers the first part only (later steps were run with
   horizon-ctl in the same world; results above).
 - next: M5-01
+
+## M5-01 Cabbage & onion — PASS — 2026-11-14
+- build pin: afe471cf | mod commit: 8a5cc5f
+- did: `cabbages`/`onions` declared on template `minecraft:wheat` (CropBlock age 0–7, growth, bonemeal, farmland
+  survival as `ofFullCopy(WHEAT)`), outline = FD SHAPE_BY_AGE, no collision (`collision_shapes` empty, as wheat),
+  `item = false` + `block_item` = the seed (getBaseSeedId). New item `cabbage_seeds` (template wheat_seeds, compost 0.3);
+  `onion` keeps its food and gains `block = farmersdelight:onions`. Loot tables, models, tags
+  (`villager_plantable_seeds`, `crops`, `maintains_farmland`) were already carried.
+- evidence (FDTest, sky plot y=150 with water, `run/shots/m5-01/`):
+  - planting by right-click on farmland: both crops placed at age 0; survival consumes one item each (seeds 20→19, onion 16→15).
+  - bonemeal → age 7; mature render with FD textures (`mature.png`); random tick grew a cabbage 0→1 unaided.
+  - survival harvest: 3 mature cabbages → 3 cabbage + 4 seeds; 2 mature onions → 6 onions; age-1 cabbage → 1 seed;
+    age-0 onion → 1 onion (matches the carried loot tables incl. `minecraft:match_block` conditions).
+  - onion used in the air is eaten (food 0→2 = FoodValues.ONION nutrition), no block placed.
+  - pick-block (creative): cabbages → cabbage_seeds, onions → onion.
+  - farmer villager (job site composter) with cabbage seeds + onions planted 9 cabbages, then 4 onions once the
+    seeds ran out (onion 14→10); a vanilla wheat control farmer planted alongside (`villager_planted.png`).
+- notes: crops cannot be placed by `horizon-ctl place` (needs a full solid face) — use look-at-block … up + `mouse right
+  click`. Crops need light ≥8 or sky (vanilla canSurvive); the first try was underground and failed for vanilla wheat too.
+  The test plot was found as plain dirt once (cause not identified: re-tilled farmland near water then held moisture 7
+  under random_tick_speed 30; only the two cells under composters turned to dirt, as vanilla). Watch for it in M5-05/M5-08.
+  FDTest difficulty is Peaceful (food tests need `/difficulty normal`); gamerules restored after the test.
+- crop state persistence across save/restart is checked in the M5-08 demo.
+- next: M5-02
