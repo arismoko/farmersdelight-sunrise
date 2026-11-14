@@ -53,3 +53,26 @@ shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875]] }
 collision_shapes = { properties = ["support"], values = { "tray" = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875], [0.0, -0.0625, 0.0, 1.0, 0.0, 1.0]] }, default = [[0.125, 0.0, 0.125, 0.875, 0.625, 0.875]] }
 [cooking_pot.components]
 "minecraft:max_stack_size" = 1
+
+# --- M5-01 crops ---
+
+[cabbages]
+source = "J/common/registry/ModBlocks.java:CABBAGE_CROP (ofFullCopy(WHEAT)); J/common/block/CabbageBlock.java:SHAPE_BY_AGE,getBaseSeedId"
+# Template minecraft:wheat: CropBlock with age 0-7, random growth (vanilla getGrowthSpeed), bonemeal,
+# farmland survival and wheat's properties, as ofFullCopy(WHEAT). Only the outline differs (SHAPE_BY_AGE,
+# no collision as wheat). The block's item and pick item are the seeds (getBaseSeedId); drops come from
+# the carried loot table.
+template = "minecraft:wheat"
+shapes = { properties = ["age"], values = { "0" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0]], "1" = [[0.0, 0.0, 0.0, 1.0, 0.1875, 1.0]], "2" = [[0.0, 0.0, 0.0, 1.0, 0.3125, 1.0]], "3" = [[0.0, 0.0, 0.0, 1.0, 0.4375, 1.0]], "4" = [[0.0, 0.0, 0.0, 1.0, 0.5, 1.0]], "5" = [[0.0, 0.0, 0.0, 1.0, 0.5625, 1.0]], "6" = [[0.0, 0.0, 0.0, 1.0, 0.5625, 1.0]], "7" = [[0.0, 0.0, 0.0, 1.0, 0.625, 1.0]] } }
+collision_shapes = { default = [] }
+item = false
+block_item = "farmersdelight:cabbage_seeds"
+
+[onions]
+source = "J/common/registry/ModBlocks.java:ONION_CROP (ofFullCopy(WHEAT)); J/common/block/OnionBlock.java:SHAPE_BY_AGE,getBaseSeedId"
+# As cabbages; the block's item (and seed) is farmersdelight:onion.
+template = "minecraft:wheat"
+shapes = { properties = ["age"], values = { "0" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0]], "1" = [[0.0, 0.0, 0.0, 1.0, 0.1875, 1.0]], "2" = [[0.0, 0.0, 0.0, 1.0, 0.25, 1.0]], "3" = [[0.0, 0.0, 0.0, 1.0, 0.3125, 1.0]], "4" = [[0.0, 0.0, 0.0, 1.0, 0.375, 1.0]], "5" = [[0.0, 0.0, 0.0, 1.0, 0.4375, 1.0]], "6" = [[0.0, 0.0, 0.0, 1.0, 0.5, 1.0]], "7" = [[0.0, 0.0, 0.0, 1.0, 0.5625, 1.0]] } }
+collision_shapes = { default = [] }
+item = false
+block_item = "farmersdelight:onion"

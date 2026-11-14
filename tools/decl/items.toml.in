@@ -76,8 +76,10 @@ template = "minecraft:stick"
 "minecraft:villager_food" = { value = 1 }
 
 [onion]
-source = "J/common/registry/ModItems.java:ONION; J/common/FoodValues.java:ONION"
+source = "J/common/registry/ModItems.java:ONION (BlockItem of ONION_CROP); J/common/FoodValues.java:ONION"
+# Places farmersdelight:onions (M5-01); eats when not used on a block, as a vanilla carrot.
 template = "minecraft:stick"
+block = "farmersdelight:onions"
 [onion.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
 "minecraft:food" = { nutrition = 2, saturation = 1.6 }
@@ -752,3 +754,12 @@ template = "minecraft:stick"
 [tree_bark.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
 "minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }
+
+# --- M5-01 crop seeds ---
+
+[cabbage_seeds]
+source = "J/common/registry/ModItems.java:CABBAGE_SEEDS (BlockItem of CABBAGE_CROP, basicItem)"
+template = "minecraft:wheat_seeds"
+block = "farmersdelight:cabbages"
+[cabbage_seeds.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3

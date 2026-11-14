@@ -1,5 +1,6 @@
 {
   "template": "minecraft:stick",
+  "block": "farmersdelight:onions",
   "components": {
     "minecraft:compostable": {
       "layers": "minecraft:compostable/medium"
