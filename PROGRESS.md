@@ -333,3 +333,38 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   reason, all for ids or `c:` tags whose FD items are declared later (crops M5, meals M7). They load once those
   exist; M3-03's "each of the 28 recipes cooks" can only be fully checked after M5/M7 (until then: the 3 vanilla ones).
 - next: M3-02 (pot block)
+
+## M3-02…M3-09 Cooking pot — CODE DONE, in-game testing IN PROGRESS (interrupted) — 2026-11-14
+- mod commit: 064e4f3 | `src/blocks/cooking_pot.rs` (block, BE tick, menu, screen, XP, item form, automation, client
+  FX), decls `tools/decl/blocks.toml.in` [cooking_pot] (template stonecutter, declared `support`
+  none/handle/tray + `waterlogged`, max_stack 1) and new `tools/decl/menus.toml.in` (menu `cooking_pot`: 9 slots,
+  2 data slots, result slot 8). clippy clean, 49 unit tests (9 new pot tests: cool clamp, meal-slot fit ≥64,
+  meal→output, servings, comparator formula, XP rounding, arrow width, remainder overrides, shift-click merge).
+- design notes / engine gaps found:
+  - meal slot 6 is **hidden** in the screen (`Screen.slots[6] = None`) and drawn from the BE's synced `Inventory`
+    (via `screen_pos()`), so it can be neither placed into nor taken (CookingPotMealSlot); `menu_slot_rules` also
+    refuses placement.
+  - **E-17 (new)**: `menu_quick_move` cannot empty an inventory slot (API `ItemStack` has no 0 count; an unchanged
+    stack is ignored) → FD routing (serving containers → slot 7, rest → 0–5) is applied only when part of the
+    stack stays behind; a stack that moves whole falls back to the game's routing.
+  - **U-11** (no take hook): XP/recipes on output take = shift-click from slot 8 (in `menu_quick_move`), or a tick
+    diff of the output count awarded to the player who opened the pot (a hopper pulling while the menu is open
+    would also award: small delta, to record as A13).
+  - comparator: `analog_output` gets a level host with no BE read → the tick computes the signal, caches it per
+    position, and calls `update_neighbors(OutputSignal)` when it changes.
+  - item form: the loot table's `copy_components` needs the BE → (as the skillet) contents/meal recorded in
+    `pre_remove_side_effects`, drop components `farmersdelight:meal`/`container` + `minecraft:block_entity_data`
+    {Items:[meal at Slot 6], Container} set in `loot_drops` (placement should merge it back — UNTESTED).
+  - per-tick sync while the container slot is filled (FD does it) dropped: sync only on real moves.
+  - not done: food_serving crafting (E-12 fallback: serving by right-click/menu only), dough recipe (wheat_dough not
+    declared yet), item tooltip image (CookingPotTooltip), custom name on the BE.
+- in game so far (world M2Demo, survival): pot on a campfire → `support=tray`, facing opposite the placer ✓;
+  "Dinner's Served!" advancement ✓; empty-hand right-click opens the menu ✓; **full GUI texture works**
+  (`farmersdelight:gui/cooking_pot` → U-10 resolved, no sprite fallback needed), heat icon shown over the campfire ✓,
+  title/inventory labels ✓, "Cooking Pot boils" subtitle ✓ (`run/shots/m3-pot-menu-empty.png`).
+- NEXT (resume here): in M2Demo the player has 4 brown + 4 red mushrooms and 3 bowls (pot at -34 65 -7 on a campfire);
+  put a mushroom in two input slots (click-slot 300/301) → expect mushroom_stew after 200 ticks in the meal display,
+  then bowl in slot 7 → stew in output; check arrow, data slots, shift-click routes, XP on take, comparator, handle
+  toggle (sneak + empty hand), hanging pot under a ceiling, hopper faces (top → inputs, side → container, bottom ←
+  output), break with meal → item keeps meal → re-place restores it, save/restart mid-cook, then M3-10 demo
+  (vegetable soup needs M5 items → demo with mushroom/beetroot/rabbit stew instead, note the deviation) + LAN guest.
