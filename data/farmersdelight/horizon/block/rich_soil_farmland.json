@@ -1,0 +1,4 @@
+{
+  "template": "minecraft:farmland",
+  "base_block": "farmersdelight:rich_soil"
+}

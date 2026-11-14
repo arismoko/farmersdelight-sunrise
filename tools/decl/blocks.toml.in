@@ -176,3 +176,20 @@ shapes = { properties = ["age"], values = { "0" = [[0.1875, 0.0, 0.1875, 0.8125,
 collision_shapes = { default = [] }
 item = false
 pick_item = "farmersdelight:rice"
+
+# --- M5-05 rich soil ---
+
+[rich_soil]
+source = "J/common/registry/ModBlocks.java:RICH_SOIL (ofFullCopy(DIRT).randomTicks()); J/common/block/RichSoilBlock.java"
+# Template minecraft:dirt (properties, sounds, shovel) ticking randomly: the mushroom→colony turn and the
+# plant boost are code (src/blocks/rich_soil.rs); tilling gives rich_soil_farmland, no path.
+template = "minecraft:dirt"
+properties = { random_ticks = true }
+
+[rich_soil_farmland]
+source = "J/common/registry/ModBlocks.java:RICH_SOIL_FARMLAND (ofFullCopy(FARMLAND)); J/common/block/RichSoilFarmlandBlock.java"
+# Template minecraft:farmland with rich soil as the block it reverts to (dry-out has no revert in FD,
+# a solid block above or failed placement does). Moisture, boost, no trampling and melon/pumpkin
+# support are code.
+template = "minecraft:farmland"
+base_block = "farmersdelight:rich_soil"
