@@ -419,7 +419,7 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - next: M4-01
 
 ## M4 foods, drinks, effects, feeding — 2026-11-14
-- mod commits: b4a1a64 1188042 33019e3  | decls: 79 food/drink rows generated once from ModItems.java + tests/fixtures/foods.json
+- mod commits: 1188042, b4a1a64 (code), 3360cfc (log) | decls: 79 food/drink rows generated once from ModItems.java + tests/fixtures/foods.json
   (`tools/decl/items.toml.in`, each row cites its FoodValues constant and consumable), effects
   `tools/decl/effects.toml.in` (nourishment 0xF3B300, comfort 14545909, beneficial), materials straw/canvas/tree_bark,
   compost tiers on every declared compostable (fixture `tests/fixtures/compostables.json`, 39 ids incl. straw_bed).
