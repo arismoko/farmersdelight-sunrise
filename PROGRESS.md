@@ -417,3 +417,46 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - engine gaps recorded: **E-17** quick move cannot empty an inventory slot (workaround above); U-11 confirmed (no
   menu take hook); `analog_output`'s level host has no block-entity read (cache workaround).
 - next: M4-01
+
+## M4 foods, drinks, effects, feeding — 2026-11-14
+- mod commits: b4a1a64 1188042 33019e3  | decls: 79 food/drink rows generated once from ModItems.java + tests/fixtures/foods.json
+  (`tools/decl/items.toml.in`, each row cites its FoodValues constant and consumable), effects
+  `tools/decl/effects.toml.in` (nourishment 0xF3B300, comfort 14545909, beneficial), materials straw/canvas/tree_bark,
+  compost tiers on every declared compostable (fixture `tests/fixtures/compostables.json`, 39 ids incl. straw_bed).
+  Tests: `tools/test_food_decls.py` (77 food items = their FoodValues constant; bowl/bottle foods return the container
+  via `minecraft:use_remainder` and stack 16; Q3 onion soup = SHEPHERDS_PIE), `tools/test_compost_fuel_decls.py`
+  (re-run at every milestone), Rust units for Nourishment/Comfort rules, numeric payloads, vanilla soup overrides,
+  pet foods (55 Rust + 19 Python tests).
+- M4-01 in game (survival, M2Demo): hamburger +11 food; beef stew → Nourishment 3600 + bowl back; apple cider (always
+  edible, at full food) → Absorption 1200 + bottle; glow berry custard → bottle; cooked rice stacks to 16; full
+  player refuses cake slice / chicken cuts (not always edible). 23 of 28 cooking recipes now resolve (rest need rice,
+  M5, and the stuffed pumpkin block, M7). `onion` is declared as a plain food item; M5 makes it the crop's block item.
+- M4-02: hot cocoa removed Poison but not Speed (harmful only); milk bottle removed one random effect; melon juice +2.0
+  HP (measured with natural regeneration off); melon popsicle put the player out (Fire 291 → -20). Fix made: data-driven
+  payloads keep JSON numbers in the narrowest NBT type (`2.0` arrives as a byte), so the heal amount reads any numeric
+  tag. Q13: the `ignored/*` effect tags are empty in FD and mob-effect tags cannot be queried at the pin, so no
+  exclusion is applied (a datapack adding to them is not honoured: delta A18).
+- M4-03 Nourishment (via `apply_effect_tick`: `add_exhaustion(-min(e,4))`, which the engine applies through
+  `cause_food_exhaustion`, i.e. exactly FD's call): server readings — nourished player under Hunger 251 for 10 s: food 9 /
+  saturation 0 unchanged; same exhaustion without Nourishment for 2 s: food 17 → 9. Residual delta: exhaustion above
+  4.0 per tick is not possible from vanilla sources, so none measured. The `naturalHealthRegeneration` rule cannot be
+  read at the pin → taken as true (delta A15, E-01). **Not ported:** NourishmentAlwaysEatMixin — `can_eat` gets no
+  player at the pin (engine gap **E-18**, delta A16). Note: `horizon-ctl` sprint does not sprint (4.2 b/s) and the
+  client's food/saturation in `state` can be stale — use `/data get entity` for food tests.
+- M4-04 Comfort: +2.0 HP over 170 ticks with saturation 0 (rule every 80 ticks of remaining duration); none while
+  saturation > 0; Regeneration check in code (unit).
+- M4-05: mushroom stew stacks to 16; rabbit stew 3 → 17 food (14/0.75), Jump Boost II 200, Nourishment 6000, bowl back.
+  Straw bed → "Hay Bed" **not applied**: the engine ignores an `item_name` default-component override (an explicit
+  `item_name` patch does display "Hay Bed") → engine gap **E-19**, delta A17. Config toggles wait for M9-01.
+- M4-06: tamed wolf healed 4 → 40 + Speed/Strength/Resistance 6000, eat sound, bowl returned; tamed horse 5 → 53 + Speed II
+  + Jump Boost 6000, feed consumed. A wild wolf passes to vanilla, which takes dog food as breeding meat (#minecraft:meat)
+  and sets InLove — same as FD (its handler passes for untamed). Star particles sent server-side (`send_particles`).
+- M4-07: straw/canvas/tree_bark burn 100/400/200 ticks in a furnace (measured `lit_total_time`); tree bark in a composter:
+  42 rises in 172 counted insertions at level > 0 (0.244; 99% band for p = 0.3 at n = 172: 36–67) → PASS.
+- M4-08: player Nourishment/Comfort and the wolf's/horse's effects keep their remaining time across save & quit and a full
+  restart (only the load-to-freeze gap, 15–28 ticks); on the dedicated server a nourished guest (Bob) kept food 20 / sat 20
+  under Hunger 251 for 10 s, while 2 s without Nourishment took saturation to 8.
+- not done here: FD's food-effect tooltips (ConsumableItem tooltips) and the Nourishment hunger-bar overlay (client,
+  carried to the HUD/tooltip work, M9); the recorded eating tour covers the first part only (later steps were run with
+  horizon-ctl in the same world; results above).
+- next: M5-01
