@@ -317,3 +317,19 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - M2 open items carried forward: flip pose / sizzle (A12, E-16), stove other three facings not screenshotted,
   skillet underwater refusal and Fire Aspect times not checked in game (unit-tested).
 - next: M3-01 (cooking codec)
+
+## M3-01 Cooking codec — PASS (unit) — 2026-11-14
+- mod commit: 554c1bb | `src/recipes/cooking.rs`: codec per `CookingPotRecipe.Serializer` (`group` "", `recipe_book_tab`
+  meals/drinks/misc default misc, `ingredients` 1–6 with `fabric:any` flattened to alternatives, `result`,
+  optional `container`, `experience` 0, `cookingtime` 200); table rebuilt with cutting on every data load.
+- matcher: Refabricated's `RecipeWrapper` counts non-empty input slots and feeds `StackedItemContents` **one unit
+  per slot** (`accountStack(stack, 1)`), so a match = filled-slot count equals ingredient count + perfect bipartite
+  matching (Kuhn). Stack sizes never matter; two identical ingredients need two slots. `find` tries the last
+  matched recipe first, then file order (`RecipeManager.CachedCheck`), none when all inputs are empty (`hasInput`).
+- unit (9 new, 40 total): all 28 parse (sizes 1/2/3/4/5/6 = 1/4/6/15/1/1; tabs meals 20, drinks 2, misc 6); the
+  3 `fabric:any` files (bone_broth, cabbage_rolls, dumplings) flatten to 4 alternatives; count rule; augmenting
+  path; duplicates; stale cache; build skips empty ingredients and unknown results.
+- in game (load only): 3 of 28 resolve (beetroot_soup, mushroom_stew, rabbit_stew); 25 skipped with a logged
+  reason, all for ids or `c:` tags whose FD items are declared later (crops M5, meals M7). They load once those
+  exist; M3-03's "each of the 28 recipes cooks" can only be fully checked after M5/M7 (until then: the 3 vanilla ones).
+- next: M3-02 (pot block)
