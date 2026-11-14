@@ -336,8 +336,11 @@ mod tests {
         impl Host for Data {}
         impl mod_api::prelude::RecipesHost for Data {
             fn recipes_of_type(&self, kind: &str) -> Arc<[Recipe]> {
-                assert_eq!(kind, TYPE);
-                self.recipes.clone()
+                if kind == TYPE {
+                    self.recipes.clone()
+                } else {
+                    Arc::from(Vec::new())
+                }
             }
             fn recipe_ingredient(&self, json: &str) -> Result<Option<Ingredient>, RecipeJsonError> {
                 let v: Value =
