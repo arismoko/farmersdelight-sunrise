@@ -1,0 +1,105 @@
+{
+  "template": "minecraft:oak_fence_gate",
+  "properties": {
+    "hardness": 1.0,
+    "explosion_resistance": 1.0
+  },
+  "open_sound": "farmersdelight:block.rope_fence_gate.open",
+  "close_sound": "farmersdelight:block.rope_fence_gate.close",
+  "shapes": {
+    "properties": [
+      "facing"
+    ],
+    "values": {
+      "north": [
+        [
+          0.0,
+          0.0,
+          0.4375,
+          1.0,
+          0.875,
+          0.5625
+        ]
+      ],
+      "south": [
+        [
+          0.0,
+          0.0,
+          0.4375,
+          1.0,
+          0.875,
+          0.5625
+        ]
+      ],
+      "east": [
+        [
+          0.4375,
+          0.0,
+          0.0,
+          0.5625,
+          0.875,
+          1.0
+        ]
+      ],
+      "west": [
+        [
+          0.4375,
+          0.0,
+          0.0,
+          0.5625,
+          0.875,
+          1.0
+        ]
+      ]
+    }
+  },
+  "collision_shapes": {
+    "properties": [
+      "facing",
+      "open"
+    ],
+    "values": {
+      "north,false": [
+        [
+          0.0,
+          0.0,
+          0.4375,
+          1.0,
+          1.5,
+          0.5625
+        ]
+      ],
+      "south,false": [
+        [
+          0.0,
+          0.0,
+          0.4375,
+          1.0,
+          1.5,
+          0.5625
+        ]
+      ],
+      "east,false": [
+        [
+          0.4375,
+          0.0,
+          0.0,
+          0.5625,
+          1.5,
+          1.0
+        ]
+      ],
+      "west,false": [
+        [
+          0.4375,
+          0.0,
+          0.0,
+          0.5625,
+          1.5,
+          1.0
+        ]
+      ]
+    },
+    "default": []
+  }
+}

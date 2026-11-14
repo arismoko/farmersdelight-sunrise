@@ -38,6 +38,7 @@ impl Hooks for FarmersDelight {
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
         effects::register(registrar);
+        blocks::rope::register(registrar);
     }
 
     fn block_entity_container(

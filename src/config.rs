@@ -43,3 +43,8 @@ pub fn vanilla_soup_extra_effects_enabled() -> bool {
 pub fn vanilla_straw_bed_rename_enabled() -> bool {
     true
 }
+
+/// `settings.enableRopeReeling` (Configuration.java:ENABLE_ROPE_REELING), default true.
+pub fn rope_reeling_enabled() -> bool {
+    true
+}
