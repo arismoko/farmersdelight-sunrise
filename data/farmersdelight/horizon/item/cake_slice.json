@@ -1,0 +1,28 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium_high"
+    },
+    "minecraft:food": {
+      "nutrition": 2,
+      "saturation": 0.4
+    },
+    "minecraft:consumable": {
+      "on_consume_effects": [
+        {
+          "type": "minecraft:apply_effects",
+          "effects": [
+            {
+              "id": "minecraft:speed",
+              "duration": 400,
+              "amplifier": 0,
+              "show_particles": false
+            }
+          ],
+          "probability": 1.0
+        }
+      ]
+    }
+  }
+}

@@ -77,7 +77,7 @@ pub fn register(
         .build();
     // FD's three particle types, registered at their first use (M3-09); providers are carried.
     let steam = registrar.particle_key("farmersdelight:steam");
-    let _ = registrar.particle_key("farmersdelight:star");
+    let _ = crate::items::foods::STAR.set(registrar.particle_key("farmersdelight:star"));
     let _ = registrar.particle_key("farmersdelight:sparkle");
     let bubble_pop = registrar.particle_key("minecraft:bubble_pop");
     registrar

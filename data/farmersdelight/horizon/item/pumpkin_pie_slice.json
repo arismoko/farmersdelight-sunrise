@@ -1,0 +1,25 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:food": {
+      "nutrition": 3,
+      "saturation": 1.8
+    },
+    "minecraft:consumable": {
+      "on_consume_effects": [
+        {
+          "type": "minecraft:apply_effects",
+          "effects": [
+            {
+              "id": "minecraft:speed",
+              "duration": 600,
+              "amplifier": 0,
+              "show_particles": false
+            }
+          ],
+          "probability": 1.0
+        }
+      ]
+    }
+  }
+}

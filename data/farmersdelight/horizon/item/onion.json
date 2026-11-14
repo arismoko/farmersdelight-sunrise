@@ -1,0 +1,16 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium"
+    },
+    "minecraft:food": {
+      "nutrition": 2,
+      "saturation": 1.6
+    },
+    "minecraft:consumable": {},
+    "minecraft:villager_food": {
+      "value": 1
+    }
+  }
+}

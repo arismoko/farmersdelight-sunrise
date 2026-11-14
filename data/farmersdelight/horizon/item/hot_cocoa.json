@@ -1,0 +1,22 @@
+{
+  "template": "minecraft:stick",
+  "max_stack_size": 16,
+  "crafting_remainder": "minecraft:glass_bottle",
+  "components": {
+    "minecraft:consumable": {
+      "animation": "drink",
+      "sound": "minecraft:entity.generic.drink",
+      "has_consume_particles": false,
+      "on_consume_effects": [
+        {
+          "type": "farmersdelight:remove_random_effects",
+          "excluded": "farmersdelight:ignored/hot_cocoa",
+          "harmful_only": true
+        }
+      ]
+    },
+    "minecraft:use_remainder": {
+      "id": "minecraft:glass_bottle"
+    }
+  }
+}

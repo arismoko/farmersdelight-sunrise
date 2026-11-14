@@ -54,3 +54,701 @@ max_stack_size = 1
 ]
 "minecraft:tool" = { rules = [], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
 "minecraft:weapon" = { item_damage_per_attack = 1 }
+
+# --- M4-01 foods and drinks (generated once from J/common/registry/ModItems.java + tests/fixtures/foods.json) ---
+
+[cabbage]
+source = "J/common/registry/ModItems.java:CABBAGE; J/common/FoodValues.java:CABBAGE"
+template = "minecraft:stick"
+[cabbage.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+"minecraft:food" = { nutrition = 2, saturation = 1.6 }
+"minecraft:consumable" = {}
+"minecraft:villager_food" = { value = 1 }
+
+[tomato]
+source = "J/common/registry/ModItems.java:TOMATO; J/common/FoodValues.java:TOMATO"
+template = "minecraft:stick"
+[tomato.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+"minecraft:food" = { nutrition = 1, saturation = 0.6 }
+"minecraft:consumable" = {}
+"minecraft:villager_food" = { value = 1 }
+
+[onion]
+source = "J/common/registry/ModItems.java:ONION; J/common/FoodValues.java:ONION"
+template = "minecraft:stick"
+[onion.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+"minecraft:food" = { nutrition = 2, saturation = 1.6 }
+"minecraft:consumable" = {}
+"minecraft:villager_food" = { value = 1 }
+
+[fried_egg]
+source = "J/common/registry/ModItems.java:FRIED_EGG; J/common/FoodValues.java:FRIED_EGG"
+template = "minecraft:stick"
+[fried_egg.components]
+"minecraft:food" = { nutrition = 4, saturation = 3.2 }
+"minecraft:consumable" = {}
+
+[milk_bottle]
+source = "J/common/registry/ModItems.java:MILK_BOTTLE,ConsumableValues.MILK_BOTTLE"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:glass_bottle"
+[milk_bottle.components]
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "farmersdelight:remove_random_effects", excluded = "farmersdelight:ignored/milk_bottle" }] }
+"minecraft:use_remainder" = { id = "minecraft:glass_bottle" }  # ConsumableItem#finishUsingItem returns the container
+
+[hot_cocoa]
+source = "J/common/registry/ModItems.java:HOT_COCOA,ConsumableValues.HOT_COCOA"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:glass_bottle"
+[hot_cocoa.components]
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "farmersdelight:remove_random_effects", excluded = "farmersdelight:ignored/hot_cocoa", harmful_only = true }] }
+"minecraft:use_remainder" = { id = "minecraft:glass_bottle" }  # ConsumableItem#finishUsingItem returns the container
+
+[apple_cider]
+source = "J/common/registry/ModItems.java:APPLE_CIDER; J/common/FoodValues.java:APPLE_CIDER,ConsumableValues.APPLE_CIDER"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:glass_bottle"
+[apple_cider.components]
+"minecraft:food" = { nutrition = 0, saturation = 0.0, can_always_eat = true }
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:absorption", duration = 1200, amplifier = 0 }] }] }
+"minecraft:use_remainder" = { id = "minecraft:glass_bottle" }  # ConsumableItem#finishUsingItem returns the container
+
+[melon_juice]
+source = "J/common/registry/ModItems.java:MELON_JUICE,ConsumableValues.MELON_JUICE"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:glass_bottle"
+[melon_juice.components]
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "farmersdelight:heal", amount = 2.0 }] }
+"minecraft:use_remainder" = { id = "minecraft:glass_bottle" }  # ConsumableItem#finishUsingItem returns the container
+
+[tomato_sauce]
+source = "J/common/registry/ModItems.java:TOMATO_SAUCE; J/common/FoodValues.java:TOMATO_SAUCE"
+template = "minecraft:stick"
+crafting_remainder = "minecraft:bowl"
+[tomato_sauce.components]
+"minecraft:food" = { nutrition = 4, saturation = 3.2 }
+"minecraft:consumable" = {}
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[wheat_dough]
+source = "J/common/registry/ModItems.java:WHEAT_DOUGH; J/common/FoodValues.java:WHEAT_DOUGH,ConsumableValues.HUNGER_INDUCING_FOOD"
+template = "minecraft:stick"
+[wheat_dough.components]
+"minecraft:food" = { nutrition = 2, saturation = 1.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:hunger", duration = 600, amplifier = 0 }], probability = 0.3 }] }
+
+[raw_pasta]
+source = "J/common/registry/ModItems.java:RAW_PASTA; J/common/FoodValues.java:RAW_PASTA,ConsumableValues.HUNGER_INDUCING_FOOD"
+template = "minecraft:stick"
+[raw_pasta.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 2, saturation = 0.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:hunger", duration = 600, amplifier = 0 }], probability = 0.3 }] }
+
+[pumpkin_slice]
+source = "J/common/registry/ModItems.java:PUMPKIN_SLICE; J/common/FoodValues.java:PUMPKIN_SLICE"
+template = "minecraft:stick"
+[pumpkin_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low_medium" }  # CompostableHelper 0.5
+"minecraft:food" = { nutrition = 3, saturation = 1.8 }
+"minecraft:consumable" = {}
+
+[cabbage_leaf]
+source = "J/common/registry/ModItems.java:CABBAGE_LEAF; J/common/FoodValues.java:CABBAGE_LEAF,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cabbage_leaf.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low_medium" }  # CompostableHelper 0.5
+"minecraft:food" = { nutrition = 1, saturation = 0.8 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[chicken_cuts]
+source = "J/common/registry/ModItems.java:CHICKEN_CUTS; J/common/FoodValues.java:CHICKEN_CUTS,ConsumableValues.CHICKEN_CUTS"
+template = "minecraft:stick"
+[chicken_cuts.components]
+"minecraft:food" = { nutrition = 1, saturation = 0.6 }
+"minecraft:consumable" = { consume_seconds = 0.8, on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:hunger", duration = 600, amplifier = 0 }], probability = 0.3 }] }
+
+[cooked_chicken_cuts]
+source = "J/common/registry/ModItems.java:COOKED_CHICKEN_CUTS; J/common/FoodValues.java:COOKED_CHICKEN_CUTS,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cooked_chicken_cuts.components]
+"minecraft:food" = { nutrition = 3, saturation = 3.6 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[bacon]
+source = "J/common/registry/ModItems.java:BACON; J/common/FoodValues.java:BACON,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[bacon.components]
+"minecraft:food" = { nutrition = 2, saturation = 1.2 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cooked_bacon]
+source = "J/common/registry/ModItems.java:COOKED_BACON; J/common/FoodValues.java:COOKED_BACON,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cooked_bacon.components]
+"minecraft:food" = { nutrition = 4, saturation = 6.4 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cod_slice]
+source = "J/common/registry/ModItems.java:COD_SLICE; J/common/FoodValues.java:COD_SLICE,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cod_slice.components]
+"minecraft:food" = { nutrition = 1, saturation = 0.2 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cooked_cod_slice]
+source = "J/common/registry/ModItems.java:COOKED_COD_SLICE; J/common/FoodValues.java:COOKED_COD_SLICE,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cooked_cod_slice.components]
+"minecraft:food" = { nutrition = 3, saturation = 3.0 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[salmon_slice]
+source = "J/common/registry/ModItems.java:SALMON_SLICE; J/common/FoodValues.java:SALMON_SLICE,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[salmon_slice.components]
+"minecraft:food" = { nutrition = 1, saturation = 0.2 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cooked_salmon_slice]
+source = "J/common/registry/ModItems.java:COOKED_SALMON_SLICE; J/common/FoodValues.java:COOKED_SALMON_SLICE,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cooked_salmon_slice.components]
+"minecraft:food" = { nutrition = 3, saturation = 4.8 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[mutton_chops]
+source = "J/common/registry/ModItems.java:MUTTON_CHOPS; J/common/FoodValues.java:MUTTON_CHOPS,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[mutton_chops.components]
+"minecraft:food" = { nutrition = 1, saturation = 0.6 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cooked_mutton_chops]
+source = "J/common/registry/ModItems.java:COOKED_MUTTON_CHOPS; J/common/FoodValues.java:COOKED_MUTTON_CHOPS,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[cooked_mutton_chops.components]
+"minecraft:food" = { nutrition = 3, saturation = 4.8 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[ham]
+source = "J/common/registry/ModItems.java:HAM; J/common/FoodValues.java:HAM"
+template = "minecraft:stick"
+[ham.components]
+"minecraft:food" = { nutrition = 5, saturation = 3.0 }
+"minecraft:consumable" = {}
+
+[smoked_ham]
+source = "J/common/registry/ModItems.java:SMOKED_HAM; J/common/FoodValues.java:SMOKED_HAM"
+template = "minecraft:stick"
+[smoked_ham.components]
+"minecraft:food" = { nutrition = 10, saturation = 16.0 }
+"minecraft:consumable" = {}
+
+[pie_crust]
+source = "J/common/registry/ModItems.java:PIE_CRUST; J/common/FoodValues.java:PIE_CRUST"
+template = "minecraft:stick"
+[pie_crust.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+"minecraft:food" = { nutrition = 2, saturation = 0.8 }
+"minecraft:consumable" = {}
+
+[cake_slice]
+source = "J/common/registry/ModItems.java:CAKE_SLICE; J/common/FoodValues.java:CAKE_SLICE,ConsumableValues.CAKE_SLICE"
+template = "minecraft:stick"
+[cake_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 2, saturation = 0.4 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:speed", duration = 400, amplifier = 0, show_particles = false }], probability = 1.0 }] }
+
+[apple_pie_slice]
+source = "J/common/registry/ModItems.java:APPLE_PIE_SLICE; J/common/FoodValues.java:PIE_SLICE,ConsumableValues.PIE_SLICE"
+template = "minecraft:stick"
+[apple_pie_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 3, saturation = 1.8 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:speed", duration = 600, amplifier = 0, show_particles = false }], probability = 1.0 }] }
+
+[sweet_berry_cheesecake_slice]
+source = "J/common/registry/ModItems.java:SWEET_BERRY_CHEESECAKE_SLICE; J/common/FoodValues.java:PIE_SLICE,ConsumableValues.PIE_SLICE"
+template = "minecraft:stick"
+[sweet_berry_cheesecake_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 3, saturation = 1.8 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:speed", duration = 600, amplifier = 0, show_particles = false }], probability = 1.0 }] }
+
+[chocolate_pie_slice]
+source = "J/common/registry/ModItems.java:CHOCOLATE_PIE_SLICE; J/common/FoodValues.java:PIE_SLICE,ConsumableValues.PIE_SLICE"
+template = "minecraft:stick"
+[chocolate_pie_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 3, saturation = 1.8 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:speed", duration = 600, amplifier = 0, show_particles = false }], probability = 1.0 }] }
+
+[pumpkin_pie_slice]
+source = "J/common/registry/ModItems.java:PUMPKIN_PIE_SLICE; J/common/FoodValues.java:PIE_SLICE,ConsumableValues.PIE_SLICE"
+template = "minecraft:stick"
+[pumpkin_pie_slice.components]
+"minecraft:food" = { nutrition = 3, saturation = 1.8 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:speed", duration = 600, amplifier = 0, show_particles = false }], probability = 1.0 }] }
+
+[sweet_berry_cookie]
+source = "J/common/registry/ModItems.java:SWEET_BERRY_COOKIE; J/common/FoodValues.java:COOKIES,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[sweet_berry_cookie.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 2, saturation = 0.4 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[honey_cookie]
+source = "J/common/registry/ModItems.java:HONEY_COOKIE; J/common/FoodValues.java:COOKIES,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[honey_cookie.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 2, saturation = 0.4 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[melon_popsicle]
+source = "J/common/registry/ModItems.java:MELON_POPSICLE; J/common/FoodValues.java:POPSICLE,ConsumableValues.MELON_POPSICLE"
+template = "minecraft:stick"
+[melon_popsicle.components]
+"minecraft:food" = { nutrition = 3, saturation = 1.2, can_always_eat = true }
+"minecraft:consumable" = { consume_seconds = 0.8, on_consume_effects = [{ type = "farmersdelight:extinguish" }] }
+
+[glow_berry_custard]
+source = "J/common/registry/ModItems.java:GLOW_BERRY_CUSTARD; J/common/FoodValues.java:GLOW_BERRY_CUSTARD,ConsumableValues.GLOW_BERRY_CUSTARD"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:glass_bottle"
+[glow_berry_custard.components]
+"minecraft:food" = { nutrition = 7, saturation = 8.4, can_always_eat = true }
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:glowing", duration = 100, amplifier = 0 }] }] }
+"minecraft:use_remainder" = { id = "minecraft:glass_bottle" }  # ConsumableItem#finishUsingItem returns the container
+
+[fruit_salad]
+source = "J/common/registry/ModItems.java:FRUIT_SALAD; J/common/FoodValues.java:FRUIT_SALAD,ConsumableValues.FRUIT_SALAD"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[fruit_salad.components]
+"minecraft:food" = { nutrition = 6, saturation = 7.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:regeneration", duration = 100, amplifier = 0 }], probability = 1.0 }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[mixed_salad]
+source = "J/common/registry/ModItems.java:MIXED_SALAD; J/common/FoodValues.java:MIXED_SALAD,ConsumableValues.MIXED_SALAD"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[mixed_salad.components]
+"minecraft:food" = { nutrition = 6, saturation = 7.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:regeneration", duration = 100, amplifier = 0 }], probability = 1.0 }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[nether_salad]
+source = "J/common/registry/ModItems.java:NETHER_SALAD; J/common/FoodValues.java:NETHER_SALAD,ConsumableValues.NETHER_SALAD"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[nether_salad.components]
+"minecraft:food" = { nutrition = 5, saturation = 4.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "minecraft:nausea", duration = 240, amplifier = 0 }], probability = 0.3 }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[barbecue_stick]
+source = "J/common/registry/ModItems.java:BARBECUE_STICK; J/common/FoodValues.java:BARBECUE_STICK"
+template = "minecraft:stick"
+[barbecue_stick.components]
+"minecraft:food" = { nutrition = 8, saturation = 14.4 }
+"minecraft:consumable" = {}
+
+[egg_sandwich]
+source = "J/common/registry/ModItems.java:EGG_SANDWICH; J/common/FoodValues.java:EGG_SANDWICH"
+template = "minecraft:stick"
+[egg_sandwich.components]
+"minecraft:food" = { nutrition = 8, saturation = 12.8 }
+"minecraft:consumable" = {}
+
+[chicken_sandwich]
+source = "J/common/registry/ModItems.java:CHICKEN_SANDWICH; J/common/FoodValues.java:CHICKEN_SANDWICH"
+template = "minecraft:stick"
+[chicken_sandwich.components]
+"minecraft:food" = { nutrition = 10, saturation = 16.0 }
+"minecraft:consumable" = {}
+
+[hamburger]
+source = "J/common/registry/ModItems.java:HAMBURGER; J/common/FoodValues.java:HAMBURGER"
+template = "minecraft:stick"
+[hamburger.components]
+"minecraft:food" = { nutrition = 11, saturation = 17.6 }
+"minecraft:consumable" = {}
+
+[bacon_sandwich]
+source = "J/common/registry/ModItems.java:BACON_SANDWICH; J/common/FoodValues.java:BACON_SANDWICH"
+template = "minecraft:stick"
+[bacon_sandwich.components]
+"minecraft:food" = { nutrition = 10, saturation = 16.0 }
+"minecraft:consumable" = {}
+
+[mutton_wrap]
+source = "J/common/registry/ModItems.java:MUTTON_WRAP; J/common/FoodValues.java:MUTTON_WRAP"
+template = "minecraft:stick"
+[mutton_wrap.components]
+"minecraft:food" = { nutrition = 10, saturation = 16.0 }
+"minecraft:consumable" = {}
+
+[dumplings]
+source = "J/common/registry/ModItems.java:DUMPLINGS; J/common/FoodValues.java:DUMPLINGS"
+template = "minecraft:stick"
+[dumplings.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+"minecraft:food" = { nutrition = 8, saturation = 12.8 }
+"minecraft:consumable" = {}
+
+[stuffed_potato]
+source = "J/common/registry/ModItems.java:STUFFED_POTATO; J/common/FoodValues.java:STUFFED_POTATO"
+template = "minecraft:stick"
+[stuffed_potato.components]
+"minecraft:food" = { nutrition = 10, saturation = 14.0 }
+"minecraft:consumable" = {}
+
+[cabbage_rolls]
+source = "J/common/registry/ModItems.java:CABBAGE_ROLLS; J/common/FoodValues.java:CABBAGE_ROLLS"
+template = "minecraft:stick"
+[cabbage_rolls.components]
+"minecraft:food" = { nutrition = 5, saturation = 5.0 }
+"minecraft:consumable" = {}
+
+[salmon_roll]
+source = "J/common/registry/ModItems.java:SALMON_ROLL; J/common/FoodValues.java:SALMON_ROLL"
+template = "minecraft:stick"
+[salmon_roll.components]
+"minecraft:food" = { nutrition = 7, saturation = 8.4 }
+"minecraft:consumable" = {}
+
+[cod_roll]
+source = "J/common/registry/ModItems.java:COD_ROLL; J/common/FoodValues.java:COD_ROLL"
+template = "minecraft:stick"
+[cod_roll.components]
+"minecraft:food" = { nutrition = 7, saturation = 8.4 }
+"minecraft:consumable" = {}
+
+[kelp_roll]
+source = "J/common/registry/ModItems.java:KELP_ROLL; J/common/FoodValues.java:KELP_ROLL,ConsumableValues.KELP_ROLL"
+template = "minecraft:stick"
+[kelp_roll.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+"minecraft:food" = { nutrition = 12, saturation = 12.0 }
+"minecraft:consumable" = { consume_seconds = 2.4 }
+
+[kelp_roll_slice]
+source = "J/common/registry/ModItems.java:KELP_ROLL_SLICE; J/common/FoodValues.java:KELP_ROLL_SLICE,ConsumableValues.FAST_FOOD"
+template = "minecraft:stick"
+[kelp_roll_slice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low_medium" }  # CompostableHelper 0.5
+"minecraft:food" = { nutrition = 6, saturation = 6.0 }
+"minecraft:consumable" = { consume_seconds = 0.8 }
+
+[cooked_rice]
+source = "J/common/registry/ModItems.java:COOKED_RICE; J/common/FoodValues.java:COOKED_RICE,ConsumableValues.NOURISHMENT_BRIEF_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[cooked_rice.components]
+"minecraft:food" = { nutrition = 6, saturation = 4.8 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[bone_broth]
+source = "J/common/registry/ModItems.java:BONE_BROTH; J/common/FoodValues.java:BONE_BROTH,ConsumableValues.BONE_BROTH"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[bone_broth.components]
+"minecraft:food" = { nutrition = 8, saturation = 11.2 }
+"minecraft:consumable" = { animation = "drink", sound = "minecraft:entity.generic.drink", has_consume_particles = false, on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 1200, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[beef_stew]
+source = "J/common/registry/ModItems.java:BEEF_STEW; J/common/FoodValues.java:BEEF_STEW,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[beef_stew.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[chicken_soup]
+source = "J/common/registry/ModItems.java:CHICKEN_SOUP; J/common/FoodValues.java:CHICKEN_SOUP,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[chicken_soup.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[vegetable_soup]
+source = "J/common/registry/ModItems.java:VEGETABLE_SOUP; J/common/FoodValues.java:VEGETABLE_SOUP,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[vegetable_soup.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[fish_stew]
+source = "J/common/registry/ModItems.java:FISH_STEW; J/common/FoodValues.java:FISH_STEW,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[fish_stew.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[fried_rice]
+source = "J/common/registry/ModItems.java:FRIED_RICE; J/common/FoodValues.java:FRIED_RICE,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[fried_rice.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[pumpkin_soup]
+source = "J/common/registry/ModItems.java:PUMPKIN_SOUP; J/common/FoodValues.java:PUMPKIN_SOUP,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[pumpkin_soup.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[baked_cod_stew]
+source = "J/common/registry/ModItems.java:BAKED_COD_STEW; J/common/FoodValues.java:BAKED_COD_STEW,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[baked_cod_stew.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[noodle_soup]
+source = "J/common/registry/ModItems.java:NOODLE_SOUP; J/common/FoodValues.java:NOODLE_SOUP,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[noodle_soup.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[onion_soup]
+source = "J/common/registry/ModItems.java:ONION_SOUP; J/common/FoodValues.java:SHEPHERDS_PIE,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[onion_soup.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[bacon_and_eggs]
+source = "J/common/registry/ModItems.java:BACON_AND_EGGS; J/common/FoodValues.java:BACON_AND_EGGS,ConsumableValues.NOURISHMENT_SHORT_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[bacon_and_eggs.components]
+"minecraft:food" = { nutrition = 10, saturation = 12.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 1200, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[pasta_with_meatballs]
+source = "J/common/registry/ModItems.java:PASTA_WITH_MEATBALLS; J/common/FoodValues.java:PASTA_WITH_MEATBALLS,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[pasta_with_meatballs.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[pasta_with_mutton_chop]
+source = "J/common/registry/ModItems.java:PASTA_WITH_MUTTON_CHOP; J/common/FoodValues.java:PASTA_WITH_MUTTON_CHOP,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[pasta_with_mutton_chop.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[mushroom_rice]
+source = "J/common/registry/ModItems.java:MUSHROOM_RICE; J/common/FoodValues.java:MUSHROOM_RICE,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[mushroom_rice.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[roasted_mutton_chops]
+source = "J/common/registry/ModItems.java:ROASTED_MUTTON_CHOPS; J/common/FoodValues.java:ROASTED_MUTTON_CHOPS,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[roasted_mutton_chops.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[vegetable_noodles]
+source = "J/common/registry/ModItems.java:VEGETABLE_NOODLES; J/common/FoodValues.java:VEGETABLE_NOODLES,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[vegetable_noodles.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[steak_and_potatoes]
+source = "J/common/registry/ModItems.java:STEAK_AND_POTATOES; J/common/FoodValues.java:STEAK_AND_POTATOES,ConsumableValues.NOURISHMENT_MEDIUM_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[steak_and_potatoes.components]
+"minecraft:food" = { nutrition = 12, saturation = 19.2 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 3600, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[ratatouille]
+source = "J/common/registry/ModItems.java:RATATOUILLE; J/common/FoodValues.java:RATATOUILLE,ConsumableValues.NOURISHMENT_SHORT_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[ratatouille.components]
+"minecraft:food" = { nutrition = 10, saturation = 12.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 1200, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[squid_ink_pasta]
+source = "J/common/registry/ModItems.java:SQUID_INK_PASTA; J/common/FoodValues.java:SQUID_INK_PASTA,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[squid_ink_pasta.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[grilled_salmon]
+source = "J/common/registry/ModItems.java:GRILLED_SALMON; J/common/FoodValues.java:GRILLED_SALMON,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[grilled_salmon.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[roast_chicken]
+source = "J/common/registry/ModItems.java:ROAST_CHICKEN; J/common/FoodValues.java:ROAST_CHICKEN,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[roast_chicken.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[stuffed_pumpkin]
+source = "J/common/registry/ModItems.java:STUFFED_PUMPKIN; J/common/FoodValues.java:STUFFED_PUMPKIN,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[stuffed_pumpkin.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[honey_glazed_ham]
+source = "J/common/registry/ModItems.java:HONEY_GLAZED_HAM; J/common/FoodValues.java:HONEY_GLAZED_HAM,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[honey_glazed_ham.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[shepherds_pie]
+source = "J/common/registry/ModItems.java:SHEPHERDS_PIE; J/common/FoodValues.java:SHEPHERDS_PIE,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[shepherds_pie.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[gleaming_salad]
+source = "J/common/registry/ModItems.java:GLEAMING_SALAD; J/common/FoodValues.java:GLEAMING_SALAD,ConsumableValues.NOURISHMENT_LONG_DURATION"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[gleaming_salad.components]
+"minecraft:food" = { nutrition = 14, saturation = 21.0 }
+"minecraft:consumable" = { on_consume_effects = [{ type = "minecraft:apply_effects", effects = [{ id = "farmersdelight:nourishment", duration = 6000, amplifier = 0, show_particles = false }] }] }
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[dog_food]
+source = "J/common/registry/ModItems.java:DOG_FOOD; J/common/FoodValues.java:DOG_FOOD"
+template = "minecraft:stick"
+max_stack_size = 16
+crafting_remainder = "minecraft:bowl"
+[dog_food.components]
+"minecraft:food" = { nutrition = 4, saturation = 1.6 }
+"minecraft:consumable" = {}
+"minecraft:use_remainder" = { id = "minecraft:bowl" }  # ConsumableItem#finishUsingItem returns the container
+
+[horse_feed]
+source = "J/common/registry/ModItems.java:HORSE_FEED (HorseFeedItem, stacksTo 16)"
+template = "minecraft:stick"
+max_stack_size = 16
+
+# --- M4-07 materials (J/common/registry/ModItems.java:STRAW,CANVAS,TREE_BARK = registerFuelWithTab) ---
+
+[straw]
+source = "J/common/registry/ModItems.java:STRAW (fuel 100); CompostableHelper:straw 0.3"
+template = "minecraft:stick"
+[straw.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+"minecraft:cooking_fuel" = { burn_time = 100, speed_multiplier = 1.0 }
+
+[canvas]
+source = "J/common/registry/ModItems.java:CANVAS (fuel 400)"
+template = "minecraft:stick"
+[canvas.components]
+"minecraft:cooking_fuel" = { burn_time = 400, speed_multiplier = 1.0 }
+
+[tree_bark]
+source = "J/common/registry/ModItems.java:TREE_BARK (fuel 200); CompostableHelper:tree_bark 0.3"
+template = "minecraft:stick"
+[tree_bark.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+"minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }

@@ -1,0 +1,13 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/always_add_one"
+    },
+    "minecraft:food": {
+      "nutrition": 8,
+      "saturation": 12.8
+    },
+    "minecraft:consumable": {}
+  }
+}

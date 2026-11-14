@@ -37,6 +37,7 @@ impl Hooks for FarmersDelight {
 
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
+        effects::register(registrar);
     }
 
     fn block_entity_container(
@@ -57,6 +58,38 @@ impl Hooks for FarmersDelight {
             SERVING_SET,
             SERVING_ITEMS.iter().map(|s| s.to_string()).collect(),
         ));
+    }
+
+    fn modify_default_components(
+        &self,
+        _: &dyn DataLoadContext,
+        event: &mut ModifyDefaultComponentsEvent<'_>,
+    ) {
+        items::foods::modify_default_components(event.item, event.components);
+    }
+
+    fn consume_effect(&self, host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<'_>) {
+        effects::consume_effect(host, event);
+    }
+
+    fn should_apply_effect_tick_this_tick(
+        &self,
+        host: &dyn Host,
+        event: &mut ShouldApplyEffectTickThisTickEvent,
+    ) {
+        effects::should_apply(host, event);
+    }
+
+    fn apply_effect_tick(&self, host: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
+        effects::apply_tick(host, event);
+    }
+
+    fn entity_interact(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut EntityInteractEvent<'_>,
+    ) -> Flow {
+        items::foods::entity_interact(host, event)
     }
 
     fn tags_updated(&self, host: HostSide<'_>, event: &mut TagsUpdatedEvent) {

@@ -1,0 +1,15 @@
+{
+  "template": "minecraft:stick",
+  "max_stack_size": 16,
+  "crafting_remainder": "minecraft:bowl",
+  "components": {
+    "minecraft:food": {
+      "nutrition": 4,
+      "saturation": 1.6
+    },
+    "minecraft:consumable": {},
+    "minecraft:use_remainder": {
+      "id": "minecraft:bowl"
+    }
+  }
+}
