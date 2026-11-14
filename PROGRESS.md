@@ -368,3 +368,52 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   toggle (sneak + empty hand), hanging pot under a ceiling, hopper faces (top → inputs, side → container, bottom ←
   output), break with meal → item keeps meal → re-place restores it, save/restart mid-cook, then M3-10 demo
   (vegetable soup needs M5 items → demo with mushroom/beetroot/rabbit stew instead, note the deviation) + LAN guest.
+
+## M3 cooking pot — in-game results — PASS (with deltas) — 2026-11-14 — **M3 closed**
+- mod commit: 77462a4 | build native-afe471c-a6ba635b96c7 | world M2Demo (survival) + dedicated server (Alice/Bob);
+  recordings `../run/horizon-home/instances/fd-port/recordings/*m3-10-demo*`; shots `../run/shots/m3-*.png`,
+  `../run/shots/m3-10/` (+ session logs).
+- fixes made during testing (commit before 77462a4): (1) **meal kept in the saved data** (`Meal`), not container slot 6:
+  the engine drops a mod container's slots after `pre_remove_side_effects`, so the meal also fell out loose
+  beside the pot item that carries it (duplication); slot 6 stays empty/hidden. (2) take-XP diff compares the output
+  at the **start** of the tick (the same tick's serving refilled it and hid the take). (3) `open_menu` returns
+  false although the menu opens → the opener is recorded regardless. (4) serving containers refused in ingredient
+  slots (`menu_slot_rules` via a mod recipe property set `farmersdelight:serving_containers`, items = the carried tag's
+  three, since the loop/data-load contexts have no item tags) → a whole shift-clicked bowl stack now reaches the
+  container slot through the game's routing (E-17 workaround). Accepted delta **A13**: an empty bowl/bottle/bucket
+  cannot be put into an ingredient slot by hand (no recipe uses one).
+- M3-01/02: pot on a campfire → `support=tray`, facing opposite the placer; placed against a ceiling → `handle`;
+  sneak + empty hand toggles handle ↔ tray (lantern sound); "Dinner's Served!" advancement.
+- M3-03: mushroom stew (2 slots) cooks in 200 ticks; meal in the display, `Container` = bowl, `RecipesUsed` counted;
+  inputs shrink one each; with bowls in slot 7 meals fill the output (one bowl each; stew stacks to 1 at this point,
+  FD's stackable-soups config is M4); unheated/no-recipe decay per the reference (unit).
+- M3-04: menu 9+36 slots, shift-click output → inventory, inventory → inputs / bowls → container slot; meal slot
+  hidden (neither placeable nor takeable).
+- M3-05: **full GUI texture works** (`farmersdelight:gui/cooking_pot`; U-10 resolved, no sprite fallback); heat icon
+  when heated; arrow width = cookTime·24/total (+1) measured 3 px at 21/200, 18 px at 144/200; meal drawn with count.
+  Tooltips (heated / meal + "Served on") implemented, **not hover-tested** (ctl cannot hover).
+- M3-06: XP + recipe award on shift-click take (2 xp for 2 stews) and on plain-click take (+1, tracker cleared);
+  breaking the pot pops the pending XP at the block (+1). Delta **A14**: a hopper pulling the output while a player
+  has the menu open also counts as that player's take (no take hook, U-11).
+- M3-07: the dropped pot carries `farmersdelight:meal` + `farmersdelight:container` + `minecraft:block_entity_data`
+  {Meal, Container}; re-placing restores the meal (served from it with a held bowl afterwards). The other slots drop
+  once (5 carrots), the meal never drops loose. **Not done** (carried forward): tooltip image (CookingPotTooltip),
+  `food_serving` crafting (E-12 fallback: serving by right-click/menu works), `dough` (wheat_dough not declared yet),
+  custom name.
+- M3-08: hopper above → ingredient slots; side hopper → container slot; hopper below an unheated pot pulls only the
+  output (carrots stay). Comparator: FD formula (unit) and in game 1 for 12 cooked beef + 1 bowl; the signal is cached
+  by the tick and pushed with `update_neighbors(OutputSignal)` (a comparator placed by /setblock reads 0 until the
+  next content change).
+- M3-09: `farmersdelight:steam`, `star`, `sparkle` particle types registered; boil sound ("Cooking Pot boils"
+  subtitle) while heated; bubble/steam particles coded (not separately screenshotted).
+- M3-10 demo: pot **crafted** from the carried recipe (bucket left in the grid); beetroot soup cooked and served into
+  bowls; mushroom stew **fully automated** (top hopper, bowls in slot 7): 3 cooked; save & quit + reopen mid-cook
+  138 → 153 and full restart 153 → 168 (+15 = load-to-freeze gap), all slots identical. **Deviation:** vegetable
+  soup needs M5 crops, so the demo uses beetroot soup / mushroom stew. Hopper insertion puts all of one item into the
+  first slot (FD's Transfer insert does the same), so 3×beetroot cannot be automated in FD either.
+- LAN (dedicated server, server engine re-exported): Alice and Bob open the same pot; both arrows 17 px at 148–150/200;
+  5 rounds of simultaneous shift-clicks on the output: 3 stews cooked = 3 received (Alice 3, Bob 0), 3 bowls used —
+  nothing duplicated or lost.
+- engine gaps recorded: **E-17** quick move cannot empty an inventory slot (workaround above); U-11 confirmed (no
+  menu take hook); `analog_output`'s level host has no block-entity read (cache workaround).
+- next: M4-01
