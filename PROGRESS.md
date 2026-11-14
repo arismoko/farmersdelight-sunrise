@@ -539,3 +539,25 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   tomatoes (the shape update cannot destroy with drops; FD ticks and `destroyBlock`s it). Breaking it drops normally.
   Ravager trampling comes from the crop templates' own entityInside.
 - next: M5-04
+
+## M5-04 Rice — PASS — 2026-11-14
+- build pin: afe471cf | mod commit: cc7f18d
+- did: `rice` on template `minecraft:kelp` (a plant that always holds a water source = RiceBlock#getFluidState,
+  takes no other liquid, not replaceable; its age 0-25 carries FD's 0-3) + `supporting`; `rice_panicles` on
+  beetroots (CropBlock age 0-3). Items `rice` (places rice, villager food 2, compost 0.3) and `rice_panicle`
+  (compost 0.3). `src/blocks/rice.rs`: placement only into a full water source at age 0; growth (light ≥ 6 above,
+  1 in 3; panicles appear above at max age), survival on `#minecraft:supports_vegetation` (VegetationBlock in 26.3)
+  or `#minecraft:supports_crops`, shape update (air when unsupported, water tick, `supporting` from above), bonemeal
+  (+1..4, carry into new panicles or the panicles' own meal); panicles grow as a plain CropBlock (vanilla speed, not
+  beetroots' 1-in-3), only on rice, CropBlock bone meal /3; RiceItem's "must be planted in shallow water" message.
+  Compost test now skips block rows with `item = false` (their item is its own items row).
+- evidence (FDTest paddy: dirt under a 3×3 water pool):
+  - rice ×3 placed from above into the water → `rice[age=0,supporting=false]`; on dry dirt: nothing placed, action
+    bar "This seed must be planted in shallow water."
+  - bone meal: age 1 → 2 → 3 + `rice_panicles[age=0]` above (`supporting=true`) → panicles 1 → 2 → 3.
+  - random_tick_speed 100, 25 s: the other two rice plants reached age 3 and grew panicles (`run/shots/m5-04/paddy.png`:
+    FD models in water).
+  - survival: ripe panicles → 1 rice panicle (base `supporting=false`); base → 1 rice, cell back to a water source.
+  - knife harvest of panicles (→ rice) is in the carried loot table (match_tool `#farmersdelight:tools/knives`); checked
+    with the knives in M8.
+- next: M5-05
