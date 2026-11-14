@@ -561,3 +561,25 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   - knife harvest of panicles (→ rice) is in the carried loot table (match_tool `#farmersdelight:tools/knives`); checked
     with the knives in M8.
 - next: M5-05
+
+## M5-05 Rich soil & farmland — IN PROGRESS (declarations only) — 2026-11-14
+- build pin: afe471cf | mod commit: 2965322
+- done: `rich_soil` (template dirt, random_ticks) and `rich_soil_farmland` (template farmland, base_block rich_soil)
+  declared; not built or run yet.
+- design decided (to implement in `src/blocks/rich_soil.rs`):
+  - rich soil `random_tick` (Cancel): brown/red mushroom above → `*_mushroom_colony` (needs M5-07 blocks); else
+    level random nextFloat ≤ 0.2 → queue a boost. Random ticks only get a LevelWriteHost, so boosts go to a shared
+    queue drained in `Hooks::server_tick`: `level.bone_meal(host, pos)` on the plant above (skip
+    `#farmersdelight:planted_from_below` / `#farmersdelight:unaffected_by_rich_soil`), else below if planted_from_below.
+  - `level_bone_meal` = dispenser path: emits level event 1505 (15 particles), which is exactly FD's
+    RichSoilBoostParticlesPayload handler (BoneMealItem.addGrowthParticles(pos, 15)) → **no custom payload** needed,
+    others see it. Delta **A21** (to record): the success roll applies (FD calls performBonemeal directly), boost lands
+    one tick later, growWaterPlant fallback in water.
+  - farmland `random_tick` (Cancel): water in box ±4, y 0..1 or rain above → moisture 7 (flag 2); else −1 if > 0, never
+    reverts to soil; at 7: skip unaffected tag / tall flowers (sunflower, lilac, rose_bush, peony), separate RNG ≤ 0.2 → queue.
+  - farmland `can_survive`: melon/pumpkin above → Some(true), else None. `fall_on` part no-op (FD fallOn = damage only;
+    verify in game that this suppresses trampling vs vanilla farmland; `farmland_trample` gets only a raw u32 state id).
+  - rich soil `tool_modified_state`: HoeTill with Some(final) → rich_soil_farmland; ShovelFlatten → Cancel (no path).
+  - growth-speed probe: Horizon's CropBlock.getGrowthSpeed uses `#minecraft:grows_crops` (horizon-world
+    level/tick.rs crop_growth_speed), which the carried tag extends with rich_soil_farmland → expected PASS; confirm in game.
+- next: write rich_soil.rs, wire register + server_tick drain, build, test (tilling, moisture, boost, trample, probe).
