@@ -583,3 +583,37 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   - growth-speed probe: Horizon's CropBlock.getGrowthSpeed uses `#minecraft:grows_crops` (horizon-world
     level/tick.rs crop_growth_speed), which the carried tag extends with rich_soil_farmland → expected PASS; confirm in game.
 - next: write rich_soil.rs, wire register + server_tick drain, build, test (tilling, moisture, boost, trample, probe).
+
+## M5-05 Rich soil & farmland — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: 791a7da
+- did: `src/blocks/rich_soil.rs`. Rich soil: random tick (mushroom above → colony once M5-07 declares it, until then
+  the mushroom is left alone; else 0.2 → boost the plant above, or the `#planted_from_below` one below, skipping
+  `#unaffected_by_rich_soil`); hoe → `rich_soil_farmland` (the dirt template gives no answer for a mod block, so the
+  part applies HoeItem.onlyIfAirAbove itself); shovel makes no path. Farmland: FD's random tick (water within 4 at y
+  0..1 or rain → 7, else −1, never back to soil; at 7 a 0.2 boost with FD's own random, tall flowers skipped),
+  canSurvive under melon/pumpkin, no trampling (Q11). Boosts are queued in the random tick and applied at the end of
+  the same server tick with `LevelRef::bone_meal` (level event 1505 = the payload's 15 particles); the
+  `rich_soil_boost_particles` payload is not registered. Config value `richSoilBoostChance` 0.2 (constant until M9-01).
+- evidence (FDTest rig at 18..34, 160, 18..26; `run/shots/m5-05/`):
+  - shovel on rich soil: unchanged; hoe with stone above: unchanged; hoe with air above → `rich_soil_farmland[moisture=0]`.
+  - farmland row x=20..24 with water at x=25, random_tick_speed 300 for 12 s: x=21..24 → moisture 7, x=20 (5 away) stays
+    0; wheat on the moist ones age 0 → 6-7; a moisture-7 farmland with no water dried to 0 and stayed farmland.
+  - boosts: oak sapling on rich soil → tree; cave vines under rich soil → `berries=true`; short grass (unaffected tag)
+    unchanged; brown mushroom unchanged (colony block comes in M5-07).
+  - trampling: before the cancel, a 6-block survival fall turned the farmland to rich soil and popped the wheat
+    (vanilla farmland → dirt the same way); with it, three falls leave `rich_soil_farmland[moisture=7]` and
+    `wheat[age=3]`, the first landing after a restart included; fall damage applies (20 → 15, stone the same).
+- growth-speed probe (U-13): PASS at source level + in game — Horizon's crop growth speed counts
+  `#minecraft:grows_crops` blocks and their `moisture` (horizon-world level/tick.rs), the carried tag adds
+  rich_soil_farmland, wheat grew on it. Speed alone was not measured apart from the boost. E-04 not needed.
+- deltas/probes: **A21** boost goes through the dispenser's bone meal path: the block's success roll applies (FD calls
+  performBonemeal directly), it lands at the end of the tick, and a plant in water can take growWaterPlant. Particles
+  seen by a second client: M5-08. Engine gap **E-22**: `farmland_trample` is told only the game's numeric state and has
+  no host, and a farmland-template block cannot opt out of trampling; the mod computes the block's state numbers at
+  server start (sum of earlier blocks' state counts — correct at this pin) and re-learns them from the `fall_on` that
+  follows if they differ (one trample would slip through then).
+- also fixed (user report, M5-04): planted rice showed no water. The client takes a block's water from vanilla's name
+  list (kelp, seagrass, …) or its `waterlogged` property, so a kelp-template mod block holds water on the server but
+  draws none (engine gap **E-21**). Rice now declares `waterlogged` (always true); existing rice loads with it. Delta
+  **A22**: rice has a `waterlogged` state property FD's does not. Confirmed by the user in game.
+- next: M5-06
