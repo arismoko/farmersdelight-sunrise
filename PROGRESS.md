@@ -617,3 +617,32 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   draws none (engine gap **E-21**). Rice now declares `waterlogged` (always true); existing rice loads with it. Delta
   **A22**: rice has a `waterlogged` state property FD's does not. Confirmed by the user in game.
 - next: M5-06
+
+## M5-06 Organic compost — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: 9f4b88c
+- did: `organic_compost` on the dirt template (hardness 1.2, crop sounds, random ticks; `composting` 0-7 declared as an
+  enum of the digits — declared properties are boolean or enum). `src/blocks/compost.rs`: FD's random tick (0.02 per
+  `#compost_activators` in the 3×3×3, +0.1/0.05 by sky light above the neighbours, +0.1 with water; at 7 → rich soil,
+  flag 3) and comparator signal 8 − stage. Unit test of the chance terms.
+- evidence (FDTest):
+  - statistical: a 16×16 layer under open sky, random_tick_speed 100 for 303 game ticks (`time query gametime`
+    82477 → 82780, ~298 ticking): stages 0..7 = 31/79/58/58/17/11/1/1 → 505 advances; expected
+    (196×0.28 + 56×0.22 + 4×0.18) × 298×100/4096 = 494 (+2.2%, within ±10%).
+  - comparator → redstone wire: stage 0/1/3/6/7 → power 8/7/5/2/1; stage 7 then turned into `rich_soil` (power 0).
+- deltas: **A5** mycelium motes not drawn (E-06), as planned.
+- next: M5-07
+
+## M5-07 Mushroom colonies — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: 9f4b88c
+- did: `brown_mushroom_colony`/`red_mushroom_colony` on the mushroom templates (`age` 0-3 enum, FD shapes, pick =
+  the mushroom, compostable 1.0). `src/blocks/colony.rs`: growth one in 4 on `#grows_mushroom_colonies` with no light
+  check (Q9) and no template spreading; survival = the template's MushroomBlock rule plus any light on that tag; bone
+  meal +1..2; shears (`c:tools/shear`) −1 stage and one mushroom; knife (`#farmersdelight:tools/knives`) all stages;
+  both cost 1 durability and send block particles; the item places at age 3. Rich soil's mushroom → colony turn is
+  live now.
+- evidence (FDTest, `run/shots/m5-05/colonies.png`): brown and red mushrooms on rich soil in daylight (block light 1,
+  sky 15) → colonies, age 3 within 12 s at random_tick_speed 300. Survival: shears on age 3 → age 2, +1 brown
+  mushroom, shears 238 → 237; flint knife on age 3 → age 0, 3 red mushrooms dropped, knife −1; bone meal 0 → 2 → 3;
+  colony item on rich soil → `[age=3]`, on stone in daylight → not placed; breaking age 3 and age 2 → 5 + 4 mushrooms
+  (carried loot table).
+- next: M5-08
