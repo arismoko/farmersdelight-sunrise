@@ -146,6 +146,7 @@ pub fn container(block: &str) -> Option<ModContainer> {
         crate::blocks::basket::WOODEN | crate::blocks::basket::BAMBOO => {
             Some(crate::blocks::basket::container())
         }
+        id if crate::blocks::cabinet::is_cabinet(id) => Some(crate::blocks::cabinet::container()),
         _ => None,
     }
 }

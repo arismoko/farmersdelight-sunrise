@@ -134,11 +134,103 @@ pub type Signals = Arc<Mutex<HashMap<[i32; 3], i32>>>;
 
 pub struct Basket {
     pub signals: Signals,
+    pub names: Names,
 }
 
-impl Basket {
-    fn signals(&self) -> std::sync::MutexGuard<'_, HashMap<[i32; 3], i32>> {
-        self.signals.lock().unwrap_or_else(|e| e.into_inner())
+/// The custom name of each basket or cabinet being removed, for its drop, and the item of each
+/// of those blocks (resolved at registration).
+pub type Names = Arc<Mutex<NameTable>>;
+
+#[derive(Default)]
+pub struct NameTable {
+    pending: HashMap<[i32; 3], Tag>,
+    items: HashMap<&'static str, ItemKey>,
+}
+
+/// Records the items of `blocks` (block items of the same id) for `name_drops`.
+pub fn name_items(registrar: &mut dyn Registrar, names: &Names, blocks: &[&'static str]) {
+    let mut table = names.lock().unwrap_or_else(|e| e.into_inner());
+    for &block in blocks {
+        let key = registrar.item_key(block);
+        table.items.insert(block, key);
+    }
+}
+
+/// `RandomizableContainerBlockEntity` keeps the placed item's `minecraft:custom_name`; the engine
+/// saves it under `components`.
+pub fn remember_name(names: &Names, pos: [i32; 3], nbt: &Compound) {
+    let name = match nbt.get(&"components".into()) {
+        Some(Tag::Compound(c)) => c.get(&"minecraft:custom_name".into()).cloned(),
+        _ => None,
+    };
+    let mut names = names.lock().unwrap_or_else(|e| e.into_inner());
+    match name {
+        Some(name) => names.pending.insert(pos, name),
+        None => names.pending.remove(&pos),
+    };
+}
+
+/// The block loot tables' `copy_components` of `minecraft:custom_name` from the block entity, on
+/// every break that drops (a player's, an explosion's, `/setblock destroy`), for the baskets and
+/// cabinets. The name was read off the block entity as it was removed.
+pub fn name_drops(names: &Names, level: &dyn LevelHost, event: &mut BlockDropsEvent<'_>) {
+    let state = level.state_string(event.state).unwrap_or_default();
+    let block = state.split('[').next().unwrap_or(&state);
+    let pos = [event.pos.x, event.pos.y, event.pos.z];
+    let (item, name) = {
+        let mut table = names.lock().unwrap_or_else(|e| e.into_inner());
+        let Some(&item) = table.items.get(block) else {
+            return;
+        };
+        let Some(name) = table.pending.remove(&pos) else {
+            return;
+        };
+        (item, name)
+    };
+    for drop in event.drops.iter_mut() {
+        if drop.stack.item() != item {
+            continue;
+        }
+        let mut patch = crate::items::skillet::patch_of(&drop.stack);
+        patch.insert("minecraft:custom_name".into(), name.clone());
+        let _ = drop.stack.set_components(patch);
+    }
+}
+
+fn lock(signals: &Signals) -> std::sync::MutexGuard<'_, HashMap<[i32; 3], i32>> {
+    signals.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+/// The comparator signal last computed for the container at `pos`.
+pub fn signal(signals: &Signals, pos: [i32; 3]) -> i32 {
+    lock(signals).get(&pos).copied().unwrap_or(0)
+}
+
+pub fn forget_signal(signals: &Signals, pos: [i32; 3]) {
+    lock(signals).remove(&pos);
+}
+
+/// `AbstractContainerMenu.getRedstoneSignalFromContainer` over `items`, kept per position; a
+/// change updates the comparators (`setChanged` → `updateNeighbourForOutputSignal`).
+pub fn update_signal(
+    host: &mut dyn ServerHost,
+    level: LevelRef,
+    pos: [i32; 3],
+    items: &[Option<ItemStack>],
+    signals: &Signals,
+) {
+    let counts: Vec<_> = items
+        .iter()
+        .map(|s| {
+            s.as_ref()
+                .map(|s| (s.count(), host.max_stack_size(s.item()).unwrap_or(64)))
+        })
+        .collect();
+    let signal = comparator(&counts);
+    if lock(signals).insert(pos, signal) != Some(signal)
+        && let Some(state) = level.block_state(&*host, pos)
+    {
+        let _ = level.update_neighbors(host, pos, state, NeighbourUpdate::OutputSignal);
     }
 }
 
@@ -207,7 +299,7 @@ impl BlockPart for Basket {
 
     fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
         let pos = [event.pos.x, event.pos.y, event.pos.z];
-        event.output = self.signals().get(&pos).copied().unwrap_or(0);
+        event.output = signal(&self.signals, pos);
     }
 
     fn is_pathfindable(&self, _: &dyn Host, event: &mut IsPathfindableEvent) {
@@ -258,21 +350,7 @@ impl BlockEntityPart for Basket {
         if int(&entity.nbt, COOLDOWN) != Some(cooldown) {
             entity.nbt.insert(COOLDOWN.into(), Tag::Int(cooldown));
         }
-        // Comparator: AbstractContainerMenu.getRedstoneSignalFromContainer.
-        let counts: Vec<_> = entity
-            .items
-            .iter()
-            .map(|s| {
-                s.as_ref()
-                    .map(|s| (s.count(), host.max_stack_size(s.item()).unwrap_or(64)))
-            })
-            .collect();
-        let signal = comparator(&counts);
-        if self.signals().insert(pos, signal) != Some(signal)
-            && let Some(state) = state
-        {
-            let _ = level.update_neighbors(host, pos, state, NeighbourUpdate::OutputSignal);
-        }
+        update_signal(host, level, pos, &entity.items, &self.signals);
     }
 
     fn pre_remove_side_effects(
@@ -281,7 +359,8 @@ impl BlockEntityPart for Basket {
         event: &mut PreRemoveSideEffectsEvent<'_>,
     ) {
         let pos = [event.pos.x, event.pos.y, event.pos.z];
-        self.signals().remove(&pos);
+        forget_signal(&self.signals, pos);
+        remember_name(&self.names, pos, &event.entity.nbt);
     }
 }
 
@@ -394,7 +473,8 @@ pub fn predict(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow 
     Flow::Cancel
 }
 
-pub fn register(registrar: &mut dyn Registrar, signals: &Signals) {
+pub fn register(registrar: &mut dyn Registrar, signals: &Signals, names: &Names) {
+    name_items(registrar, names, &[WOODEN, BAMBOO]);
     let ty = registrar
         .block_entity_type(WOODEN)
         .blocks(&[WOODEN, BAMBOO])
@@ -404,6 +484,7 @@ pub fn register(registrar: &mut dyn Registrar, signals: &Signals) {
             &ty,
             Basket {
                 signals: signals.clone(),
+                names: names.clone(),
             },
         )
         .expect("basket block entity type");

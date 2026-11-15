@@ -542,3 +542,136 @@ shapes = { properties = ["facing"], values = { "down" = [[0.0, 0.875, 0.0, 1.0, 
 interaction_shapes = { default = [[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] }
 [bamboo_basket.components]
 "minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+# --- M7-05 cabinets ---
+# CabinetBlock: ofFullCopy(BARREL) (strength 2.5, wood map colour, ignited by lava), cherry/bamboo/crimson/warped
+# with their own sound types. Template minecraft:oak_planks as the baskets (the barrel template brings its own
+# opener sounds, 6-way facing and menu); its fire odds are dropped in code (barrels are not flammable). Declared:
+# horizontal `facing` (opposite the placer, in code) and `open`, written from the mod container's opener count
+# (src/blocks/cabinet.rs). 27-slot block entity, generic_9x3 menu. Fuel 300 except crimson/warped (no fuel).
+
+[oak_cabinet]
+source = "J/common/registry/ModBlocks.java:OAK_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:OAK_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[oak_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[spruce_cabinet]
+source = "J/common/registry/ModBlocks.java:SPRUCE_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:SPRUCE_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[spruce_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[birch_cabinet]
+source = "J/common/registry/ModBlocks.java:BIRCH_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:BIRCH_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[birch_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[jungle_cabinet]
+source = "J/common/registry/ModBlocks.java:JUNGLE_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:JUNGLE_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[jungle_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[acacia_cabinet]
+source = "J/common/registry/ModBlocks.java:ACACIA_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:ACACIA_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[acacia_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[dark_oak_cabinet]
+source = "J/common/registry/ModBlocks.java:DARK_OAK_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:DARK_OAK_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[dark_oak_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[mangrove_cabinet]
+source = "J/common/registry/ModBlocks.java:MANGROVE_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:MANGROVE_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[mangrove_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[cherry_cabinet]
+source = "J/common/registry/ModBlocks.java:CHERRY_CABINET (ofFullCopy(BARREL), sound CHERRY_WOOD); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:CHERRY_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:cherry_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[cherry_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[bamboo_cabinet]
+source = "J/common/registry/ModBlocks.java:BAMBOO_CABINET (ofFullCopy(BARREL), sound BAMBOO_WOOD); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:BAMBOO_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:bamboo_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[bamboo_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[pale_oak_cabinet]
+source = "J/common/registry/ModBlocks.java:PALE_OAK_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:PALE_OAK_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[pale_oak_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[poplar_cabinet]
+source = "J/common/registry/ModBlocks.java:POPLAR_CABINET (ofFullCopy(BARREL), sound WOOD (barrel)); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:POPLAR_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+[poplar_cabinet.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[crimson_cabinet]
+source = "J/common/registry/ModBlocks.java:CRIMSON_CABINET (ofFullCopy(BARREL), sound NETHER_WOOD); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:CRIMSON_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:crimson_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }
+
+[warped_cabinet]
+source = "J/common/registry/ModBlocks.java:WARPED_CABINET (ofFullCopy(BARREL), sound NETHER_WOOD); J/common/block/CabinetBlock.java:FACING,OPEN; J/common/registry/ModItems.java:WARPED_CABINET"
+# See the M7-05 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:crimson_planks", map_color = 13 }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
+default_state = { facing = "north", open = "false" }

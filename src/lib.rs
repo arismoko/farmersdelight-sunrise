@@ -27,6 +27,7 @@ struct FarmersDelight {
     trample: blocks::rich_soil::Trample,
     drops: blocks::wild::Drops,
     baskets: blocks::basket::Signals,
+    container_names: blocks::basket::Names,
 }
 
 #[mod_api::horizon_mod]
@@ -52,7 +53,8 @@ impl Hooks for FarmersDelight {
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
         blocks::storage::register(registrar);
-        blocks::basket::register(registrar, &self.baskets);
+        blocks::basket::register(registrar, &self.baskets, &self.container_names);
+        blocks::cabinet::register(registrar, &self.baskets, &self.container_names);
     }
 
     fn block_entity_container(
@@ -171,6 +173,7 @@ impl Hooks for FarmersDelight {
 
     fn block_drops(&self, level: &dyn LevelHost, event: &mut BlockDropsEvent<'_>) -> Flow {
         blocks::wild::block_drops(level, event);
+        blocks::basket::name_drops(&self.container_names, level, event);
         Flow::Continue
     }
 
@@ -187,10 +190,19 @@ impl Hooks for FarmersDelight {
     ) -> Flow {
         if blocks::feast::predict(host.reborrow(), event) == Flow::Cancel
             || blocks::basket::predict(host.reborrow(), event) == Flow::Cancel
+            || blocks::cabinet::predict(host.reborrow(), event) == Flow::Cancel
         {
             return Flow::Cancel;
         }
         blocks::pie::predict_use(host, event)
+    }
+
+    fn mod_container_viewers(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut ModContainerViewersEvent<'_>,
+    ) {
+        blocks::cabinet::on_viewers(host, event);
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {

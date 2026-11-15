@@ -1045,3 +1045,45 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: bamboo basket with cobblestone + sticks, comparator and wire at ~50126,220,49996; player at
   22,160,22, creative. Test items: wooden baskets 5 in hotbar slot 3 (replacing the campfires).
 - next: M7-05 (cabinets).
+
+## M7-05 Cabinets — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: 13 cabinets declared (`tools/decl/blocks.toml.in`, oak-planks template as the baskets; barrel's strength 2.5
+  and wood map colour, cherry/bamboo/nether sound types, fuel 300 except crimson/warped; horizontal `facing`,
+  `open`). Code `src/blocks/cabinet.rs`: one block entity type for all 13 (27 slots, `ModContainer` on every face,
+  `generic_9x3` menu), facing opposite the placer, `useWithoutItem` opens the menu (SUCCESS; client prediction E-28),
+  comparator via the basket's signal cache (now shared helpers `basket::{signal, update_signal, forget_signal}`),
+  fire odds dropped. **Barrel-template probe (U-15): rejected** — the engine's barrel branch hard-codes barrel sounds
+  and a 6-way facing; instead the engine's `mod_container_viewers` hook (vanilla `ContainerOpenersCounter` for mod
+  containers) drives `onOpen`/`onClose`: sound `block.cabinet.open`/`close` half a block out of the front (volume
+  0.5, pitch 0.9–1.0), `open` written with flag 3, `container_open`/`container_close` game events.
+- Custom name (`copy_components minecraft:custom_name` from the block entity, baskets too): the engine keeps the
+  placed item's name under the block entity's `components`; `pre_remove_side_effects` records it and `block_drops`
+  puts it on the block's own item (item keys resolved at registration).
+- evidence (FDTest pad 50145..50155,219,49995..50005, creative; `run/shots/m7-05/`):
+  - placed looking south → `facing=north`, looking west → `facing=east`.
+  - use opens the 9×3 menu titled "Oak Cabinet" (`cabinet-menu.png`); state `open=true` on server
+    (`execute if block`) and client; closing → `open=false` within a tick; subtitles "Cabinet opens" /
+    "Cabinet closes" (`subtitles.png`).
+  - two cobblestone stacks (slots 0, 26) shown in the menu; comparator → wire power 2; hopper below pulled 6 → power 1;
+    `setblock … destroy` dropped all 122 cobblestone plus the cabinet.
+  - contents (17 carrots slot 4, 5 cabbages slot 13) identical after quit and relaunch.
+  - named "Pantry" cherry cabinet broken in survival → dropped item keeps `minecraft:custom_name "Pantry"`.
+- deltas / gaps:
+  - **A30 extended**: cabinet menu title is the block's name ("Oak Cabinet"), FD "Cabinet" or the custom name (E-29).
+  - **A32** close is heard within a tick of the last viewer leaving; in FD the close comes from the 5-tick
+    `recheckOpeners` (FD's manual `startOpen(Player)` keeps the count from reaching 0 on menu close), so up to 5 ticks
+    later. The open event's game-event source is none (FD: the player).
+  - **E-30 (new)**: `block_drops` gives no block entity (NeoForge's `BlockDropsEvent.getBlockEntity`), and level-side
+    breaks (`/setblock destroy`, explosions, pistons) drop before the removal and skip `loot_drops` → **A33** the
+    custom name is lost on those paths (player breaks keep it). Same limit applies to the cooking pot's meal item form.
+- tooling note: `ctl look`/`place` turn the view without sending the rotation to the server until a mouse move, so
+  the placement saw the previous yaw; `ctl mouse-move 2 0` before `place` gives the real facing (not a mod issue).
+- incident: in creative, `click-slot` ids address the creative screen; three clicks replaced the user's 3 shepherd's
+  pies in hotbar slot 9 with a jungle plank. Restored with `item replace … shepherds_pie 3`.
+- not covered: second viewer / LAN `open` state (M7-09), loot-table (`LootTable`) fields (no FD structure places a
+  cabinet), flammability in game (same Part as the basket).
+- world changes: stone pad at 50145..50155,219,49995..50005 (cabinets removed). Test items left in the user's
+  inventory: 3 oak, 1 crimson, 3 cherry cabinets (main slots 16–18). Player returned to 22,160,22, creative;
+  random_tick_speed 3. Game left running (restarted three times during the task).
+- next: M7-06 (canvas signs).
