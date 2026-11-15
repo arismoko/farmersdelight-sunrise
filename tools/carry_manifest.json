@@ -1,7 +1,7 @@
 {
  "fd_repo": "https://github.com/MehVahdJukaar/FarmersDelightRefabricated",
  "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
- "rules_sha256": "d2b7454f951013c864f0eda4241b5ce4743e01bbd232f771b244ca517adafa12",
+ "rules_sha256": "814dfa89d3bf394861eae37bb3a57a2027d7d78ae3f6f1377adbb147243550d5",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -16611,22 +16611,22 @@
    "source": "src/generated/resources/data/minecraft/tags/villager_trade/farmer/level_1.json",
    "dest": "data/minecraft/tags/villager_trade/farmer/level_1.json",
    "sha256_source": "a49f34f002ce543f6e3d494e5ca6bdeffe8097108c0a26406328be5bc23cb028",
-   "sha256_dest": "a49f34f002ce543f6e3d494e5ca6bdeffe8097108c0a26406328be5bc23cb028",
-   "rule": "copy"
+   "sha256_dest": "b396cdfac1899da5429b42d7533175fefaa319e89f4365e37e089a22ac480894",
+   "rule": "rewrite"
   },
   {
    "source": "src/generated/resources/data/minecraft/tags/villager_trade/farmer/level_2.json",
    "dest": "data/minecraft/tags/villager_trade/farmer/level_2.json",
    "sha256_source": "62ec378501e1eb9162284eeecee318f492690249809e1b0c8b7fd3dbb640b4e2",
-   "sha256_dest": "62ec378501e1eb9162284eeecee318f492690249809e1b0c8b7fd3dbb640b4e2",
-   "rule": "copy"
+   "sha256_dest": "27d921c4a370a7e0d664a560db20956063ff908404867579e173c208929f9ac3",
+   "rule": "rewrite"
   },
   {
    "source": "src/generated/resources/data/minecraft/tags/villager_trade/wandering_trader/common.json",
    "dest": "data/minecraft/tags/villager_trade/wandering_trader/common.json",
    "sha256_source": "eddc3568ffc236e0616ddaf9ea465fe503596b1db0bb6dcb7de4686233e83d46",
-   "sha256_dest": "eddc3568ffc236e0616ddaf9ea465fe503596b1db0bb6dcb7de4686233e83d46",
-   "rule": "copy"
+   "sha256_dest": "81036864fcaa1d53d8bea23c47914b0d431e65c0b3376c69f102ba660f8c692a",
+   "rule": "rewrite"
   }
  ]
 }

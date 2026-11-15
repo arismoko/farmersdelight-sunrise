@@ -85,6 +85,18 @@ class CarryTest(unittest.TestCase):
         self.assertEqual(stale, ["data/farmersdelight/recipe/a.json"])
         self.assertFalse((self.out / stale[0]).exists())
 
+    def test_villager_trade_tag_entries_flattened(self):
+        write(
+            self.fd,
+            "src/generated/resources/data/minecraft/tags/villager_trade/farmer/level_1.json",
+            '{"values":[{"id":"farmersdelight:farmer/1/onion_emerald","required":false},"#minecraft:x"]}',
+        )
+        carry_fd.carry(self.fd, self.out, RULES)
+        tag = json.loads(
+            (self.out / "data/minecraft/tags/villager_trade/farmer/level_1.json").read_text("utf-8")
+        )
+        self.assertEqual(tag["values"], ["farmersdelight:farmer/1/onion_emerald", "#minecraft:x"])
+
     def test_worldgen_rewrites(self):
         gen = "src/main/resources/data/farmersdelight/worldgen/"
         write(

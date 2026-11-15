@@ -62,6 +62,14 @@ rename_type = { from = "farmersdelight:in_order", to = "minecraft:overlay" }
 reason = "in_order == minecraft:overlay"
 
 [[rewrite]]
+glob = "data/minecraft/tags/villager_trade/**/*.json"
+# FD lists its trades as optional tag entries ({"id": …, "required": false}). The engine's villager_trade tag reader
+# keeps only plain string entries (horizon-client merchant.rs Trades::load, `e.as_str()`), so FD's trades were
+# dropped (E-27). Every listed trade is shipped by this mod, so the optional flag never matters: written as plain ids.
+flatten_tag_entries = true
+reason = "E-27: villager_trade tags keep only string entries"
+
+[[rewrite]]
 glob = "data/farmersdelight/worldgen/placed_feature/*.json"
 # farmersdelight:biome_tag (BiomeTagFilter) keeps a position whose biome is in the tag; every placed feature names
 # #minecraft:is_overworld, and the biome modifiers add these features only to overworld biomes (each FD biome tag

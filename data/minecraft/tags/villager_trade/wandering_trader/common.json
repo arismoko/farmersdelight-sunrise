@@ -1,20 +1,8 @@
 {
   "values": [
-    {
-      "id": "farmersdelight:wandering_trader/cabbage_emerald",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:wandering_trader/rice_emerald",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:wandering_trader/tomato_emerald",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:wandering_trader/onion_emerald",
-      "required": false
-    }
+    "farmersdelight:wandering_trader/cabbage_emerald",
+    "farmersdelight:wandering_trader/rice_emerald",
+    "farmersdelight:wandering_trader/tomato_emerald",
+    "farmersdelight:wandering_trader/onion_emerald"
   ]
 }

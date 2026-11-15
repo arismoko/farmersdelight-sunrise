@@ -856,3 +856,30 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not covered: a screenshot (the player landed in ocean at night; counts are the evidence); taiga/snowy rates on
   more villages.
 - next: M6-04 (trades & farmer POI).
+
+## M6-04 Trades & farmer POI — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: the 8 carried trades (`data/farmersdelight/villager_trade/**`) and the 3 `minecraft:villager_trade/*` tags
+  were already shipped, but no FD trade was ever offered: 30 level-1 farmers sampled, 0 FD trades (P ≈ 10⁻⁹ if
+  the tag held 7 entries). Cause: the engine's villager_trade tag reader keeps only plain string entries
+  (`horizon-client/src/merchant.rs` `Trades::load`: `filter_map(|e| e.as_str())`), and FD writes its entries as
+  `{"id": …, "required": false}`. Engine gap **E-27**. Workaround: new carry rewrite `flatten_tag_entries`
+  (`tools/carry_fd.py`, rule in `tools/carry_rules.toml.in`, unit test in `tools/test_carry.py`) writes those entries
+  as plain ids in the 3 tags. Delta **A27**: the entries are no longer optional; no player-visible difference,
+  because every listed trade ships in this mod (vanilla would only differ if a trade file were missing).
+- farmer POI probe (U-14, E-10): no engine change needed. The engine's farmer secondary-POI scan and
+  HarvestFarmland use any block of class `FarmlandBlock` (`mobs/villager_secondary.rs` `sense_secondary`,
+  `villager_brain.rs` `farmland`), which is what FD's `VillagersTargetRichSoilMixin` adds; rich soil farmland
+  is declared on the `minecraft:farmland` template. **E-10 not needed.**
+- evidence (FDTest, sky platform at 50000,220,50000, far from the user's spot; `run/shots/m6-04/`):
+  - after the fix, `/summon` farmer (NoAI) + right-click + `/data get entity … Offers`
+    (`trade_sample.py`): L1 12 villagers → 5 × 26 tomato→emerald, 3 × 26 onion→emerald; L2 12 → 7 × 16 cabbage,
+    3 × 20 rice; wandering trader 10 → tomato seeds ×2, rice, onion for 1 emerald. Counts match the carried JSON.
+    Before the fix: `before-fix-farmer-l1.txt` (30 villagers, vanilla trades only).
+  - a farmer (AI on, composter job site) on a 9×5 rich soil farmland plot with water, 18 ripe wheat + 26 bare
+    cells, `time set 2500`: within 90 s it harvested ripe wheat (replanted at age 0) and sowed bare cells
+    (18 → 24 wheat); `farmer-rich-soil.png`.
+- not covered: completing a trade through the merchant screen (engine path, data only here); trades after a
+  restart (M6-05).
+- world changes: time of day set to 2500; test platform, plot and the M6-03 jigsaw pieces stay at ~50000,50000.
+- next: M6-05 (M6 demo).

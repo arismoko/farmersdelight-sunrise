@@ -75,10 +75,13 @@ def rewrite_conditions(node, rules: dict, rel: str):
 
 
 def apply_rewrite(node, rw: dict):
-    """One [[rewrite]] rule over a JSON tree: rename a `type` value, or drop entries of a `placement` list."""
+    """One [[rewrite]] rule over a JSON tree: rename a `type` value, drop entries of a `placement` list, or write a
+    tag's `{"id": x, "required": false}` entries as plain "x" (flatten_tag_entries)."""
     if isinstance(node, dict):
         out = {}
         for key, value in node.items():
+            if key == "values" and rw.get("flatten_tag_entries") and isinstance(value, list):
+                value = [v["id"] if isinstance(v, dict) and set(v) <= {"id", "required"} else v for v in value]
             if key == "type" and "rename_type" in rw and value == rw["rename_type"]["from"]:
                 value = rw["rename_type"]["to"]
             elif key == "placement" and "drop_placement" in rw and isinstance(value, list):
