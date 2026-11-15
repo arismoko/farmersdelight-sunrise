@@ -175,6 +175,65 @@ impl BlockPart for CuttingBoard {
             .flatten()
     }
 
+    fn has_analog_output(&self, _: &dyn LevelHost, event: &mut HasAnalogOutputEvent) {
+        event.output = true;
+    }
+
+    fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+        event.output = signal([event.pos.x, event.pos.y, event.pos.z]);
+    }
+
+    /// Automation (hoppers, any side) changed the slot: keep the client mirror and the
+    /// comparator level in step.
+    fn contents_changed(&self, host: &mut dyn ServerHost, event: &mut ContentsChangedEvent) {
+        let pos = [event.pos.x, event.pos.y, event.pos.z];
+        let Some(be) = host.block_entity(event.level, pos) else {
+            return;
+        };
+        let stored = be.item_slot(&*host, 0).ok().flatten();
+        mirror_inventory(host, be, stored.as_ref());
+        host.block_entity_sync(pos);
+    }
+
+    /// `CuttingBoardDispenserMixin` + `CuttingBoardDispenseBehavior`: with the config on, a
+    /// dispenser facing a board uses whatever it dispenses as the tool and keeps it (damaged);
+    /// click sound on a cut, fail sound otherwise, never vanilla's dispense.
+    fn dispense_method(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut DispenseMethodEvent<'_>,
+    ) -> Option<Dispensed> {
+        if !crate::config::dispenser_tools_cutting_board() {
+            return None;
+        }
+        let level = host.level(event.dimension)?;
+        let s = match event.facing {
+            Direction::North => [0, 0, -1],
+            Direction::South => [0, 0, 1],
+            Direction::West => [-1, 0, 0],
+            Direction::East => [1, 0, 0],
+            Direction::Up => [0, 1, 0],
+            Direction::Down => [0, -1, 0],
+        };
+        let pos = [
+            event.pos[0] + s[0],
+            event.pos[1] + s[1],
+            event.pos[2] + s[2],
+        ];
+        let Some(be) = host.block_entity(level, pos) else {
+            return Some((Some(event.stack.clone()), 1001));
+        };
+        let stored = be.item_slot(&*host, 0).ok().flatten();
+        let carved = be.data(&*host).is_some_and(|d| is_carved(&d));
+        if stored.is_none() {
+            return Some((Some(event.stack.clone()), 1001));
+        }
+        match self.cut(host, None, level, be, pos, event.stack, stored, carved) {
+            Some(after) => Some((after, 1000)),
+            None => Some((Some(event.stack.clone()), 1001)),
+        }
+    }
+
     fn use_item_on(
         &self,
         host: &mut dyn ServerHost,
@@ -299,7 +358,10 @@ impl CuttingBoard {
             }
             Action::UseTool => {
                 let tool = held?;
-                if self.cut(host, player, level, be, pos, &tool, stored, carved) {
+                if self
+                    .cut(host, Some(player), level, be, pos, &tool, stored, carved)
+                    .is_some()
+                {
                     Some(InteractionResult::Success)
                 } else {
                     Some(InteractionResult::Consume)
@@ -308,21 +370,23 @@ impl CuttingBoard {
         }
     }
 
-    /// `CuttingBoardBlockEntity#processStoredItemUsingTool`.
+    /// `CuttingBoardBlockEntity#processStoredItemUsingTool`. `player` is None for a dispenser,
+    /// which then gets the tool back damaged (`Some(tool)`, None when it broke); with a player
+    /// the hand's stack is damaged in place. None when nothing was cut.
     #[allow(clippy::too_many_arguments)]
     fn cut(
         &self,
         host: &mut dyn ServerHost,
-        player: PlayerRef,
+        player: Option<PlayerRef>,
         level: LevelRef,
         be: BlockEntityRef,
         pos: [i32; 3],
         tool: &ItemStack,
         stored: Option<ItemStack>,
         carved: bool,
-    ) -> bool {
+    ) -> Option<Option<ItemStack>> {
         if carved {
-            return false;
+            return None;
         }
         let table = self.recipes.cutting.snapshot();
         let found = stored.as_ref().and_then(|input| {
@@ -334,17 +398,19 @@ impl CuttingBoard {
             }
         });
         let (Some(recipe), Some(input)) = (found, stored) else {
-            let _ = player.action_bar(
-                host,
-                Text::translate("block.farmersdelight.cutting_board.invalid_item", vec![]),
-            );
-            return false;
+            if let Some(player) = player {
+                let _ = player.action_bar(
+                    host,
+                    Text::translate("block.farmersdelight.cutting_board.invalid_item", vec![]),
+                );
+            }
+            return None;
         };
         let facing = level
             .block_property(&*host, pos, "facing")
             .unwrap_or_else(|| "north".into());
         let [dx, dz] = counter_clockwise_step(&facing);
-        let fortune = 0; // Fortune on cutting tools: M8-03 (no enchantment read yet).
+        let fortune = enchantment_level(tool, "minecraft:fortune");
         let bonus = crate::config::cutting_board_fortune_bonus();
         let mut random = level.random(&*host);
         for result in &recipe.results {
@@ -372,11 +438,17 @@ impl CuttingBoard {
         if let Some(r) = random {
             level.set_random(host, r);
         }
-        if let Some(living) = host.living(player.entity()) {
-            let _ = living.hurt_and_break(host, EquipmentSlot::MainHand, 1);
-        }
-        let tool_id = tool.item().id(&*host);
-        player.award_stat(host, StatType::Used, &tool_id, 1);
+        let tool_after = match player {
+            Some(player) => {
+                if let Some(living) = host.living(player.entity()) {
+                    let _ = living.hurt_and_break(host, EquipmentSlot::MainHand, 1);
+                }
+                let tool_id = tool.item().id(&*host);
+                player.award_stat(host, StatType::Used, &tool_id, 1);
+                None
+            }
+            None => damaged(&*host, tool),
+        };
         let particles = ParticleOptions::item_stack(self.item_particle, input.clone());
         level.send_particles(
             host,
@@ -391,7 +463,8 @@ impl CuttingBoard {
             0.05,
             5,
         );
-        let (sound, volume, pitch) = processing_sound(&*host, recipe.sound.as_deref(), tool);
+        let (sound, volume, pitch) =
+            processing_sound(&*host, recipe.sound.as_deref(), tool, &input);
         level.play_sound(
             host,
             &sound,
@@ -412,20 +485,22 @@ impl CuttingBoard {
                 .map_err(|_| ())
         });
         mirror_inventory(host, be, remaining.as_ref());
-        if let Ok(trigger) = Identifier::parse(USE_CUTTING_BOARD) {
-            let _ = player.trigger_criterion(host, &trigger, Arc::new(Always));
+        if let Some(player) = player {
+            if let Ok(trigger) = Identifier::parse(USE_CUTTING_BOARD) {
+                let _ = player.trigger_criterion(host, &trigger, Arc::new(Always));
+            }
+            let line = if left > 0 {
+                Text::translate(
+                    "block.farmersdelight.cutting_board.remaining_items",
+                    vec![Text::literal(left.to_string())],
+                )
+            } else {
+                Text::literal("")
+            };
+            let _ = player.action_bar(host, line);
         }
-        let line = if left > 0 {
-            Text::translate(
-                "block.farmersdelight.cutting_board.remaining_items",
-                vec![Text::literal(left.to_string())],
-            )
-        } else {
-            Text::literal("")
-        };
-        let _ = player.action_bar(host, line);
         host.block_entity_sync(pos);
-        true
+        Some(tool_after)
     }
 }
 
@@ -434,6 +509,7 @@ fn processing_sound(
     host: &dyn Host,
     recipe_sound: Option<&str>,
     tool: &ItemStack,
+    board_item: &ItemStack,
 ) -> (String, f32, f32) {
     if let Some(s) = recipe_sound {
         return (s.to_owned(), 1.0, 1.0);
@@ -444,8 +520,233 @@ fn processing_sound(
     if in_item_tag(host, tool, KNIFE_TAG) {
         return (SOUND_KNIFE.into(), 0.8, 1.0);
     }
-    // BlockItem → its block's break sound at pitch 0.8: M8-03 (no tool on M1's path reaches it).
+    // `boardItem.getItem() instanceof BlockItem`: its block's default state's break sound.
+    if let Some(sound) = host
+        .item_block(board_item.item())
+        .and_then(|b| host.block_state_default(b))
+        .and_then(|state| host.block_states().sound(state))
+    {
+        return (sound.break_sound.to_string(), 1.0, 0.8);
+    }
     ("minecraft:block.wood.break".into(), 1.0, 0.8)
+}
+
+/// `EnchantmentHelper.getItemEnchantmentLevel`: the level in the stack's `minecraft:enchantments`.
+pub fn enchantment_level(stack: &ItemStack, id: &str) -> u32 {
+    match stack
+        .components()
+        .and_then(|p| p.as_nbt().get(&"minecraft:enchantments".into()).cloned())
+    {
+        Some(Tag::Compound(levels)) => match levels.get(&id.into()) {
+            Some(Tag::Int(l)) => (*l).max(0) as u32,
+            _ => 0,
+        },
+        _ => 0,
+    }
+}
+
+/// `hurtAndBreak(1, level, null, …)` for a stack held by no one (a dispenser's): one more damage
+/// on a damageable stack, None once it breaks. Unbreaking is not applied (A40).
+fn damaged(host: &dyn Host, tool: &ItemStack) -> Option<ItemStack> {
+    let max = match tool
+        .components()
+        .and_then(|p| p.as_nbt().get(&"minecraft:max_damage".into()).cloned())
+        .or_else(|| host.item_default_component(tool.item(), "minecraft:max_damage"))
+    {
+        Some(Tag::Int(m)) => m.max(0) as u32,
+        Some(Tag::Long(m)) => m.max(0) as u32,
+        _ => return Some(tool.clone()),
+    };
+    let unbreakable = tool
+        .components()
+        .is_some_and(|p| p.as_nbt().get(&"minecraft:unbreakable".into()).is_some())
+        || host
+            .item_default_component(tool.item(), "minecraft:unbreakable")
+            .is_some();
+    if max == 0 || unbreakable {
+        return Some(tool.clone());
+    }
+    let next = tool.damage() + 1;
+    if next >= max {
+        return tool.clone().shrink(1);
+    }
+    let mut out = tool.clone();
+    out.set_damage(next);
+    Some(out)
+}
+
+// ---------------------------------------------------------------- sneak carving, dispenser, comparator
+
+/// `ToolCarvingEvent#onSneakPlaceTool`: what the main hand may be carved into a board.
+fn carvable(host: &dyn Host, stack: &ItemStack) -> bool {
+    let has_tool = stack
+        .components()
+        .and_then(|p| p.as_nbt().get(&"minecraft:tool".into()).cloned())
+        .is_some()
+        || host
+            .item_default_component(stack.item(), "minecraft:tool")
+            .is_some();
+    let id = stack.item().id(host);
+    has_tool || id == "minecraft:trident" || id == "minecraft:shears"
+}
+
+/// `UseBlockCallback` `ToolCarvingEvent#onSneakPlaceTool`: sneaking with a tool in the main hand
+/// on an empty board carves it in (the whole stack, one used up outside creative). Decided the
+/// same way on both sides; the server changes the board.
+pub fn on_right_click(mut host: HostSide<'_>, event: &mut RightClickBlockEvent<'_>) -> Flow {
+    let click = event.click;
+    // FD reads the main hand on either hand's event; the off hand's is reached only after the
+    // main hand's passed under the same test, so only the main hand's event can carve.
+    if click.hand != Hand::Main {
+        return Flow::Continue;
+    }
+    match host.reborrow() {
+        HostSide::Client(h) => {
+            let h: &dyn ClientHost = &*h;
+            let Some(player) = h.local_player() else {
+                return Flow::Continue;
+            };
+            if player.is_spectator(h) == Some(true)
+                || player.entity().is_shift_key_down(h) != Some(true)
+            {
+                return Flow::Continue;
+            }
+            let Some(held) = click.stack else {
+                return Flow::Continue;
+            };
+            if !carvable(h, held) {
+                return Flow::Continue;
+            }
+            let Some(level) = h.level(h.dimension()) else {
+                return Flow::Continue;
+            };
+            let board = level
+                .block_state(h, click.pos)
+                .and_then(|s| h.block_state_string(s))
+                .is_some_and(|n| n.split('[').next() == Some(ID));
+            if !board {
+                return Flow::Continue;
+            }
+            let empty = h
+                .block_entity(level, click.pos)
+                .and_then(|e| e.data(h))
+                .is_none_or(
+                    |d| !matches!(d.get(&INVENTORY.into()), Some(Tag::List(l)) if !l.is_empty()),
+                );
+            if !empty {
+                return Flow::Continue;
+            }
+        }
+        HostSide::Server(h) => {
+            if !carve(h, click) {
+                return Flow::Continue;
+            }
+        }
+    }
+    *event.cancellation_result = InteractionResult::Success;
+    Flow::Cancel
+}
+
+fn carve(host: &mut dyn ServerHost, click: &BlockClick<'_>) -> bool {
+    let Some(player) = host.players().acting_player() else {
+        return false;
+    };
+    if player.is_spectator(&*host) == Some(true)
+        || player.entity().is_shift_key_down(&*host) != Some(true)
+    {
+        return false;
+    }
+    let Some(living) = host.living(player.entity()) else {
+        return false;
+    };
+    let Some(held) = living.hand_item(&*host, Hand::Main) else {
+        return false;
+    };
+    if !carvable(&*host, &held) {
+        return false;
+    }
+    let Some(level) = host.level(click.dimension.key().id()) else {
+        return false;
+    };
+    let Some(be) = host.block_entity(level, click.pos) else {
+        return false;
+    };
+    let is_board = level
+        .block_state(&*host, click.pos)
+        .and_then(|s| host.block_state_string(s))
+        .is_some_and(|n| n.split('[').next() == Some(ID));
+    if !is_board || be.item_slot(&*host, 0).ok().flatten().is_some() {
+        return false;
+    }
+    let creative = player.is_creative(&*host).unwrap_or(false);
+    // addItem(stack) inserts up to the slot limit; FD counts it carved only when all went in.
+    let limit = SLOT_LIMIT.min(host.max_stack_size(held.item()).unwrap_or(64));
+    if held.count() > limit {
+        return false;
+    }
+    if host
+        .transaction(|host, tx| {
+            be.set_item_slot(host, tx, 0, Some(held.clone()))
+                .map(|_| ())
+                .map_err(|_| ())
+        })
+        .is_err()
+    {
+        return false;
+    }
+    let mut data = BTreeMap::new();
+    data.insert(CARVED.into(), Tag::Byte(1));
+    let _ = be.merge_data(host, data);
+    mirror_inventory(host, be, Some(&held));
+    if !creative {
+        let _ = living.set_hand_item(host, Hand::Main, held.clone().shrink(1));
+    }
+    let pos = click.pos;
+    let centre = [
+        pos[0] as f64 + 0.5,
+        pos[1] as f64 + 0.5,
+        pos[2] as f64 + 0.5,
+    ];
+    level.play_sound(
+        host,
+        "minecraft:block.wood.place",
+        centre,
+        SoundSource::Blocks,
+        1.0,
+        0.8,
+    );
+    host.block_entity_sync(pos);
+    true
+}
+
+/// `getAnalogOutputSignal`: `floor(count / min(64, max stack) * 14) + 1`, 0 when empty.
+pub fn comparator(count: u32, max_stack: u32) -> i32 {
+    if count == 0 {
+        return 0;
+    }
+    let proportion = count as f32 / SLOT_LIMIT.min(max_stack).max(1) as f32;
+    (proportion * 14.0).floor() as i32 + 1
+}
+
+static SIGNALS: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<[i32; 3], i32>>> =
+    std::sync::LazyLock::new(Default::default);
+
+fn set_signal(pos: [i32; 3], signal: i32) {
+    let mut map = SIGNALS.lock().unwrap_or_else(|e| e.into_inner());
+    if signal == 0 {
+        map.remove(&pos);
+    } else {
+        map.insert(pos, signal);
+    }
+}
+
+fn signal(pos: [i32; 3]) -> i32 {
+    SIGNALS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .get(&pos)
+        .copied()
+        .unwrap_or(0)
 }
 
 fn in_item_tag(host: &dyn Host, stack: &ItemStack, tag: &str) -> bool {
@@ -460,6 +761,12 @@ fn in_item_tag(host: &dyn Host, stack: &ItemStack, tag: &str) -> bool {
 /// Keep the reference's `Inventory` list (one stack or none) in the block entity's NBT, so the
 /// update tag can send what the board holds. `Items` stays the engine-owned saved copy.
 fn mirror_inventory(host: &mut dyn ServerHost, be: BlockEntityRef, stack: Option<&ItemStack>) {
+    if let Some(pos) = be.position(&*host) {
+        let level = stack.map_or(0, |s| {
+            comparator(s.count(), host.max_stack_size(s.item()).unwrap_or(64))
+        });
+        set_signal(pos, level);
+    }
     let list = stack
         .and_then(|s| s.to_nbt(&*host))
         .map(|c| vec![Tag::Compound(c)])
@@ -502,9 +809,15 @@ impl BlockEntityPart for CuttingBoard {
         let pose = if is_carved(&event.entity.nbt) {
             let tool = in_item_tag(host, &stack, "minecraft:pickaxes")
                 || in_item_tag(host, &stack, "minecraft:hoes");
-            // TridentItem → 135: M8-03 (tool carving)
+            let trident = stack.item().id(host) == "minecraft:trident";
             Pose::Carved {
-                angle: if tool { 225.0 } else { 180.0 },
+                angle: if tool {
+                    225.0
+                } else if trident {
+                    135.0
+                } else {
+                    180.0
+                },
             }
         } else if host.item_block(stack.item()).is_some() && !in_item_tag(host, &stack, FLAT_TAG) {
             Pose::Block
@@ -542,6 +855,16 @@ fn stored_on_client(host: &dyn Host, entity: &ModBlockEntity) -> Option<ItemStac
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn comparator_levels() {
+        assert_eq!(comparator(0, 64), 0);
+        assert_eq!(comparator(1, 64), 1);
+        assert_eq!(comparator(32, 64), 8);
+        assert_eq!(comparator(64, 64), 15);
+        assert_eq!(comparator(1, 1), 15);
+        assert_eq!(comparator(8, 16), 8);
+    }
 
     #[test]
     fn empty_hand() {

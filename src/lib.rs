@@ -217,7 +217,14 @@ impl Hooks for FarmersDelight {
         blocks::cabinet::on_viewers(host, event);
     }
 
-    fn right_click_block(&self, host: HostSide<'_>, event: &mut RightClickBlockEvent<'_>) -> Flow {
+    fn right_click_block(
+        &self,
+        mut host: HostSide<'_>,
+        event: &mut RightClickBlockEvent<'_>,
+    ) -> Flow {
+        if blocks::cutting_board::on_right_click(host.reborrow(), event) == Flow::Cancel {
+            return Flow::Cancel;
+        }
         items::knife::on_right_click(host, event)
     }
 

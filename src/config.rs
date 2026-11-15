@@ -68,3 +68,8 @@ pub fn rich_soil_boost_chance() -> f64 {
 pub fn pumpkin_pie_sneak_to_place() -> bool {
     false
 }
+
+/// `common.enableCuttingBoardDispenserBehavior` (Configuration.java:ENABLE_DISPENSER_TOOLS_CUTTING_BOARD).
+pub fn dispenser_tools_cutting_board() -> bool {
+    true
+}

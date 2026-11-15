@@ -1273,3 +1273,40 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: none left (pad removed, forceload removed). User inventory restored, survival at 22,160,22,
   slot 8 selected. The game was restarted once (rebuild) and is left running.
 - next: M8-03 (cutting board completion).
+
+## M8-03 Cutting board completion — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did (`src/blocks/cutting_board.rs`):
+  - sneak tool carving (`ToolCarvingEvent#onSneakPlaceTool`) as `right_click_block`, both sides deciding alike:
+    Shift held, main-hand stack with a `minecraft:tool` component (patch or default), a trident or shears, on an
+    empty board → stored, `IsItemCarved` 1, one used outside creative, `block.wood.place` 1.0/0.8. A carved board
+    takes no items and cuts nothing until emptied by hand. Render: trident pose 135° added (pickaxes/hoes 225°,
+    others 180° were there).
+  - Fortune read from the tool's `minecraft:enchantments` (fortune bonus 0.1 per level, config default).
+  - processing sound for a block item on the board: its block's default-state break sound at pitch 0.8.
+  - comparator: `has_analog_output`, `floor(count / min(64, max) · 14) + 1`, kept per position whenever the slot
+    changes (clicks, cuts, carving, automation).
+  - `contents_changed` (block Part): automation (hoppers, any side) refreshes the client mirror (`Inventory`), the
+    comparator level and syncs — before, a hopper-fed item was invisible on the client.
+  - dispenser (`CuttingBoardDispenserMixin`/`CuttingBoardDispenseBehavior`) as `dispense_method` on the board:
+    with `enableCuttingBoardDispenserBehavior` (default on; config wiring M9-01) any dispensed stack is used as the
+    tool; a cut → click (1000) and the stack comes back damaged by 1; no recipe / empty board → fail sound (1001),
+    stack kept; vanilla's dispense never runs. `cut` takes an optional player (no stat, overlay or trigger without).
+- evidence (FDTest pad under forceload, survival; `run/shots/m8-03/`):
+  - Shift + iron axe on the empty board → `IsItemCarved:1b`, axe stored and drawn upright, hand empty, subtitle
+    "Block placed" (`axe-carved.png`); empty-hand click → axe back, `IsItemCarved:0b`.
+  - oak log on the board, iron axe → stripped oak log + tree bark, axe 250 → 249, subtitle "Axe strips"
+    (`log-stripped.png`).
+  - hopper above (64 beef): board 6 / 11 / 16 → comparator 2 / 3 / 4; beef drawn on the board (`hopper-beef.png`);
+    hopper on the east side inserted 8; hopper below pulled 11, board 30 → comparator 7.
+  - dispenser (facing the board, iron knife): two pulses → 4 minced beef, knife back in the dispenser with damage
+    2; a stick → no cut, stick kept.
+  - Fortune: 50 dispenser cuts of gravel each — diamond shovel 7 flint (p 0.1, expected 5), Fortune III shovel 20
+    flint (p 0.4, expected 20).
+  - all 117 cutting recipes: shape/tool-form unit tests (`every_reference_recipe_has_a_valid_shape`,
+    `tool_form_counts`); in game knife, axe_strip and shovel_dig recipes used.
+- deltas: **A40** a dispenser's tool loses 1 durability per cut without Unbreaking's chance (the API has no
+  entity-free `hurtAndBreak`).
+- not covered: config off (M9-01 wires the config), trident carving render (angle coded, not looked at).
+- world changes: none left; user inventory/XP restored, survival at 22,160,22. Game left running.
+- next: M8-04 (backstabbing).
