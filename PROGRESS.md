@@ -1372,3 +1372,23 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   lifetime XP total stays 317 instead of 200).
 - world changes: none left. Game left running.
 - next: M8-06 (rotten tomato).
+
+## M8-06 Rotten tomato — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: entity type `farmersdelight:rotten_tomato` declared on the snowball template (`tools/decl/entities.toml.in`;
+  size 0.25, tracking 4, interval 10 are the snowball's; `damage` 0 = FD's `hurt(thrown, 0)`). `src/items/rotten_tomato.rs`:
+  `use_item` (FD's throw sound NEUTRAL 0.5 / `0.4/(r·0.4+0.8)`, `spawn_projectile_from_rotation` at 1.5 with 1.0
+  spread, use stat, one used outside creative; SUCCESS client / CONSUME server), `dispense_item`
+  (`ProjectileDispenseBehavior` default: 0.7 in front of the centre, `(x, y+0.1, z)` × 1.1 with uncertainty 6,
+  launch sound 1002), `projectile_impact` (FD's hit sound once per impact, twice when an entity is hit:
+  `onHitEntity` + `onHit`).
+- evidence (pad; `run/shots/m8-06/`):
+  - thrown at a pig: stack 16 → 15; subtitles "Rotten Tomato flies", "Pig hurts", "Rotten Tomato splatters"
+    (`hit.png`); pig health stays 10. A slowed pig with AI was pushed 1.99 blocks away from the thrower, no damage.
+  - dispenser facing east (5 tomatoes): pulses leave 4, 3; the projectile is a `farmersdelight:rotten_tomato`
+    flying east (+3.3 blocks per 0.1 s poll, slight drop); `/summon farmersdelight:rotten_tomato` works.
+- deltas: **A43** the impact particles are the snowball's 8 item crumbs (FD's `handleEntityEvent` draws 12); the
+  hit-sound pitches and the dispenser's spread draw from the level random, not the projectile's.
+- not covered: raider anger and the `hit_raider_with_rotten_tomato` advancement (M8-07), LAN view (M8-08).
+- world changes: none left. Game left running.
+- next: M8-07 (advancements).

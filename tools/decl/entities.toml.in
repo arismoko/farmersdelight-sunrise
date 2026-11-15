@@ -1,0 +1,8 @@
+# (Named *.toml.in: the Horizon packager refuses .toml files outside src/.)
+# Entity type declarations (PORT_PLAN M8-06). Generated into data/farmersdelight/horizon/entity_type/.
+
+[rotten_tomato]
+source = "J/common/registry/ModEntityTypes.java:ROTTEN_TOMATO (MISC, sized 0.25, tracking 4, interval 10 = the snowball's); J/common/entity/RottenTomatoEntity.java (thrown damage 0)"
+template = "minecraft:snowball"
+item = "farmersdelight:rotten_tomato"
+damage = 0.0

@@ -55,6 +55,7 @@ impl Hooks for FarmersDelight {
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
         items::knife::register(registrar);
+        items::rotten_tomato::register(registrar);
         blocks::storage::register(registrar);
         blocks::basket::register(registrar, &self.baskets, &self.container_names);
         blocks::tatami::register(registrar);
@@ -246,6 +247,19 @@ impl Hooks for FarmersDelight {
         event: &mut LivingIncomingDamageEvent<'_>,
     ) -> Flow {
         enchant::on_incoming(&self.backstabs, event);
+        Flow::Continue
+    }
+
+    fn hears_projectile_impacts(&self, _: &dyn Host, event: &mut HearsProjectileImpactsEvent) {
+        event.hears = true;
+    }
+
+    fn projectile_impact(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut ProjectileImpactEvent<'_>,
+    ) -> Flow {
+        items::rotten_tomato::on_impact(host, event);
         Flow::Continue
     }
 
