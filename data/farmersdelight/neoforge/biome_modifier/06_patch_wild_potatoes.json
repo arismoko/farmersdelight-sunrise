@@ -1,0 +1,22 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": {
+    "type": "neoforge:and",
+    "values": [
+      "#farmersdelight:wild_potatoes_whitelist",
+      {
+        "type": "neoforge:not",
+        "value": "#farmersdelight:wild_potatoes_blacklist"
+      },
+      {
+        "type": "horizon:climate",
+        "temperature": {
+          "min": 0.1,
+          "max": 0.3
+        }
+      }
+    ]
+  },
+  "features": "farmersdelight:patch_wild_potatoes",
+  "step": "vegetal_decoration"
+}

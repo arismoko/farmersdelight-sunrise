@@ -1,0 +1,22 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": {
+    "type": "neoforge:and",
+    "values": [
+      "#farmersdelight:wild_carrots_whitelist",
+      {
+        "type": "neoforge:not",
+        "value": "#farmersdelight:wild_carrots_blacklist"
+      },
+      {
+        "type": "horizon:climate",
+        "temperature": {
+          "min": 0.4,
+          "max": 0.9
+        }
+      }
+    ]
+  },
+  "features": "farmersdelight:patch_wild_carrots",
+  "step": "vegetal_decoration"
+}

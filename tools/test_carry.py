@@ -85,6 +85,37 @@ class CarryTest(unittest.TestCase):
         self.assertEqual(stale, ["data/farmersdelight/recipe/a.json"])
         self.assertFalse((self.out / stale[0]).exists())
 
+    def test_worldgen_rewrites(self):
+        gen = "src/main/resources/data/farmersdelight/worldgen/"
+        write(
+            self.fd,
+            gen + "feature/patch.json",
+            '{"type":"farmersdelight:in_order","features":[{"feature":{"type":"minecraft:simple_block"},'
+            '"placement":[{"type":"minecraft:offset"}]}]}',
+        )
+        write(
+            self.fd,
+            gen + "placed_feature/patch.json",
+            '{"feature":"farmersdelight:patch","placement":[{"type":"minecraft:biome"},'
+            '{"type":"farmersdelight:biome_tag","tag":"minecraft:is_overworld"},{"type":"minecraft:offset"}]}',
+        )
+        write(self.fd, gen + "feature/plain.json", '{"type":"minecraft:simple_block"}')
+        m = carry_fd.carry(self.fd, self.out, RULES)
+        rules = {e["dest"]: e["rule"] for e in m["files"]}
+        feature = json.loads((self.out / "data/farmersdelight/worldgen/feature/patch.json").read_text("utf-8"))
+        self.assertEqual(feature["type"], "minecraft:overlay")
+        self.assertEqual(feature["features"][0]["feature"]["type"], "minecraft:simple_block")
+        placed = json.loads((self.out / "data/farmersdelight/worldgen/placed_feature/patch.json").read_text("utf-8"))
+        self.assertEqual([p["type"] for p in placed["placement"]], ["minecraft:biome", "minecraft:offset"])
+        self.assertEqual(rules["data/farmersdelight/worldgen/feature/patch.json"], "rewrite")
+        self.assertEqual(rules["data/farmersdelight/worldgen/placed_feature/patch.json"], "rewrite")
+        # a file no rule changes stays a byte copy
+        self.assertEqual(rules["data/farmersdelight/worldgen/feature/plain.json"], "copy")
+        self.assertEqual(
+            (self.out / "data/farmersdelight/worldgen/feature/plain.json").read_text("utf-8"),
+            '{"type":"minecraft:simple_block"}',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

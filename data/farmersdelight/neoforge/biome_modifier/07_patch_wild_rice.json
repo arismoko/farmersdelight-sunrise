@@ -1,0 +1,15 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": {
+    "type": "neoforge:and",
+    "values": [
+      "#farmersdelight:wild_rice_whitelist",
+      {
+        "type": "neoforge:not",
+        "value": "#farmersdelight:wild_rice_blacklist"
+      }
+    ]
+  },
+  "features": "farmersdelight:patch_wild_rice",
+  "step": "vegetal_decoration"
+}

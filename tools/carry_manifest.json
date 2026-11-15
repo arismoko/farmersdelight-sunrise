@@ -1,7 +1,7 @@
 {
  "fd_repo": "https://github.com/MehVahdJukaar/FarmersDelightRefabricated",
  "fd_sha": "1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3",
- "rules_sha256": "7f4a678e0aec62bd6f8442007d019b2b8c65026c5aef83c0f98ea9461e447f8a",
+ "rules_sha256": "d2b7454f951013c864f0eda4241b5ce4743e01bbd232f771b244ca517adafa12",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -16086,15 +16086,15 @@
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/brown_mushroom_colony.json",
    "dest": "data/farmersdelight/worldgen/feature/brown_mushroom_colony.json",
    "sha256_source": "c384e40d782631a9c09c5183c0a0c61e6591aaeaf7561911db58ae5cbef0cfa8",
-   "sha256_dest": "c384e40d782631a9c09c5183c0a0c61e6591aaeaf7561911db58ae5cbef0cfa8",
-   "rule": "copy"
+   "sha256_dest": "6f77c0967e02f388923224e20bda601a4a0ffced80db7fed7c3b36c23c85d8dc",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/red_mushroom_colony.json",
    "dest": "data/farmersdelight/worldgen/feature/red_mushroom_colony.json",
    "sha256_source": "d5cc49a9a459fd4f2b2b91975dda27c8675acaa4710d6a2c87c6c47927bf8bca",
-   "sha256_dest": "d5cc49a9a459fd4f2b2b91975dda27c8675acaa4710d6a2c87c6c47927bf8bca",
-   "rule": "copy"
+   "sha256_dest": "d2a548acd457a639a94ee3ebacb6226470ec9aa0a6386c87f7ebe8fc08e3d4e2",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/sandy_shrub.json",
@@ -16107,64 +16107,64 @@
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_beetroots.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_beetroots.json",
    "sha256_source": "55fccbac8f72e47ebdebfa5e9efe3520aa2d4f6df2fe772a2d05436f627fea2b",
-   "sha256_dest": "55fccbac8f72e47ebdebfa5e9efe3520aa2d4f6df2fe772a2d05436f627fea2b",
-   "rule": "copy"
+   "sha256_dest": "eadcb9812c1a7ec781c28bdd54bda2e6a2bb4496fa7c3a73591d633a548dce1a",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_cabbages.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_cabbages.json",
    "sha256_source": "43445931b2efc3b2bc3f539274c53fe9d8228fcb386392bfa465d23a66b5ea9a",
-   "sha256_dest": "43445931b2efc3b2bc3f539274c53fe9d8228fcb386392bfa465d23a66b5ea9a",
-   "rule": "copy"
+   "sha256_dest": "421f4fe41107b3f610c7042259a2bb5831ce1f1118069031489ac70f6cb92c20",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_carrots.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_carrots.json",
    "sha256_source": "20d2215ac88659ee34f51043402e3f40f307f54dc0203ebaa38c6f7922e0bac0",
-   "sha256_dest": "20d2215ac88659ee34f51043402e3f40f307f54dc0203ebaa38c6f7922e0bac0",
-   "rule": "copy"
+   "sha256_dest": "dae96f2e5c1bc1aa8676e38650a7c2bb3289761f1bb0aaf25455b7c20e159515",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_onions.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_onions.json",
    "sha256_source": "585622b756965862b3adf7f3c74abbf7aff237187987c7dce8e6806601df6e12",
-   "sha256_dest": "585622b756965862b3adf7f3c74abbf7aff237187987c7dce8e6806601df6e12",
-   "rule": "copy"
+   "sha256_dest": "97a5e7f9ef0b2a451ba351ee600ab1142755dad104d59a85d3ba3aaddd6cd234",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_potatoes.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_potatoes.json",
    "sha256_source": "ffcac1da5a2d50665f4be081e553c2671f06e1df70b6f0a53f33806aec40757d",
-   "sha256_dest": "ffcac1da5a2d50665f4be081e553c2671f06e1df70b6f0a53f33806aec40757d",
-   "rule": "copy"
+   "sha256_dest": "0463f37e42c03b85ec163d05cb9e630858d47dadb6d17a4cdfaec2aedca9a44d",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_rice.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_rice.json",
    "sha256_source": "dcc8c7fd55649e9a447fb85d995afd6a01a717a06ba33de156b082fd81115089",
-   "sha256_dest": "dcc8c7fd55649e9a447fb85d995afd6a01a717a06ba33de156b082fd81115089",
-   "rule": "copy"
+   "sha256_dest": "e186e76ad0b0ef16f9da8dbe1cfb97d039ceda209bf68aff604654f8b51b75ac",
+   "rule": "override"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/feature/wild_tomatoes.json",
    "dest": "data/farmersdelight/worldgen/feature/wild_tomatoes.json",
    "sha256_source": "9460e1e52bd95fdeeb1dafd2548169cbfd4fbc36287add8a149793c4b9c39a76",
-   "sha256_dest": "9460e1e52bd95fdeeb1dafd2548169cbfd4fbc36287add8a149793c4b9c39a76",
-   "rule": "copy"
+   "sha256_dest": "7909e52e6b08b44db125ad8abea1803961704af2de4670a30fa66a6c5840b9b0",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_brown_mushroom_colony.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_brown_mushroom_colony.json",
    "sha256_source": "e660fbf0c78543b6ea264b1c02943154fc1b33b5ae7d71759c467d14c102d82c",
-   "sha256_dest": "e660fbf0c78543b6ea264b1c02943154fc1b33b5ae7d71759c467d14c102d82c",
-   "rule": "copy"
+   "sha256_dest": "4b19660cad6ccc44b6b2ec26f689b7b7bae8c90ace8d490637a8dff3512b4817",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_red_mushroom_colony.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_red_mushroom_colony.json",
    "sha256_source": "3cbe39334597e82009f0140717916f9e644900ac41df6a0affae2d7432b2c91c",
-   "sha256_dest": "3cbe39334597e82009f0140717916f9e644900ac41df6a0affae2d7432b2c91c",
-   "rule": "copy"
+   "sha256_dest": "c3edcf9178716bf7e0f8ef49efc7bb5936a1199fe8d688166ac25cbb3cd08cbd",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_sandy_shrub.json",
@@ -16177,50 +16177,50 @@
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_beetroots.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_beetroots.json",
    "sha256_source": "1a104a6822b99dab1e12e53c50c5de0878be31ce6c6b99fd81aef2a6a2932e57",
-   "sha256_dest": "1a104a6822b99dab1e12e53c50c5de0878be31ce6c6b99fd81aef2a6a2932e57",
-   "rule": "copy"
+   "sha256_dest": "77d2c97a27020d91df8399f744564b3ce7bbdbf3b19d7556e555515105a4b60d",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_cabbages.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_cabbages.json",
    "sha256_source": "56ca1b0a40bba0a420a4822b01370374d890998d92358f65c7e6839619735a56",
-   "sha256_dest": "56ca1b0a40bba0a420a4822b01370374d890998d92358f65c7e6839619735a56",
-   "rule": "copy"
+   "sha256_dest": "a8e28e08fcd7cb94ccdeb690806e3bebfebf794d17e23786c4c76327cc06c782",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_carrots.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_carrots.json",
    "sha256_source": "0117c7c5fd3094a3fa066f94bc0a8ee9352c59e2bae26f2bf6fc6c30450430e4",
-   "sha256_dest": "0117c7c5fd3094a3fa066f94bc0a8ee9352c59e2bae26f2bf6fc6c30450430e4",
-   "rule": "copy"
+   "sha256_dest": "2c4d70f7ec5f681704d578e147ff91063be843d077af16d2b5e902413488183a",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_onions.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_onions.json",
    "sha256_source": "c8561ac5bc712d09c646aea5d9fed9947bcccc31724ce08dc637f5c36fdff7b3",
-   "sha256_dest": "c8561ac5bc712d09c646aea5d9fed9947bcccc31724ce08dc637f5c36fdff7b3",
-   "rule": "copy"
+   "sha256_dest": "709ba7bf39acda6ec01243d80d4d09d1fc45f3eec695890a83de3d4dec112e0c",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_potatoes.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_potatoes.json",
    "sha256_source": "eb4953ee1cc759218db6f16d5a7ca5bacdc46500198b2845d67210ddf4a97c46",
-   "sha256_dest": "eb4953ee1cc759218db6f16d5a7ca5bacdc46500198b2845d67210ddf4a97c46",
-   "rule": "copy"
+   "sha256_dest": "bbfdd01c3499a45bc833a3099d0a5ae7e0a736c7259613d3c81df05bf224300a",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_rice.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_rice.json",
    "sha256_source": "c7400d5824cdfa4d3b13e9953463db187e4b43d6e67010750daf03d5033e44f4",
-   "sha256_dest": "c7400d5824cdfa4d3b13e9953463db187e4b43d6e67010750daf03d5033e44f4",
-   "rule": "copy"
+   "sha256_dest": "51f8872198974ec54748932de698944446a1207d0561c54a5d9d92b9f36e2a01",
+   "rule": "rewrite"
   },
   {
    "source": "src/main/resources/data/farmersdelight/worldgen/placed_feature/patch_wild_tomatoes.json",
    "dest": "data/farmersdelight/worldgen/placed_feature/patch_wild_tomatoes.json",
    "sha256_source": "f64fb5058e09fe2b263a784bfe968d0957317c3a84927c53511d956928f798c4",
-   "sha256_dest": "f64fb5058e09fe2b263a784bfe968d0957317c3a84927c53511d956928f798c4",
-   "rule": "copy"
+   "sha256_dest": "e0250ad4a8b886cc17774c19f85d192ac06dbac441375134cb9820469e2c1b53",
+   "rule": "rewrite"
   },
   {
    "source": "src/generated/resources/data/minecraft/tags/block/blocks_motion_no_leaves.json",

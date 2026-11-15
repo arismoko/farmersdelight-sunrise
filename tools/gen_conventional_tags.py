@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate the Fabric-API convention item tags FD relies on (tools/conventional/item_tags.toml.in).
+"""Generate the Fabric-API convention tags FD relies on (tools/conventional/{item,biome}_tags.toml.in).
 
-Writes data/c/tags/item/<name>.json with `"replace": false` so other mods' entries merge. Refuses to
+Writes data/c/tags/item/<name>.json and data/c/tags/worldgen/biome/<name>.json with `"replace": false` so other mods' entries merge. Refuses to
 write over a file the FD carry owns (tools/carry_manifest.json). `--check` verifies the files.
 """
 import argparse
@@ -11,20 +11,23 @@ import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SRC = REPO / "tools" / "conventional" / "item_tags.toml.in"
-OUT = REPO / "data" / "c" / "tags" / "item"
+TABLES = [
+    (REPO / "tools" / "conventional" / "item_tags.toml.in", "data/c/tags/item"),
+    (REPO / "tools" / "conventional" / "biome_tags.toml.in", "data/c/tags/worldgen/biome"),
+]
 
 
 def render() -> dict[str, bytes]:
-    with SRC.open("rb") as f:
-        table = tomllib.load(f)
     carried = {e["dest"] for e in json.loads((REPO / "tools" / "carry_manifest.json").read_text())["files"]}
     out = {}
-    for name, values in sorted(table.items()):
-        rel = f"data/c/tags/item/{name}.json"
-        if rel in carried:
-            raise SystemExit(f"{rel} is carried from FD; refusing to generate it")
-        out[rel] = (json.dumps({"replace": False, "values": values}, indent=2) + "\n").encode()
+    for src, folder in TABLES:
+        with src.open("rb") as f:
+            table = tomllib.load(f)
+        for name, values in sorted(table.items()):
+            rel = f"{folder}/{name}.json"
+            if rel in carried:
+                raise SystemExit(f"{rel} is carried from FD; refusing to generate it")
+            out[rel] = (json.dumps({"replace": False, "values": values}, indent=2) + "\n").encode()
     return out
 
 

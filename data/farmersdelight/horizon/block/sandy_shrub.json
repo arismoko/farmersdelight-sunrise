@@ -1,5 +1,9 @@
 {
-  "template": "minecraft:short_grass",
+  "template": "minecraft:short_dry_grass",
+  "properties": {
+    "sounds": "minecraft:short_grass",
+    "map_color": 7
+  },
   "shapes": {
     "default": [
       [

@@ -6,8 +6,8 @@ Usage:
   carry_fd.py --fd <checkout> --check                               # verify the repo matches (CI)
   carry_fd.py --fd <checkout> --out <dir>                           # write into another tree
 
-Files are copied byte for byte; the only content change is the fabric:load_conditions rewrite
-from tools/carry_rules.toml.in. tools/carry_manifest.json records every carried file.
+Files are copied byte for byte; content changes are the fabric:load_conditions rewrite, the scripted
+[[rewrite]] rules and the [[override]] files listed in tools/carry_rules.toml.in. tools/carry_manifest.json records every carried file.
 """
 from __future__ import annotations
 
@@ -74,6 +74,36 @@ def rewrite_conditions(node, rules: dict, rel: str):
     return node, False
 
 
+def apply_rewrite(node, rw: dict):
+    """One [[rewrite]] rule over a JSON tree: rename a `type` value, or drop entries of a `placement` list."""
+    if isinstance(node, dict):
+        out = {}
+        for key, value in node.items():
+            if key == "type" and "rename_type" in rw and value == rw["rename_type"]["from"]:
+                value = rw["rename_type"]["to"]
+            elif key == "placement" and "drop_placement" in rw and isinstance(value, list):
+                value = [v for v in value if not (isinstance(v, dict) and v.get("type") == rw["drop_placement"])]
+            out[key] = apply_rewrite(value, rw)
+        return out
+    if isinstance(node, list):
+        return [apply_rewrite(v, rw) for v in node]
+    return node
+
+
+def rewrite_json(rel: str, data: bytes, rules: dict) -> bytes | None:
+    """The [[rewrite]] rules matching `rel` applied in order; None when none matches or nothing changed."""
+    matching = [rw for rw in rules.get("rewrite", []) if fnmatch.fnmatchcase(rel, rw["glob"])]
+    if not matching:
+        return None
+    obj = json.loads(data.decode("utf-8"))
+    new = obj
+    for rw in matching:
+        new = apply_rewrite(new, rw)
+    if new == obj:
+        return None
+    return (json.dumps(new, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+
 def collect(fd: Path, rules: dict) -> dict[str, tuple[str, Path]]:
     """rel path -> (root, source path). Fails on overlap between roots."""
     found: dict[str, tuple[str, Path]] = {}
@@ -107,6 +137,11 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
             if changed:
                 result = (json.dumps(new, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
                 rule = "load_conditions"
+        if rel.endswith(".json"):
+            rewritten = rewrite_json(rel, result, rules)
+            if rewritten is not None:
+                result = rewritten
+                rule = "rewrite"
         overrides = {o["dest"] for o in rules.get("override", [])}
         if rel in overrides:
             result = (REPO / "tools" / "carry_overrides" / rel).read_bytes()
@@ -185,6 +220,8 @@ def counts(manifest: dict) -> list[tuple[str, int]]:
             c["rewritten"] += 1
         if e["rule"] == "override":
             c["overridden"] += 1
+        if e["rule"] == "rewrite":
+            c["rewritten (worldgen)"] += 1
     c["total files"] = len(manifest["files"])
     return sorted(c.items())
 

@@ -1,0 +1,51 @@
+# FD's biome selection (common/registry/ModBiomeModifiers.java, Fabric BiomeModifications.addFeature) restated as
+# NeoForge-format biome modifiers (PORT_PLAN M6-02). Rendered by tools/gen_biome_modifiers.py into
+# data/farmersdelight/neoforge/biome_modifier/<NN>_<feature>.json; NN keeps FD's registration order, which is the
+# order Fabric adds them in (phase, then registration), so each step's feature list matches FD's.
+#
+# FDBiomeSelector: not in `denied`, in `allowed`, base temperature within [min, max] (default −4…4, which no
+# biome leaves, so no climate filter is written for it). Step: VEGETAL_DECORATION for all.
+
+[[modifier]]
+feature = "patch_brown_mushroom_colony"
+allowed = "farmersdelight:has_brown_mushroom_colony"
+
+[[modifier]]
+feature = "patch_red_mushroom_colony"
+allowed = "farmersdelight:has_red_mushroom_colony"
+
+[[modifier]]
+feature = "patch_wild_cabbages"
+allowed = "farmersdelight:has_wild_cabbage"
+
+[[modifier]]
+feature = "patch_wild_beetroots"
+allowed = "farmersdelight:has_wild_beetroots"
+
+[[modifier]]
+feature = "patch_wild_carrots"
+allowed = "farmersdelight:wild_carrots_whitelist"
+denied = "farmersdelight:wild_carrots_blacklist"
+temperature = [0.4, 0.9]
+
+[[modifier]]
+feature = "patch_wild_onions"
+allowed = "farmersdelight:wild_onions_whitelist"
+denied = "farmersdelight:wild_onions_blacklist"
+temperature = [0.4, 0.9]
+
+[[modifier]]
+feature = "patch_wild_potatoes"
+allowed = "farmersdelight:wild_potatoes_whitelist"
+denied = "farmersdelight:wild_potatoes_blacklist"
+temperature = [0.1, 0.3]
+
+[[modifier]]
+feature = "patch_wild_rice"
+allowed = "farmersdelight:wild_rice_whitelist"
+denied = "farmersdelight:wild_rice_blacklist"
+
+[[modifier]]
+feature = "patch_wild_tomatoes"
+allowed = "farmersdelight:wild_tomatoes_whitelist"
+denied = "farmersdelight:wild_tomatoes_blacklist"

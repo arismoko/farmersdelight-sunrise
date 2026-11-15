@@ -1,9 +1,9 @@
 {
-  "type": "farmersdelight:in_order",
+  "type": "minecraft:overlay",
   "features": [
     {
       "feature": {
-      "type": "minecraft:simple_block",
+        "type": "minecraft:simple_block",
         "to_place": {
           "type": "minecraft:simple",
           "state": {

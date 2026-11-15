@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:overlay",
+  "features": [
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:simple",
+          "state": { "id": "farmersdelight:wild_rice", "properties": { "half": "lower", "waterlogged": "true" } }
+        }
+      },
+      "placement": []
+    },
+    {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:simple",
+          "state": { "id": "farmersdelight:wild_rice", "properties": { "half": "upper", "waterlogged": "false" } }
+        }
+      },
+      "placement": [{ "type": "minecraft:offset", "x": 0, "y": 1, "z": 0 }]
+    }
+  ]
+}

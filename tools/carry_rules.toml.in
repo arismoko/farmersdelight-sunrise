@@ -50,3 +50,31 @@ dest = "assets/farmersdelight/items/skillet.json"
 # (register_item_models / item_model_update; ids must be `<mod id>:<path>`), so the node is restated in
 # that shape; the flip animation itself is omitted (delta A12, E-16).
 reason = "item-model node shape differs (A12/E-16)"
+
+# Scripted JSON rewrites (approved exceptions to D6's single rewrite, PORT_PLAN M6-02). Each applies to the
+# carried files matching `glob`; the manifest records rule "rewrite". FD registers two worldgen codecs Horizon does
+# not have; both have an exact vanilla 26.3 equivalent:
+[[rewrite]]
+glob = "data/farmersdelight/worldgen/feature/*.json"
+# farmersdelight:in_order (InOrderFeature) places every listed placed feature and succeeds if any did, which is
+# vanilla's minecraft:overlay (same `features` field).
+rename_type = { from = "farmersdelight:in_order", to = "minecraft:overlay" }
+reason = "in_order == minecraft:overlay"
+
+[[rewrite]]
+glob = "data/farmersdelight/worldgen/placed_feature/*.json"
+# farmersdelight:biome_tag (BiomeTagFilter) keeps a position whose biome is in the tag; every placed feature names
+# #minecraft:is_overworld, and the biome modifiers add these features only to overworld biomes (each FD biome tag
+# lists overworld biomes only), so the filter never rejects and is dropped. It draws no random numbers.
+drop_placement = "farmersdelight:biome_tag"
+reason = "biome_tag(#is_overworld) always passes"
+
+[[override]]
+dest = "data/farmersdelight/worldgen/feature/wild_rice.json"
+# farmersdelight:wild_rice (WildRiceFeature): water at the origin, air above, the lower half survives →
+# DoublePlantBlock.placeAt (lower half waterlogged from the water, upper half dry). Restated with vanilla types:
+# minecraft:overlay of a simple_block of the lower half at the origin (simple_block checks canSurvive) and a
+# simple_block of the upper half one block up (its canSurvive needs the lower half below, so it is placed only when
+# the lower one was). One simple_block of the lower half is not enough: the engine's worldgen places both halves only
+# for vanilla's double plants (E-24). The placed feature already filters water / air above / substrate below.
+reason = "wild_rice feature == lower + upper simple_block (E-24)"

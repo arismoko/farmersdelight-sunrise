@@ -244,7 +244,11 @@ pick_item = "minecraft:red_mushroom"
 
 [wild_cabbages]
 source = "J/common/registry/ModBlocks.java:WILD_CABBAGES (WildCropBlock(STRENGTH, 6), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
-template = "minecraft:short_grass"
+# Template minecraft:short_dry_grass, not short_grass: the worldgen survival check reads the template's rule
+# (E-25) and FD generates this crop on beach sand; short dry grass survives on sand and on all short grass does.
+# Placement and survival in play come from src/blocks/wild.rs. Grass sounds and plant map colour as TALL_GRASS.
+template = "minecraft:short_dry_grass"
+properties = { sounds = "minecraft:short_grass", map_color = 7 }
 shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
 collision_shapes = { default = [] }
 
@@ -289,7 +293,11 @@ collision_shapes = { default = [] }
 
 [wild_beetroots]
 source = "J/common/registry/ModBlocks.java:WILD_BEETROOTS (WildCropBlock(WATER_BREATHING, 8), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
-template = "minecraft:short_grass"
+# Template minecraft:short_dry_grass, not short_grass: the worldgen survival check reads the template's rule
+# (E-25) and FD generates this crop on beach sand; short dry grass survives on sand and on all short grass does.
+# Placement and survival in play come from src/blocks/wild.rs. Grass sounds and plant map colour as TALL_GRASS.
+template = "minecraft:short_dry_grass"
+properties = { sounds = "minecraft:short_grass", map_color = 7 }
 shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
 collision_shapes = { default = [] }
 
@@ -298,8 +306,11 @@ collision_shapes = { default = [] }
 
 [sandy_shrub]
 source = "J/common/registry/ModBlocks.java:SANDY_SHRUB (ofFullCopy(TALL_GRASS)); J/common/block/SandyShrubBlock.java:SHAPE,mayPlaceOn(SAND)"
-# Template minecraft:short_grass; on `#minecraft:sand` only, no bone meal (isValidBonemealTarget is false).
-template = "minecraft:short_grass"
+# On `#minecraft:sand` only, no bone meal (isValidBonemealTarget is false). Template minecraft:short_dry_grass:
+# the worldgen survival check reads the template's rule (E-25), and short grass refuses sand. Grass sounds and
+# plant map colour as TALL_GRASS.
+template = "minecraft:short_dry_grass"
+properties = { sounds = "minecraft:short_grass", map_color = 7 }
 shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
 collision_shapes = { default = [] }
 

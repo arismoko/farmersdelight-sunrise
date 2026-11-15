@@ -1,0 +1,15 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": {
+    "type": "neoforge:and",
+    "values": [
+      "#farmersdelight:wild_tomatoes_whitelist",
+      {
+        "type": "neoforge:not",
+        "value": "#farmersdelight:wild_tomatoes_blacklist"
+      }
+    ]
+  },
+  "features": "farmersdelight:patch_wild_tomatoes",
+  "step": "vegetal_decoration"
+}

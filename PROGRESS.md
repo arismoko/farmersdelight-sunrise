@@ -750,3 +750,53 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
     skillet, cutting board, …); no load warnings for the tab (creative-tabs-p2.png). Closes the creative-tab entry.
 - not covered: fire spread/burn odds of the wild crops (declared 60/100, not run).
 - next: M6-02 (design in the M6-01 IN PROGRESS entry above).
+
+## M6-02 Worldgen — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did (near-exact instead of the planned degraded form):
+  - carry: two scripted `[[rewrite]]` rules (`tools/carry_rules.toml.in`, manifest rule "rewrite", covered by
+    `tools/test_carry.py`): `farmersdelight:in_order` → vanilla `minecraft:overlay` (identical semantics), and the
+    `farmersdelight:biome_tag` (#is_overworld) placement entry dropped (always passes in the overworld, draws no
+    random). Override `worldgen/feature/wild_rice.json`: overlay of `simple_block` lower half (waterlogged) at the
+    origin + `simple_block` upper half one up.
+  - biome selection: FD's `ModBiomeModifiers` (Fabric `BiomeModifications`) restated as 9 NeoForge `add_features`
+    modifiers in `data/farmersdelight/neoforge/biome_modifier/NN_*.json`, generated from
+    `tools/worldgen/biome_modifiers.toml.in` by `tools/gen_biome_modifiers.py` (`--check`): `neoforge:and` of the
+    allow tag, `neoforge:not` deny tag, `horizon:climate` base temperature (carrots/onions 0.4–0.9, potatoes 0.1–0.3).
+    File prefix NN keeps FD's registration order (Fabric sorts by phase, then registration — checked in the user's
+    fabric-biome-api-v1 jar with javap), so each step's feature order matches.
+  - Fabric convention biome tags FD's tags reference: `tools/conventional/biome_tags.toml.in` →
+    `data/c/tags/worldgen/biome/` (is_mushroom, is_beach, is_underground, is_cave, is_wet/overworld,
+    is_hot/overworld), same generator as the item tags.
+  - wild_cabbages, wild_beetroots, sandy_shrub: template `minecraft:short_dry_grass` (was short_grass), grass sounds,
+    plant map colour.
+- engine gaps found (mod-side workarounds in place):
+  - **E-24** worldgen `simple_block` places both halves only for vanilla's double plants (a fixed list); a mod double
+    plant gets its lower half alone. Workaround: the two-step overlay above.
+  - **E-25** worldgen survival (`generator_decoration` `block_survives`) reads the template's static rule table
+    (`survival-rules.json`), never mod parts. Short grass refuses sand, so beach cabbages/beetroots/shrubs never
+    generated (0 on 11 beaches). Workaround: short_dry_grass template (`#supports_dry_vegetation` = sand, terracotta,
+    `#supports_vegetation`); every FD feature's own filter already demands the right ground below.
+- deltas: **A24** wild cabbages/beetroots/sandy shrub use the short dry grass template: the client predicts a
+  placement on terracotta that the server refuses (snaps back, E-14), and on sand they may play the dry-vegetation
+  ambient sound. **A25** generated wild rice is checked by the tall grass template's survival rule (E-25), so it can
+  generate in flowing water where FD's canSurvive needs a source (the placed filter only asks for water). Placing by
+  hand keeps FD's rule.
+- evidence (new world `FDGen`, seed 0; `run/shots/m6-02/`):
+  - load log: no worldgen/biome modifier warnings. Content cache biomes: every overworld biome got exactly the FD
+    features FD's selectors give (e.g. plains/forest/river/oceans/deep_dark: carrots+onions; taiga, old growth
+    pine/spruce taiga, windswept hills/forest/gravelly hills, stony shore: potatoes; desert/badlands/savanna/
+    jungles/stony peaks/warm ocean/mushroom fields: tomatoes; swamp/mangrove/jungles/beach: rice; beach/snowy beach:
+    cabbages+beetroots; mushroom fields: both colonies; carrots/onions not in mushroom fields or lush caves).
+  - generated in new chunks (find-block, 64 radius): swamp −1175,414: 28 wild rice blocks (14 plants, lower
+    waterlogged on dirt + dry upper; swamp-wild-rice.png); mushroom fields −503,−1154: 21 brown colonies; plains/
+    forest: 9 carrots; desert 634,−1619: 11 tomatoes; taiga 2810,192: potatoes; beaches after the template change:
+    cabbages (−6106,64,−6435, beach-wild-cabbages.png; 9122,−78; −129,−9137; 9064,−8985), beetroots (9102,−57: 32;
+    −147,−9076), sandy shrubs. `/place feature` in FDTest: cabbages on sand, carrots (+coarse dirt, short grass),
+    rice 30/30 with both halves.
+  - restart: generated cabbages and both rice halves still there.
+  - M6-01 behaviour re-checked with the new template: terracotta refused, grass accepted, bone meal spreads cabbages
+    only.
+- not covered: density against an FD reference run (no oracle: FD is never run here); red colony seen only in the
+  modified-biome table, not found in the one mushroom field visited.
+- next: M6-03 (village pools/processors, `horizon:add_to`).

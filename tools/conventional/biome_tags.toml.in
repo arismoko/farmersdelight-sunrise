@@ -1,0 +1,20 @@
+# Fabric API convention biome tags (`c:` namespace) that FD's biome tags reference (data/farmersdelight/tags/
+# worldgen/biome). On Fabric, Fabric API ships them; Horizon ships none. Members as listed by
+# fabric-convention-tags-v2 4.10.4 for 26.3 (read from the jar's data/c/tags/worldgen/biome). An entry
+# `{ id = …, required = false }` is an optional reference, as in the jar.
+# Generated into data/c/tags/worldgen/biome by tools/gen_conventional_tags.py.
+
+"is_mushroom" = ["minecraft:mushroom_fields"]
+"is_beach" = [{ id = "#minecraft:is_beach", required = false }]
+"is_underground" = [{ id = "#c:is_cave", required = false }]
+"is_cave" = ["minecraft:lush_caves", "minecraft:dripstone_caves", "minecraft:sulfur_caves", "minecraft:deep_dark"]
+"is_wet/overworld" = [
+  "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:jungle", "minecraft:bamboo_jungle",
+  "minecraft:sparse_jungle", "minecraft:beach", "minecraft:lush_caves", "minecraft:dripstone_caves",
+  "minecraft:sulfur_caves",
+]
+"is_hot/overworld" = [
+  "minecraft:jungle", "minecraft:bamboo_jungle", "minecraft:sparse_jungle", "minecraft:desert", "minecraft:badlands",
+  "minecraft:wooded_badlands", "minecraft:eroded_badlands", "minecraft:savanna", "minecraft:savanna_plateau",
+  "minecraft:windswept_savanna", "minecraft:stony_peaks", "minecraft:mushroom_fields", "minecraft:warm_ocean",
+]
