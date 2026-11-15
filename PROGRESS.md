@@ -1125,3 +1125,35 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: pad cleared (leftover M7-05 cabinets removed too). The world time was set to noon to take the
   screenshots (it was night). Player back at 22,160,22, creative; hotbar slot 9 holds the shepherd's pies again.
 - next: M7-07 (rug, tatami, mats).
+
+## M7-07 Rug, tatami, mats — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `tatami`, `full_tatami_mat`, `half_tatami_mat`, `canvas_rug` declared (white-wool template; mats 0.3
+  strength and FD's 2-px shape, half mat POPPED, rug 0.2 strength, grass sounds, 1-px shape, no crack overlay and
+  no survival rule — FD's CanvasRugBlock is a plain Block; fuel 400/200/100/200; wool fire odds dropped). Code
+  `src/blocks/tatami.rs`: tatami placement (facing into the clicked block, paired with an unpaired clicked tatami
+  unless sneaking) and unpairing in `updateShape`; full mat placement along the look direction, refused unless the
+  cell ahead is replaceable with a floor; mat `updateShape` (partner and floor), creative foot break removing the
+  head without drops (`on_destroyed_by_player` → `destroy_block(drop=false)`); half mat facing and floor rule.
+- `setPlacedBy` (no `on_block_placed_by` at the pin): done in `entity_place`, which the engine fires from a
+  placement preview before the block is written; it writes the partner (paired tatami / mat head, flag 3). The
+  engine then asks `state_for_placement` again for the real placement, so both rules accept the partner just
+  written (a head of the same facing in front; a clicked tatami already paired toward this cell). Found in game:
+  without that, the mat head was written and the foot refused.
+- evidence (pad 50145..50155,219,49995..50005, creative unless noted):
+  - mat looking south → foot `[facing=south,part=foot]` + head at z+1 `[part=head]`; with stone in the head cell
+    the placement is refused (nothing placed).
+  - creative break of a foot: both halves gone, no item. Survival break of a foot: one mat dropped (from the head,
+    FD's loot is `part=head` only); survival break of a head: one mat, the foot vanishes.
+  - tatami placed against a tatami's side → clicked one `[facing=north,paired=true]`, new one
+    `[facing=south,paired=true]`; removing one → the other `paired=false`. With Shift held → both unpaired.
+  - half mat placed looking south → `facing=north`; floor removed → it breaks and drops itself.
+  - rug stays when its floor is removed (FD: no survival rule); sky light under it 15 (propagatesSkylightDown).
+- deltas: **A36** the head removed by a creative foot break sends its break particles/sound to the breaker as well
+  (FD `levelEvent(player, 2001, …)` skips the breaker; the API has no raw state id for a hand-made level event).
+- tooling note: `ctl interact --sneak` / `place --sneak` click before the server sees the sneak; hold Shift
+  (`ctl key shift down`) first.
+- not covered: crack overlay hidden on the rug (declared `destroy_overlay = false`, not watched mid-break),
+  combination step sounds (tag carried).
+- world changes: pad cleared and its floor restored. Player back at 22,160,22, creative, hotbar slot 9 restored.
+- next: M7-08 (safety net, straw bed, misc).

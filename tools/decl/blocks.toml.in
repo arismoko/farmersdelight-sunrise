@@ -1256,3 +1256,50 @@ template = "minecraft:spruce_wall_hanging_sign"
 wood_type = "farmersdelight:canvas_black"
 sign_text_color = "white"
 item = false
+
+# --- M7-07 rug, tatami, mats ---
+# Template minecraft:white_wool (FD: ofFullCopy(WOOL.white()) / ofFullCopy(CARPET.white())); FireBlock odds are
+# per vanilla block and not copied, so the wool's fire odds are dropped in code (src/blocks/tatami.rs). The rug is a
+# plain Block in FD (no CarpetBlock survival rule), so it is not on the carpet template; its crack overlay is hidden
+# (HideBlockBreakProgressMixin). Mats keep FD's two-pixel getShape (outline and collision); the full mat is a
+# bed-style pair written in code (`entity_place` stands in for setPlacedBy).
+
+[tatami]
+source = "J/common/registry/ModBlocks.java:TATAMI (ofFullCopy(WOOL.white())); J/common/block/TatamiBlock.java:FACING,PAIRED; J/common/registry/ModItems.java:TATAMI (fuel 400)"
+# See the M7-07 note above.
+template = "minecraft:white_wool"
+state_properties = { facing = { type = "enum", values = ["down", "up", "north", "south", "west", "east"] }, paired = { type = "boolean" } }
+default_state = { facing = "down", paired = "false" }
+[tatami.components]
+"minecraft:cooking_fuel" = { burn_time = 400, speed_multiplier = 1.0 }
+
+[full_tatami_mat]
+source = "J/common/registry/ModBlocks.java:FULL_TATAMI_MAT (ofFullCopy(WOOL.white()).strength(0.3)); J/common/block/TatamiMatBlock.java:FACING,PART,SHAPE; J/common/registry/ModItems.java:FULL_TATAMI_MAT (fuel 200)"
+# See the M7-07 note above.
+template = "minecraft:white_wool"
+properties = { hardness = 0.3, explosion_resistance = 0.3, occludes = false }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, part = { type = "enum", values = ["head", "foot"] } }
+default_state = { facing = "north", part = "foot" }
+shapes = { default = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0]] }
+[full_tatami_mat.components]
+"minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }
+
+[half_tatami_mat]
+source = "J/common/registry/ModBlocks.java:HALF_TATAMI_MAT (ofFullCopy(WOOL.white()).strength(0.3).pushReaction(POPPED)); J/common/block/TatamiHalfMatBlock.java:FACING,SHAPE; J/common/registry/ModItems.java:HALF_TATAMI_MAT (fuel 100)"
+# See the M7-07 note above.
+template = "minecraft:white_wool"
+properties = { hardness = 0.3, explosion_resistance = 0.3, occludes = false, push_reaction = "POPPED" }
+state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] } }
+default_state = { facing = "north" }
+shapes = { default = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0]] }
+[half_tatami_mat.components]
+"minecraft:cooking_fuel" = { burn_time = 100, speed_multiplier = 1.0 }
+
+[canvas_rug]
+source = "J/common/registry/ModBlocks.java:CANVAS_RUG (ofFullCopy(CARPET.white()).sound(GRASS).strength(0.2)); J/common/block/CanvasRugBlock.java:SHAPE,propagatesSkylightDown; J/common/mixin/HideBlockBreakProgressMixin.java; J/common/registry/ModItems.java:CANVAS_RUG (fuel 200)"
+# See the M7-07 note above.
+template = "minecraft:white_wool"
+properties = { hardness = 0.2, explosion_resistance = 0.2, occludes = false, sounds = "minecraft:grass_block", destroy_overlay = false }
+shapes = { default = [[0.0, 0.0, 0.0, 1.0, 0.0625, 1.0]] }
+[canvas_rug.components]
+"minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }

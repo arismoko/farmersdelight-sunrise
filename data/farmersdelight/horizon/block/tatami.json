@@ -1,0 +1,29 @@
+{
+  "template": "minecraft:white_wool",
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "paired": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "facing": "down",
+    "paired": "false"
+  },
+  "components": {
+    "minecraft:cooking_fuel": {
+      "burn_time": 400,
+      "speed_multiplier": 1.0
+    }
+  }
+}

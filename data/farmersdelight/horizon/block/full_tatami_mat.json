@@ -1,0 +1,48 @@
+{
+  "template": "minecraft:white_wool",
+  "properties": {
+    "hardness": 0.3,
+    "explosion_resistance": 0.3,
+    "occludes": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "part": {
+      "type": "enum",
+      "values": [
+        "head",
+        "foot"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "part": "foot"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.125,
+        1.0
+      ]
+    ]
+  },
+  "components": {
+    "minecraft:cooking_fuel": {
+      "burn_time": 200,
+      "speed_multiplier": 1.0
+    }
+  }
+}

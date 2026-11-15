@@ -54,6 +54,7 @@ impl Hooks for FarmersDelight {
         blocks::pie::register(registrar);
         blocks::storage::register(registrar);
         blocks::basket::register(registrar, &self.baskets, &self.container_names);
+        blocks::tatami::register(registrar);
         blocks::cabinet::register(registrar, &self.baskets, &self.container_names);
     }
 
@@ -195,6 +196,11 @@ impl Hooks for FarmersDelight {
             return Flow::Cancel;
         }
         blocks::pie::predict_use(host, event)
+    }
+
+    fn entity_place(&self, host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) -> Flow {
+        blocks::tatami::on_placed(host, event);
+        Flow::Continue
     }
 
     fn mod_container_viewers(

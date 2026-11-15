@@ -1,0 +1,28 @@
+{
+  "template": "minecraft:white_wool",
+  "properties": {
+    "hardness": 0.2,
+    "explosion_resistance": 0.2,
+    "occludes": false,
+    "sounds": "minecraft:grass_block",
+    "destroy_overlay": false
+  },
+  "shapes": {
+    "default": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0625,
+        1.0
+      ]
+    ]
+  },
+  "components": {
+    "minecraft:cooking_fuel": {
+      "burn_time": 200,
+      "speed_multiplier": 1.0
+    }
+  }
+}

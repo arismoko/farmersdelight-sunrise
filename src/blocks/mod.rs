@@ -13,5 +13,6 @@ pub mod rope;
 pub mod skillet;
 pub mod storage;
 pub mod stove;
+pub mod tatami;
 pub mod tomato;
 pub mod wild;
