@@ -48,6 +48,7 @@ impl Hooks for FarmersDelight {
         blocks::compost::register(registrar);
         blocks::colony::register(registrar);
         blocks::wild::register(registrar, &self.drops);
+        blocks::feast::register(registrar);
     }
 
     fn block_entity_container(
@@ -172,6 +173,10 @@ impl Hooks for FarmersDelight {
     fn loot_drops(&self, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
         blocks::skillet::on_loot_drops(&self.removed_skillets, host, event);
         blocks::cooking_pot::on_loot_drops(&self.recipes, &self.pots, host, event);
+    }
+
+    fn use_item_on_block(&self, host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow {
+        blocks::feast::predict(host, event)
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {

@@ -206,7 +206,7 @@ fn left_behind(level: &dyn LevelHost, state: BlockState) -> Option<BlockState> {
 /// level-scoped host these hooks get has no face-sturdiness or shape query at the build pin, so
 /// any block below that is not air and not `#minecraft:replaceable` supports the board
 /// (accepted delta A9, PROGRESS M1-02).
-fn supported(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
+pub(crate) fn supported(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
     let floor = [pos[0], pos[1] - 1, pos[2]];
     let Some(state) = level.block_state(floor) else {
         return true;

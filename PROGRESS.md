@@ -907,3 +907,49 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   investigated).
 - **M6 closed.**
 - next: M7-01 (PORT_PLAN §11).
+
+## M7-01 Feasts — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: 6 feast blocks declared (`tools/decl/blocks.toml.in`, stonecutter template for `facing` opposite the
+  placer, declared `servings` 0–4 / medley 0–8, placed full; outlines generated from BlockShapes/feast classes
+  incl. ShapeUtils rotation; gleaming salad `state_light` = servings × 3; push reaction POPPED; items stack to 1;
+  stuffed pumpkin block compostable 1.0, caught by `tools/test_compost_fuel_decls.py`). Code `src/blocks/feast.rs`:
+  FeastBlock#takeServing (container rule, creative keeps the bowl, leftovers break with loot on the next use,
+  stuffed pumpkin vanishes with its last serving, armor-equip sound, 3 block particles), medley serving order,
+  survival/updateShape, comparator = servings, not pathfindable, `use_without_item` Pass (template menu never
+  opens), PlaceableItem "Placeable" tooltip, gleaming salad sparkles.
+- evidence (FDTest, sky platform 50096–50108,220,49996–50008; `run/shots/m7-01/`):
+  - roast chicken in survival with 6 bowls: servings 4→0, one bowl used and one roast chicken given per use;
+    next use broke the leftovers, dropping bowl + bone meal (carried loot table). `feasts-placed.png`.
+  - empty hand on the ham: action bar "You need a Bowl to eat this.", no stonecutter menu (`need-bowl.png`).
+  - rice roll medley, empty hand: 3 kelp roll slices, 3 salmon rolls, 2 cod rolls in that order, then leftovers
+    broke. Stuffed pumpkin: 4 servings, block gone after the 4th, nothing dropped (its table drops only at 4).
+  - breaking a full ham in survival drops the ham block; placed from the item looking west → `facing=east`.
+  - comparator behind the shepherd's pie: power 4, 3 after a serving (and 2→1 after the restart).
+  - gleaming salad block light 12 at 4 servings, 6 at 2. Sparkles: 66 in 30 s from 21 salads (expected ≈ 56–63
+    from vanilla's animateTick odds × 0.05 × servings); one visible in `salad-sparkle-night.png`.
+  - support removed → the feast dropped itself; enclosed water source beside a feast does not flow into it
+    (forceSolidOn behaviour holds); piston push pops it with its drop.
+  - creative with a bowl: served, bowl kept. Off hand: bone meal in the main hand + bowl in the off hand → action
+    bar message for the main hand, then the off hand served (bowl 2→1, salad 3→2).
+  - full restart (`ctl quit`, rebuild, `launch.sh FDTest`): feast states identical, serving still works.
+- engine gap **E-28** (new): a remote client predicts a mod block's use from its template (`remote_block_reacts`
+  in `game/network/remote/mod.rs`); the block Part's `use_item_on` is server-only, so the stonecutter's empty-hand
+  use claimed every main-hand click and the client never sent the off hand's click. Workaround: `use_item_on_block`
+  (Block phase, client side only) answers the feast's own prediction (Success when it serves or breaks, Pass when it
+  needs a container), as FD's client-side `takeServing` does. Same gap likely for other template-backed blocks
+  (cutting board, pot, skillet answer every main-hand click, so they are unaffected).
+- deltas: **A28** feast survival uses the A9 approximation (the hook's level host has no face-sturdiness query; any
+  non-air, non-replaceable block below supports it). **A29** gleaming salad sparkles come from a mod-side block
+  entity that ticks on the client (no animate-tick hook for plain blocks, E-06); the salad therefore saves an empty
+  `farmersdelight:gleaming_salad_block` block entity, which FD does not have. The rate per tick is vanilla's
+  per-block animateTick chance (≈0.0229) × 0.05 × servings; vanilla's real odds vary with the player's distance.
+- plan correction: PORT_PLAN M7-01 lists `destroy_overlay` false, but HideBlockBreakProgressMixin hides the crack
+  only on the canvas rug (M7-07); feasts keep it.
+- not covered: the "Placeable" tooltip (coded, not hovered in game: horizon-ctl has no hover), pathfinding (hook
+  coded, not observed with a mob), LAN second client (M7-09).
+- world changes: test platform with feasts, 20 gleaming salads, piston and comparator at ~50100,220,50000; time set
+  to 1000; player back at 22,160,22 in creative. Test items left in the inventory: cod rolls 2, gleaming salads 2,
+  kelp roll slices 3, roast chickens 4, salmon rolls 3, shepherd's pies 3, stuffed pumpkins 4, bowls 3 + 1 in the
+  off hand, 1 extra bone meal (`clear` is not run on the user's inventory).
+- next: M7-02 (pies & pumpkin pie).
