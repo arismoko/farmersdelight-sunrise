@@ -646,3 +646,20 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   colony item on rich soil → `[age=3]`, on stone in daylight → not placed; breaking age 3 and age 2 → 5 + 4 mushrooms
   (carried loot table).
 - next: M5-08
+
+## M5-08 M5 demo — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: 9f4b88c
+- single player (FDTest demo farm at 18..26, 160..164, 18 plus the M5-05..07 rigs; `run/shots/m5-08/farm_*.png`):
+  cabbages[age=4], onions[age=2], budding_tomatoes[age=2], tomatoes[age=3], tomatoes_on_rope[age=1] under rope,
+  rice[age=3,supporting=true] + rice_panicles[age=2], open rope fence gate, organic_compost[composting=4],
+  colonies age 2/3, rich_soil_farmland moisture 5/7 with wheat — 15 block states read before `quit` and after a
+  fresh launch: identical. Per-feature behaviour is in the M5-01…M5-07 entries (each run in game).
+- LAN (dedicated server re-exported with this build, clients Alice and Bob refreshed from it):
+  - Alice opens the rope fence gate by hand → Bob's subtitles show "Rope Fence Gate unties"
+    (`bob_gate_open.png`): other players hear it; only the clicker's own client is silent (E-20).
+  - wheat on moist rich soil farmland, random_tick_speed 60: Bob sees the green growth particles on the boosted
+    wheat and the "Bone Meal crinkles" subtitle (`bob_boost_3.png`).
+- deltas: A21 addition — the boost from rich **soil** also plays the bone meal sound (FD's payload draws particles
+  only; the farmland's boost already uses level event 1505 in FD, sound included).
+- not covered here: compost → rich soil → tilled → crop as one continuous survival run (each step was run on its own).
+- next: M6-01
