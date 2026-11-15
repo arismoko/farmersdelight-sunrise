@@ -1,4 +1,6 @@
 //! Blocks. See PORT_PLAN §6.1.
+pub mod colony;
+pub mod compost;
 pub mod cooking_pot;
 pub mod cutting_board;
 pub mod rice;

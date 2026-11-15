@@ -1,0 +1,73 @@
+{
+  "template": "minecraft:brown_mushroom",
+  "state_properties": {
+    "age": {
+      "type": "enum",
+      "values": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ]
+    }
+  },
+  "default_state": {
+    "age": "0"
+  },
+  "shapes": {
+    "properties": [
+      "age"
+    ],
+    "values": {
+      "0": [
+        [
+          0.25,
+          0.0,
+          0.25,
+          0.75,
+          0.5,
+          0.75
+        ]
+      ],
+      "1": [
+        [
+          0.1875,
+          0.0,
+          0.1875,
+          0.8125,
+          0.625,
+          0.8125
+        ]
+      ],
+      "2": [
+        [
+          0.125,
+          0.0,
+          0.125,
+          0.875,
+          0.75,
+          0.875
+        ]
+      ],
+      "3": [
+        [
+          0.0625,
+          0.0,
+          0.0625,
+          0.9375,
+          0.875,
+          0.9375
+        ]
+      ]
+    }
+  },
+  "collision_shapes": {
+    "default": []
+  },
+  "pick_item": "minecraft:brown_mushroom",
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/always_add_one"
+    }
+  }
+}

@@ -44,6 +44,8 @@ impl Hooks for FarmersDelight {
         blocks::tomato::register(registrar);
         blocks::rice::register(registrar);
         blocks::rich_soil::register(registrar, &self.boosts, &self.trample);
+        blocks::compost::register(registrar);
+        blocks::colony::register(registrar);
     }
 
     fn block_entity_container(

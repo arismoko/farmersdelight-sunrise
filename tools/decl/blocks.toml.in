@@ -195,3 +195,43 @@ source = "J/common/registry/ModBlocks.java:RICH_SOIL_FARMLAND (ofFullCopy(FARMLA
 # support are code.
 template = "minecraft:farmland"
 base_block = "farmersdelight:rich_soil"
+
+# --- M5-06 organic compost ---
+
+[organic_compost]
+source = "J/common/registry/ModBlocks.java:ORGANIC_COMPOST (ofFullCopy(DIRT).strength(1.2F).sound(CROP)); J/common/block/OrganicCompostBlock.java:COMPOSTING(0-7),isRandomlyTicking"
+# Template minecraft:dirt. `composting` 0-7 is an enum of the digits (declared properties are boolean
+# or enum; the carried blockstate's `composting=N` variants match). The composting tick and the
+# comparator signal are code (src/blocks/compost.rs); the mycelium motes are not drawn (delta A5).
+template = "minecraft:dirt"
+properties = { hardness = 1.2, explosion_resistance = 1.2, sounds = "minecraft:wheat", random_ticks = true }
+state_properties = { composting = { type = "enum", values = ["0", "1", "2", "3", "4", "5", "6", "7"] } }
+default_state = { composting = "0" }
+
+# --- M5-07 mushroom colonies ---
+
+[brown_mushroom_colony]
+source = "J/common/registry/ModBlocks.java:BROWN_MUSHROOM_COLONY (ofFullCopy(BROWN_MUSHROOM)); J/common/block/MushroomColonyBlock.java:COLONY_AGE(AGE_3),SHAPE_BY_AGE,getCloneItemStack"
+# Template minecraft:brown_mushroom (properties, light 1, sounds). `age` 0-3 as an enum of the digits.
+# Growth, survival, bone meal, shears/knife harvest and placement at age 3 are code (src/blocks/colony.rs).
+template = "minecraft:brown_mushroom"
+state_properties = { age = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { age = "0" }
+shapes = { properties = ["age"], values = { "0" = [[0.25, 0.0, 0.25, 0.75, 0.5, 0.75]], "1" = [[0.1875, 0.0, 0.1875, 0.8125, 0.625, 0.8125]], "2" = [[0.125, 0.0, 0.125, 0.875, 0.75, 0.875]], "3" = [[0.0625, 0.0, 0.0625, 0.9375, 0.875, 0.9375]] } }
+collision_shapes = { default = [] }
+pick_item = "minecraft:brown_mushroom"
+
+[brown_mushroom_colony.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+
+[red_mushroom_colony]
+source = "J/common/registry/ModBlocks.java:RED_MUSHROOM_COLONY (ofFullCopy(RED_MUSHROOM)); J/common/block/MushroomColonyBlock.java"
+template = "minecraft:red_mushroom"
+state_properties = { age = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { age = "0" }
+shapes = { properties = ["age"], values = { "0" = [[0.25, 0.0, 0.25, 0.75, 0.5, 0.75]], "1" = [[0.1875, 0.0, 0.1875, 0.8125, 0.625, 0.8125]], "2" = [[0.125, 0.0, 0.125, 0.875, 0.75, 0.875]], "3" = [[0.0625, 0.0, 0.0625, 0.9375, 0.875, 0.9375]] } }
+collision_shapes = { default = [] }
+pick_item = "minecraft:red_mushroom"
+
+[red_mushroom_colony.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
