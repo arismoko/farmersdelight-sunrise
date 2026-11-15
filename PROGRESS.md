@@ -835,3 +835,24 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   effect; villages always get FD's additions (FD's default).
 - not covered: trades (M6-04), taiga/snowy farm rates measured on few villages.
 - next: M6-03 savanna probe, then M6-04.
+
+## M6-03 Villages — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit) | no mod code change since 936a5da
+- did: closed the open savanna question from the IN PROGRESS entry above. Not an engine problem: savanna village
+  **street** pieces (`streets/crossroad_07`, `straight_06`, `straight_08`, `straight_11`) carry their own wheat and
+  melon-stem plots in the structure NBT (153 wheat, 31 melon stems ≈ 20% melon) and use the street processor list,
+  not `farm_savanna`. The `/place structure` village at 40512,70,40512 had only street plots, which explains its 21%
+  melon and 0 FD crops; natural savanna villages mix street plots with real farms (hence the low FD share there).
+  FD on vanilla leaves street plots alone too.
+- evidence (world FDTest, far from the user's area; `run/shots/m6-03/savanna-jigsaw-counts.txt`):
+  - 37 × `/place jigsaw minecraft:village/savanna/houses minecraft:building_entrance 1 X 200 Z` around 50000,50000:
+    farm pieces with `farm_savanna` gave wheat 208, cabbages 95, tomatoes 91, melon stems 35 → 48.5 / 22.1 / 21.2 /
+    8.2% vs expected 49 / 20 / 21 / 10% (vanilla melon 0.1, then FD's processor reseeded per position). FD compost
+    piece also placed (14 composters, 25 organic compost, 5 rich soil farmland).
+  - with the earlier entry: compost heaps in plains/snowy/savanna villages, FD crops on plains/desert/savanna farms.
+- quirk added to PORT_PLAN §4.1 as **Q19** (Q17 was already taken): plains/taiga farms never get cabbages
+  (position-seeded draw shared with vanilla's carrot rule). Kept.
+- deltas: A26 (config keys inert, E-26) stands; "config off → none" in the acceptance cannot be met (recorded delta).
+- not covered: a screenshot (the player landed in ocean at night; counts are the evidence); taiga/snowy rates on
+  more villages.
+- next: M6-04 (trades & farmer POI).
