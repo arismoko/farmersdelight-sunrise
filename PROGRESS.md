@@ -1503,3 +1503,41 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDM6 (test world): pad 10..20,99..104,1340..1348 holds rich soil, cave vines, signs, pies, board +
   dispenser, tomato vines; random_tick_speed 3, time noon. Config files back to defaults. FDTest untouched. Game closed.
 - next: M9-02 (recipe book).
+
+## M9-02 Recipe book — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/recipes/book.rs`. Book type `farmersdelight:cooking` registered (`recipe_book_type`); the pot menu bound
+  to it with `menu_recipe_book` (layout `Crafting` 3×2 over the six inputs, result role = output slot 8) and a
+  frozen screen = the pot's screen + book + toggle at (5, 34) (`CookingPotScreen#getRecipeBookButtonPosition`:
+  `leftPos + 5`, `height/2 − 49`); the block's `screen` hook returns the same value. `recipe_book_categories` builds
+  three categories from the parsed pot recipes by `recipe_book_tab`: `farmersdelight:cooking_meals` (icon vegetable
+  noodles), `cooking_drinks` (apple cider), `cooking_misc` (dumplings), search group
+  `farmersdelight:cooking_search`; each recipe a Shapeless display (ingredients, result stack, station cooking pot)
+  with placement cells (a `fabric:any` slot merged into one ingredient). `enableCookingPotRecipeBook` off: the
+  pot closes an open book when it opens (`CookingPotScreen#init` toggles it shut; the button stays usable).
+  Decision: the `send_recipe_book_values` payload is not needed — the engine syncs custom book settings itself.
+  FD's `farmersdelight:cutting` category is not declared (no screen shows it; the engine needs a target menu).
+- evidence (`run/shots/m9-02/`):
+  - single player (FDM6): toggle drawn at FD's spot (`pot-closed.png`); book opens with search + 3 tabs
+    (`book-open.png`); with the player's 20 unlocked pot recipes: Drinks 1, Meals 14, Misc 5; after
+    `recipe give @s *`: Drinks 2, Meals 20, Misc 6 (= the 28 files' tabs), search 20 + a second page; a craftable
+    recipe has the white frame (`misc-tab.png`). The open state survived closing the pot and a game restart.
+  - dedicated server (re-exported with this build, Alice): clicking Tomato Sauce with 4 tomatoes moves 2 into input
+    slots 0 and 1 (`server-placed.png`); clicking Cabbage Rolls without ingredients shows ghost cabbage and raw
+    pork in the grid and the result ghost in the output slot, the tomatoes go back (`server-ghost.png`).
+    `enableCookingPotRecipeBook` false in the server's file: reopening the pot → book closed, the toggle still
+    opens it; true: the open state is kept.
+- engine gap **E-36**: in single player (window on the integrated server thread) clicking a recipe in a mod book
+  does nothing — no placement and no ghost, nothing logged, also after reopening the pot 3 times; the same build
+  places and shows ghosts for a dedicated server's client. The client drops the click when no catalogue was
+  negotiated (`request_mod_book_recipe` needs a placement window; the server answers catalogue requests through
+  `mod_book_menu_snapshot`, which reads the LAN hub's guest). No mod-side route (the catalogue handshake is engine
+  internal). Not E-08: the E-08 retry (`f87fde4`) is present at the pin as `apply_screen_with_mod_book`.
+- deltas: **A48** (E-36) no recipe placement or ghost in single player. **A49** book presentation from the engine:
+  tab order Drinks, Meals, Misc (categories ordered by id; FD: Meals, Drinks, Misc); one Misc icon (FD shows
+  dumplings and tomato sauce); vanilla filter-button sprites and "Craftable" wording (FD: `cooking_pot_*` sprites,
+  "Cookable"); result ghost in the output slot (FD: the meal display) and no ghost for the serving container
+  (FD fills slot 7 when empty).
+- world changes: FDM6 cooking pot at 12,100,1343; FDServer: a cooking pot at −532,81,70 and Alice's tomatoes. All
+  games stopped.
+- next: M9-03 (HUD overlays).

@@ -1,4 +1,5 @@
 //! Mod-side recipe types (`farmersdelight:cutting`, `farmersdelight:cooking`), parsed from raw JSON.
+pub mod book;
 pub mod cache;
 pub mod cooking;
 pub mod cutting;

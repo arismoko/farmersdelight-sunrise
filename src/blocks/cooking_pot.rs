@@ -467,6 +467,7 @@ impl CookingPot {
             }
             return InteractionResult::Success;
         }
+        crate::recipes::book::close_if_disabled(host, player);
         let _ = player.open_menu(host, be);
         {
             let mut s = lock(&self.shared);
@@ -772,22 +773,7 @@ impl BlockEntityPart for CookingPot {
     }
 
     fn screen(&self, _: &dyn Host, _: &mut ScreenEvent<'_>) -> Option<Screen> {
-        let mut slots: Vec<Option<[f32; 2]>> = (0..INPUTS)
-            .map(|i| Some([30.0 + 18.0 * (i % 3) as f32, 17.0 + 18.0 * (i / 3) as f32]))
-            .collect();
-        slots.push(None); // meal display: drawn below, never clicked (CookingPotMealSlot)
-        slots.push(Some([92.0, 55.0]));
-        slots.push(Some([124.0, 55.0]));
-        Some(Screen {
-            width: 176.0,
-            height: 166.0,
-            slots,
-            inventory_x: 8.0,
-            inventory_y: 84.0,
-            own_labels: false,
-            own_background: true,
-            ..Screen::default()
-        })
+        Some(crate::recipes::book::screen())
     }
 
     /// `CookingPotScreen#renderBg`: the background, the heat icon while heated, the arrow, and
@@ -1063,6 +1049,26 @@ impl CookingPot {
             entity.items[CONTAINER] = c.shrink(n);
         }
         true
+    }
+}
+
+/// `CookingPotScreen`'s geometry: six inputs, the meal display (drawn, never a slot), container and output.
+pub fn screen_layout() -> Screen {
+    let mut slots: Vec<Option<[f32; 2]>> = (0..INPUTS)
+        .map(|i| Some([30.0 + 18.0 * (i % 3) as f32, 17.0 + 18.0 * (i / 3) as f32]))
+        .collect();
+    slots.push(None); // meal display: drawn below, never clicked (CookingPotMealSlot)
+    slots.push(Some([92.0, 55.0]));
+    slots.push(Some([124.0, 55.0]));
+    Screen {
+        width: 176.0,
+        height: 166.0,
+        slots,
+        inventory_x: 8.0,
+        inventory_y: 84.0,
+        own_labels: false,
+        own_background: true,
+        ..Screen::default()
     }
 }
 

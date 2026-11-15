@@ -57,6 +57,7 @@ impl Hooks for FarmersDelight {
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
         effects::register(registrar);
+        recipes::book::register(registrar);
         blocks::rope::register(registrar);
         blocks::tomato::register(registrar);
         blocks::rice::register(registrar);
@@ -93,6 +94,18 @@ impl Hooks for FarmersDelight {
             SERVING_SET,
             SERVING_ITEMS.iter().map(|s| s.to_string()).collect(),
         ));
+    }
+
+    fn recipe_book_categories(
+        &self,
+        host: HostSide<'_>,
+        event: &mut RecipeBookCategoriesEvent<'_>,
+    ) {
+        let host: &dyn Host = match host {
+            HostSide::Server(h) => h,
+            HostSide::Client(h) => h,
+        };
+        recipes::book::categories(host, event.categories);
     }
 
     fn modify_default_components(
