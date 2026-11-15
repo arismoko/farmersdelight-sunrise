@@ -1,0 +1,70 @@
+# FD's village additions (common/world/VillageStructures.java, run at SERVER_STARTING) restated as Horizon
+# `horizon:add_to` files (PORT_PLAN M6-03). Rendered by tools/gen_worldgen.py into
+# data/farmersdelight/worldgen/template_pool/village/<pool>.json and worldgen/processor_list/<list>.json.
+#
+# addBuildingToPool: SinglePoolElement.single(<piece>, minecraft:empty), projection RIGID, `weight` times (a
+# pool entry's weight). addNewRuleToProcessorList: one RuleProcessor appended to the list; its rules replace
+# WHEAT / POTATOES (RandomBlockMatchTest, any age) by the crop's default state (age 0), first matching rule wins.
+
+[[house]]
+pool = "minecraft:village/plains/houses"
+piece = "farmersdelight:village/houses/plains_compost_pile"
+weight = 5
+
+[[house]]
+pool = "minecraft:village/snowy/houses"
+piece = "farmersdelight:village/houses/snowy_compost_pile"
+weight = 3
+
+[[house]]
+pool = "minecraft:village/savanna/houses"
+piece = "farmersdelight:village/houses/savanna_compost_pile"
+weight = 4
+
+[[house]]
+pool = "minecraft:village/desert/houses"
+piece = "farmersdelight:village/houses/desert_compost_pile"
+weight = 3
+
+[[house]]
+pool = "minecraft:village/taiga/houses"
+piece = "farmersdelight:village/houses/taiga_compost_pile"
+weight = 4
+
+# Rule sets: [input block, probability, output block] in order.
+[crops]
+temperate = [
+  ["minecraft:wheat", 0.3, "farmersdelight:cabbages"],
+  ["minecraft:wheat", 0.3, "farmersdelight:tomatoes"],
+  ["minecraft:wheat", 0.3, "farmersdelight:onions"],
+]
+cold = [
+  ["minecraft:wheat", 0.3, "farmersdelight:cabbages"],
+  ["minecraft:wheat", 0.3, "farmersdelight:onions"],
+  ["minecraft:potatoes", 0.2, "farmersdelight:cabbages"],
+  ["minecraft:potatoes", 0.2, "farmersdelight:onions"],
+]
+arid = [
+  ["minecraft:wheat", 0.3, "farmersdelight:cabbages"],
+  ["minecraft:wheat", 0.3, "farmersdelight:tomatoes"],
+]
+
+[[farm]]
+list = "minecraft:farm_plains"
+crops = "temperate"
+
+[[farm]]
+list = "minecraft:farm_savanna"
+crops = "arid"
+
+[[farm]]
+list = "minecraft:farm_snowy"
+crops = "cold"
+
+[[farm]]
+list = "minecraft:farm_taiga"
+crops = "temperate"
+
+[[farm]]
+list = "minecraft:farm_desert"
+crops = "arid"

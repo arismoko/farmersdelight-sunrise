@@ -800,3 +800,38 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not covered: density against an FD reference run (no oracle: FD is never run here); red colony seen only in the
   modified-biome table, not found in the one mushroom field visited.
 - next: M6-03 (village pools/processors, `horizon:add_to`).
+
+## M6-03 Villages — IN PROGRESS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `tools/worldgen/villages.toml.in` (FD's VillageStructures: 5 compost-pile houses with FD's weights, 3 crop
+  rule sets on 5 farm processor lists) rendered by `tools/gen_worldgen.py` (renamed from gen_biome_modifiers.py; it
+  renders the biome modifiers too, `--check`) into `horizon:add_to` files:
+  `data/farmersdelight/worldgen/template_pool/village/<biome>_houses.json` (single_pool_element, processors
+  minecraft:empty, rigid, weight 5/3/4/3/4) and `worldgen/processor_list/farm_<biome>.json` (one `minecraft:rule`
+  processor appended; output states as 26.3 `{"id": …}` — the first try used `{"Name": …}`, which the engine refused
+  silently and dropped the processor).
+- evidence (world `FDGen`, seed 0, villages in fresh chunks):
+  - content cache: each vanilla house pool ends with FD's piece, each farm list with FD's rule processor.
+  - compost heaps generate: plains −848,25904 (6 organic compost) and −25312,−25264; snowy −384,−25280 (24);
+    savanna 28352,2240 / −32368,−448 / −1552,−27392.
+  - FD crops on farms: plains 24752,24864: 8 onions, 11 tomatoes, 56 wheat; plains −848,25904: 6 onions, 5 tomatoes;
+    desert 31584,32960: 6 cabbages, 8 tomatoes, 25 wheat; desert −25344,−30272: 3/4/25. These match the rate expected
+    when each RuleProcessor reseeds from the position (vanilla RuleProcessor: `RandomSource.create(Mth.getSeed(pos))`,
+    engine `LegacyRandom::new(position_seed)`, `random_block_match` short-circuits like vanilla): FD's processor
+    re-reads the draws vanilla's processor already used.
+  - quirk (kept, not fixed): plains and taiga farms never get cabbages — vanilla's first rule there is also
+    `wheat 0.3`, so FD's `wheat 0.3 → cabbages` sees the same first draw that vanilla already rejected. Same in FD on
+    vanilla (order and seeding are vanilla's). Candidate quirk-table entry Q17.
+- OPEN (blocks PASS): savanna farms get almost no FD crops. A `/place structure minecraft:village_savanna` at
+  40512,70,40512 → farmland tops: 228 wheat, 62 melon stems, 0 FD crops, 68 water, 4 air (expected ≈ 20% cabbages,
+  21% tomatoes); natural savanna villages show a few (−1968,31632: 8 cabbages, 7 tomatoes, 303 wheat). Vanilla's own
+  melon rate there is 21% instead of 10%, as if those farms ran another list. `farm_savanna` in the content cache
+  holds both processors; the savanna farm pieces reference `minecraft:farm_savanna`; nothing savanna-specific in
+  `horizon-world/src/worldgen/structure`. Next: an engine-side probe (structure placement of
+  `village/savanna/houses/savanna_small_farm` with `farm_savanna`, printing the processors applied per block).
+- engine gap **E-26**: worldgen data (template pools, processor lists, biome modifiers) has no load conditions and
+  there is no code route to add pool elements or processors, so FD's `generateVillageCompostHeaps` and
+  `generateFDCropsOnVillageFarms` (default true) cannot switch the additions off. Delta **A26**: both keys have no
+  effect; villages always get FD's additions (FD's default).
+- not covered: trades (M6-04), taiga/snowy farm rates measured on few villages.
+- next: M6-03 savanna probe, then M6-04.
