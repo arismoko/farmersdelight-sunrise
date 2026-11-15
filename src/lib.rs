@@ -49,6 +49,7 @@ impl Hooks for FarmersDelight {
         blocks::colony::register(registrar);
         blocks::wild::register(registrar, &self.drops);
         blocks::feast::register(registrar);
+        blocks::pie::register(registrar);
     }
 
     fn block_entity_container(
@@ -175,8 +176,16 @@ impl Hooks for FarmersDelight {
         blocks::cooking_pot::on_loot_drops(&self.recipes, &self.pots, host, event);
     }
 
-    fn use_item_on_block(&self, host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow {
-        blocks::feast::predict(host, event)
+    /// Client-side predictions for blocks whose use is a server Part (E-28).
+    fn use_item_on_block(
+        &self,
+        mut host: HostSide<'_>,
+        event: &mut UseItemOnBlockEvent<'_>,
+    ) -> Flow {
+        if blocks::feast::predict(host.reborrow(), event) == Flow::Cancel {
+            return Flow::Cancel;
+        }
+        blocks::pie::predict_use(host, event)
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {

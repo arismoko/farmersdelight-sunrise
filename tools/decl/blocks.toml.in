@@ -403,3 +403,54 @@ default_state = { facing = "north", servings = "8" }
 shapes = { properties = ["facing"], values = { "east" = [[0.125, 0.0625, 0.0625, 0.875, 0.1875, 0.9375], [0.125, 0.0, 0.1875, 0.875, 0.125, 0.3125], [0.125, 0.0, 0.6875, 0.875, 0.125, 0.8125]], "west" = [[0.125, 0.0625, 0.0625, 0.875, 0.1875, 0.9375], [0.125, 0.0, 0.1875, 0.875, 0.125, 0.3125], [0.125, 0.0, 0.6875, 0.875, 0.125, 0.8125]] }, default = [[0.0625, 0.0625, 0.125, 0.9375, 0.1875, 0.875], [0.1875, 0.0, 0.125, 0.3125, 0.125, 0.875], [0.6875, 0.0, 0.125, 0.8125, 0.125, 0.875]] }
 [rice_roll_medley_block.components]
 "minecraft:max_stack_size" = 1
+
+# --- M7-02 pies ---
+# Template minecraft:stonecutter for `facing` and no block entity; PieBlock faces the way the placer looks
+# (state_for_placement in src/blocks/pie.rs; the client's own prediction shows the template's opposite facing
+# for a tick, the A10/E-14 class). Declared `bites` 0-3; outlines PieBlock.SHAPES rotated from north (ShapeUtils).
+# Eating, cutting with a knife, survival, comparator (4 - bites) and pathfinding are code. Loot tables are empty.
+
+[apple_pie]
+source = "J/common/registry/ModBlocks.java:APPLE_PIE (ofFullCopy(CAKE): strength 0.5, sound WOOL, pushReaction DESTROY, forceSolidOn); J/common/block/PieBlock.java:BITES,SHAPES"
+# PlaceableItem, stacks to 64; compostable 1.0.
+template = "minecraft:stonecutter"
+properties = { hardness = 0.5, explosion_resistance = 0.5, requires_tool = false, sounds = "minecraft:white_wool", map_color = 0, push_reaction = "POPPED" }
+state_properties = { bites = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { facing = "north", bites = "0" }
+shapes = { properties = ["facing", "bites"], values = { "north,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "east,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "west,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "north,1" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875], [0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,1" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5], [0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,1" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5], [0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,1" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875], [0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,2" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,2" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,2" = [[0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,2" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,3" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,3" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875]], "south,3" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875]], "west,3" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5]] } }
+[apple_pie.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+
+[sweet_berry_cheesecake]
+source = "J/common/registry/ModBlocks.java:SWEET_BERRY_CHEESECAKE (ofFullCopy(CAKE): strength 0.5, sound WOOL, pushReaction DESTROY, forceSolidOn); J/common/block/PieBlock.java:BITES,SHAPES"
+# PlaceableItem, stacks to 64; compostable 1.0.
+template = "minecraft:stonecutter"
+properties = { hardness = 0.5, explosion_resistance = 0.5, requires_tool = false, sounds = "minecraft:white_wool", map_color = 0, push_reaction = "POPPED" }
+state_properties = { bites = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { facing = "north", bites = "0" }
+shapes = { properties = ["facing", "bites"], values = { "north,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "east,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "west,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "north,1" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875], [0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,1" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5], [0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,1" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5], [0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,1" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875], [0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,2" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,2" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,2" = [[0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,2" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,3" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,3" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875]], "south,3" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875]], "west,3" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5]] } }
+[sweet_berry_cheesecake.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+
+[chocolate_pie]
+source = "J/common/registry/ModBlocks.java:CHOCOLATE_PIE (ofFullCopy(CAKE): strength 0.5, sound WOOL, pushReaction DESTROY, forceSolidOn); J/common/block/PieBlock.java:BITES,SHAPES"
+# PlaceableItem, stacks to 64; compostable 1.0.
+template = "minecraft:stonecutter"
+properties = { hardness = 0.5, explosion_resistance = 0.5, requires_tool = false, sounds = "minecraft:white_wool", map_color = 0, push_reaction = "POPPED" }
+state_properties = { bites = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { facing = "north", bites = "0" }
+shapes = { properties = ["facing", "bites"], values = { "north,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "east,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "west,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "north,1" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875], [0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,1" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5], [0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,1" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5], [0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,1" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875], [0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,2" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,2" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,2" = [[0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,2" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,3" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,3" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875]], "south,3" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875]], "west,3" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5]] } }
+[chocolate_pie.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+
+[pumpkin_pie]
+source = "J/common/registry/ModBlocks.java:PUMPKIN_PIE (ofFullCopy(CAKE): strength 0.5, sound WOOL, pushReaction DESTROY, forceSolidOn); J/common/block/PieBlock.java:BITES,SHAPES"
+# No item of its own (ModBlockIds): its item is the hidden farmersdelight:debug_pumpkin_pie; vanilla
+# minecraft:pumpkin_pie places it (src/blocks/pie.rs, PlacePumpkinPieMixin).
+template = "minecraft:stonecutter"
+properties = { hardness = 0.5, explosion_resistance = 0.5, requires_tool = false, sounds = "minecraft:white_wool", map_color = 0, push_reaction = "POPPED" }
+state_properties = { bites = { type = "enum", values = ["0", "1", "2", "3"] } }
+default_state = { facing = "north", bites = "0" }
+shapes = { properties = ["facing", "bites"], values = { "north,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "east,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "west,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "north,1" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875], [0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,1" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5], [0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,1" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5], [0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,1" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875], [0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,2" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,2" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,2" = [[0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,2" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,3" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,3" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875]], "south,3" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875]], "west,3" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5]] } }
+item = false
+block_item = "farmersdelight:debug_pumpkin_pie"

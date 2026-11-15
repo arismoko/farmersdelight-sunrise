@@ -795,3 +795,11 @@ source = "J/common/registry/ModItems.java:RICE_PANICLE (Item::new)"
 template = "minecraft:stick"
 [rice_panicle.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+
+# --- M7-02 ---
+
+[debug_pumpkin_pie]
+source = "J/common/registry/ModItems.java:DEBUG_PUMPKIN_PIE (registerHidden, BlockItem of PUMPKIN_PIE, basicItem)"
+# Hidden: in no creative tab. The pumpkin pie block's item (pick block gives it, as Item.byBlock does).
+template = "minecraft:stick"
+block = "farmersdelight:pumpkin_pie"

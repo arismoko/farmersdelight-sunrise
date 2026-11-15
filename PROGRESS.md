@@ -953,3 +953,37 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   kelp roll slices 3, roast chickens 4, salmon rolls 3, shepherd's pies 3, stuffed pumpkins 4, bowls 3 + 1 in the
   off hand, 1 extra bone meal (`clear` is not run on the user's inventory).
 - next: M7-02 (pies & pumpkin pie).
+
+## M7-02 Pies & pumpkin pie — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: 4 pie blocks declared (stonecutter template, declared `bites` 0–3, CAKE properties, outlines PieBlock.SHAPES
+  rotated per facing, empty loot tables carried); apple/cheesecake/chocolate items compostable 1.0 + "Placeable"
+  tooltip; hidden `farmersdelight:debug_pumpkin_pie` item is the pumpkin pie block's item (no tab). Code
+  `src/blocks/pie.rs`: facing the way the placer looks (`state_for_placement`), eating a bite with any non-knife
+  item in the main hand (canEat; FoodProperties#onConsume: eat sound, `feed(3, 0.3)`, burp; slice consume effect
+  Speed via `apply_consume_effect`; eat sound + block particles at the pie; removed without drops after the 4th),
+  knife (`c:tools/knife`, either hand) cuts a slice toward the player + ITEM_USED stat, comparator 4 − bites, not
+  pathfindable; vanilla `minecraft:pumpkin_pie` ItemPart `use_on` places `farmersdelight:pumpkin_pie` (config
+  `enablePumpkinPieSneakToPlace`, default false, in `src/config.rs`). Client predictions (E-28) for pie clicks and
+  the pumpkin pie placement in `use_item_on_block`.
+- support approximation refined (A28): feasts and pies now refuse, besides air and replaceables, floors known never
+  to have a rigid top (fences, walls, carpets, beds, candles, buttons, pressure plates, flower pots, rails, bottom
+  slabs, FD feasts/pies/cutting board/skillet/pot) — found when a pie went on top of a pie in game; refused now.
+- evidence (FDTest, pad 50110–50120,219,49994–50006; `run/shots/m7-02/pies.png`):
+  - apple pie placed in survival looking north → `facing=north`; full food: a click does nothing to the pie.
+  - food drained (difficulty Easy for the test, Peaceful restored): 4 bites → food 0→3→6→9→12, saturation +1.8
+    each, pie gone after the 4th, `speed` 600 ticks (icon and particles hidden, as FD's effect instance).
+  - flint knife: 4 slices cut and picked up, comparator 4→3→2→1→0, knife undamaged.
+  - vanilla pumpkin pie on the floor → `farmersdelight:pumpkin_pie[bites=0,facing=north]`, stack 3→2 on server
+    and client, no eating started.
+  - pie onto a pie: refused after the fix (server keeps the stack; the client shows one fewer until resync, the
+    E-14 placement-prediction class).
+- not covered: save/restart of pie bites (M7-09), "Placeable" tooltip (no hover in horizon-ctl), pick block of the
+  pumpkin pie (gives the hidden item by declaration), sneak-to-place config on (inert constant, A26 style).
+- incident: a teleport to the pad position before the pad was filled, then `gamemode survival`, killed the player
+  (fall). keep_inventory is off: everything dropped; all items were collected back (the user's 4 tomatoes, 2 glow
+  berries and bone meal included; the bone meal had fallen to y 68). The death message is in chat and the death
+  in the statistics. Rigs are now built before teleporting, in creative.
+- world changes: pad with 4 pies and a comparator at ~50115,220,50000; time 1000; player at 22,160,22 in creative.
+  Test items added to the inventory since M7-01: apple pie slices 4, pumpkin pies 2.
+- next: M7-03 (storage blocks).

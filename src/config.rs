@@ -63,3 +63,8 @@ pub fn tomato_rope_permanence() -> bool {
 pub fn rich_soil_boost_chance() -> f64 {
     0.2
 }
+
+/// `settings.enablePumpkinPieSneakToPlace` (Configuration.java:ENABLE_PUMPKIN_PIE_SNEAK_TO_PLACE), default false.
+pub fn pumpkin_pie_sneak_to_place() -> bool {
+    false
+}

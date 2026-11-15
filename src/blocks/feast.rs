@@ -116,10 +116,58 @@ pub fn decide(
     }
 }
 
-/// `level.getBlockState(pos.below())`, approximated as the cutting board's support (A9): the hook's
-/// level host has no face-sturdiness query at the pin. `canSupportRigidBlock(below)`.
-fn supported(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
-    crate::blocks::cutting_board::supported(level, pos)
+/// Floors known never to have a rigid top face (`canSupportRigidBlock` false), for the support
+/// approximation below. Tags first, then single blocks; a bottom slab is checked by its state.
+const NOT_RIGID_TAGS: [&str; 10] = [
+    "farmersdelight:feasts",
+    "minecraft:fences",
+    "minecraft:walls",
+    "minecraft:wool_carpets",
+    "minecraft:beds",
+    "minecraft:candles",
+    "minecraft:buttons",
+    "minecraft:pressure_plates",
+    "minecraft:flower_pots",
+    "minecraft:rails",
+];
+const NOT_RIGID_BLOCKS: [&str; 7] = [
+    "farmersdelight:apple_pie",
+    "farmersdelight:sweet_berry_cheesecake",
+    "farmersdelight:chocolate_pie",
+    "farmersdelight:pumpkin_pie",
+    "farmersdelight:cutting_board",
+    "farmersdelight:skillet",
+    "farmersdelight:cooking_pot",
+];
+
+/// `canSupportRigidBlock(level, pos.below())`, approximated (A28): the hooks' level host has no
+/// face-sturdiness query at the pin. `floor` is the state string below; `in_tag` asks its tags.
+/// Air, replaceable blocks and the floors listed above do not support; anything else does.
+pub(crate) fn rigid_floor(floor: Option<&str>, in_tag: impl Fn(&str) -> bool) -> bool {
+    let Some(name) = floor else {
+        return false;
+    };
+    let id = name.split('[').next().unwrap_or(name);
+    if matches!(
+        id,
+        "minecraft:air" | "minecraft:cave_air" | "minecraft:void_air"
+    ) || NOT_RIGID_BLOCKS.contains(&id)
+        || in_tag("minecraft:replaceable")
+        || NOT_RIGID_TAGS.iter().any(|t| in_tag(t))
+    {
+        return false;
+    }
+    !(in_tag("minecraft:slabs") && state_value(name, "type") == Some("bottom"))
+}
+
+pub(crate) fn supported(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
+    let Some(state) = level.block_state([pos[0], pos[1] - 1, pos[2]]) else {
+        return true; // not loaded: leave the block alone
+    };
+    let name = level.state_string(state);
+    rigid_floor(name.as_deref(), |t| {
+        level.block_in_tag(state.block(), t) == Some(true)
+    })
 }
 
 fn servings_of(state: Option<String>) -> u32 {
@@ -312,12 +360,12 @@ pub fn predict(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow 
         .and_then(|id| stack_of(host, id))
         .and_then(|s| host.item_crafting_remainder(&s));
     let holds_it = matches!((event.click.stack, &container), (Some(h), Some(c)) if h.same_item(c));
-    *event.cancellation_result =
-        match decide(kind, servings, container.is_some(), holds_it, false) {
-            // TRY_WITH_EMPTY_HAND, then Block's useWithoutItem (PASS): on to the item.
-            Outcome::NeedContainer => InteractionResult::Pass,
-            _ => InteractionResult::Success,
-        };
+    *event.cancellation_result = match decide(kind, servings, container.is_some(), holds_it, false)
+    {
+        // TRY_WITH_EMPTY_HAND, then Block's useWithoutItem (PASS): on to the item.
+        Outcome::NeedContainer => InteractionResult::Pass,
+        _ => InteractionResult::Success,
+    };
     Flow::Cancel
 }
 
@@ -466,7 +514,10 @@ mod tests {
                 vanish: false
             }
         );
-        assert_eq!(decide(PLAIN, 0, true, false, false), Outcome::BreakLeftovers);
+        assert_eq!(
+            decide(PLAIN, 0, true, false, false),
+            Outcome::BreakLeftovers
+        );
         assert_eq!(
             decide(PUMPKIN, 1, true, true, false),
             Outcome::Serve {
@@ -474,6 +525,29 @@ mod tests {
                 vanish: true
             }
         );
+    }
+
+    #[test]
+    fn rigid_floor_refuses_known_soft_tops() {
+        let none = |_: &str| false;
+        assert!(rigid_floor(Some("minecraft:stone"), none));
+        assert!(!rigid_floor(Some("minecraft:air"), none));
+        assert!(!rigid_floor(None, none));
+        assert!(!rigid_floor(
+            Some("farmersdelight:apple_pie[bites=0,facing=north]"),
+            none
+        ));
+        let slab = |t: &str| t == "minecraft:slabs";
+        assert!(!rigid_floor(
+            Some("minecraft:oak_slab[type=bottom,waterlogged=false]"),
+            slab
+        ));
+        assert!(rigid_floor(
+            Some("minecraft:oak_slab[type=top,waterlogged=false]"),
+            slab
+        ));
+        assert!(!rigid_floor(Some("minecraft:oak_fence[east=false]"), |t| t
+            == "minecraft:fences"));
     }
 
     #[test]
