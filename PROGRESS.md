@@ -1444,3 +1444,62 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDM6 (test world) keeps the planting pad and boards at 10..34,99..103,1330..1348; the player
   there in creative. FDTest: none (inventory/XP restored earlier). The game is left closed.
 - next: M9-01 (PORT_PLAN §11).
+
+## M9-01 Config — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/config.rs` rewritten: FD's two files as the Fabric build keeps them (mlconfigs `FabricConfigHolder`):
+  pretty-printed JSON, `#README` + one object per category (`settings`, `farming`, `crafting`, `overrides` with
+  nested `stack_size`, `world`, `debug`; client file `client`), 19 common + 3 client keys with FD's defaults and
+  ranges. Registered with `register_configs` (Common + Client); `config_loading` and `config_reloading` read the
+  text over the current values with the reference's per-entry rules (missing key/category or unreadable value keeps
+  the value; double out of range → default; Gson's lenient reads: `"TRUE"` → true, a number as a boolean → false,
+  `"0.25d"` → 0.25, one-element arrays unwrap; a non-array list keeps its value; an unreadable list element stops
+  the list) and write the normalised file back when it differs (`saveConfig`), via `Host::config_files`. Not
+  synced (Q6): each side reads its own file.
+  Consumers wired: every existing reader now takes the loaded value; new ones: `world.generateFDChestLoot`
+  (loot.rs), `farming.defaultTomatoVineRope` (rope.rs `rope_state_for_vine`: FD's rope with connections, another
+  block's default state, unknown id → air as `DefaultedRegistry` gives), `settings.canvasSignDarkBackgroundList`
+  (new `blocks/canvas_sign.rs`: a player's placement sets both sides' colour with `data merge` at the tick's end —
+  the block entity is made after `entity_place`), `soupItemList` matched as `Identifier.parse` does (bare path →
+  `minecraft:`). Getters ready for M9-02 (`enableCookingPotRecipeBook`), M9-03 (two overlay keys), M9-04
+  (`enableFoodEffectTooltip`). Village keys are read but stay inert (A26/E-26).
+- startup-only / reload-only keys (documented in `config.rs`): `overrides.*` item-default keys and
+  `stack_size.*` are read when item defaults are built; `enableVanillaCropCrates` and `generateFDChestLoot` act on
+  the next data load (`/reload`); every other key is read where it is used, so a file edit applies within ~1 s.
+- evidence (test world FDM6, pad 10..20,99..104,1340..1348; file `config/ported_farmersdelight-common.json` edited
+  while the game ran; each check run with the key changed and back):
+  - files written on first start in FD's layout (both files; default text = unit-tested render).
+  - `enableRopeReeling` false: Shift + empty-hand use leaves the 3-rope column; true: bottom rope reeled (air).
+  - `defaultTomatoVineRope` `minecraft:stone`: a broken `tomatoes_on_rope` leaves stone; `enableTomatoRopePermanence`
+    false: leaves air; both back to default: leaves `farmersdelight:rope`.
+  - `enableVanillaCropCrates` false + `/reload`: `recipe give … carrot_crate` → "Unknown recipe"; true + `/reload`:
+    known again. `generateFDChestLoot` false + `/reload`: 40 rolls of `chests/abandoned_mineshaft` → 0 FD items
+    (147 others); true: 45 FD items in 40 rolls.
+  - `enablePumpkinPieSneakToPlace` true: plain use places nothing, Shift places `farmersdelight:pumpkin_pie`; false:
+    plain use places it.
+  - `enableCuttingBoardDispenserBehavior` false: the dispenser shoots the flint knife out, beef stays on the board;
+    true: the beef is cut and the knife takes 1 damage.
+  - `richSoilBoostChance` 0.0: 5 cave vines under rich soil keep `berries=false` (random_tick_speed 200, 4 s); 1.0:
+    all 5 `berries=true`.
+  - `enableTomatoVineClimbingTaggedRopes` (test datapack adding `minecraft:iron_chain` to `#farmersdelight:ropes`,
+    removed afterwards): true → the vine climbs the chain; false → the chain stays, FD's rope is still climbed.
+  - `cuttingBoardFortuneBonus` 1.0 with a Fortune III shovel: 6 gravel cuts → 6 flint; 0.0: 10 cuts → 1 flint.
+  - `canvasSignDarkBackgroundList` `["white"]`, read at start (no edit after the restart): a player's white canvas
+    sign gets `front_text.color`/`back_text.color` "white", a red one "black" (`run/shots/m9-01/`).
+- engine gap **E-35**: config files load after item default components are built (the window reads Client/Common
+  configs after its initial load, `loading_window.rs` "Finish Setup -> Config"; `modify_default_components` runs
+  once per item at the load boundary and its `DataLoadContext` offers settings, not config files), so the
+  item-default keys cannot reach their consumer. Observed: `enableStackableSoupItems` false across a restart, mushroom
+  stew still stacks to 16. A settings mirror was considered and rejected (adds Options rows FD lacks, applies one
+  restart late, no list kind).
+- deltas: **A45** the files are `ported_farmersdelight-common.json` / `-client.json` (the engine accepts only names
+  owned by the mod id), not `farmersdelight-*.json`. **A46** an edit to the file applies while the game runs (FD
+  reads the file once; only its YACL/Cloth screen applies live); an unparseable `defaultTomatoVineRope` leaves air
+  instead of throwing. **A47** (E-35) `enableVanillaStrawBedRename` (already inert, A17), `enableVanillaSoupExtraEffects`
+  and `enableRabbitStewBuff` for item defaults, `enableStackableSoupItems`, `soupItemList` always have their defaults.
+  **A35** narrowed: canvas signs placed by players follow the configured list; signs made by commands or structures
+  keep the default list (static `sign_text_color`).
+- not covered: client keys (no consumer before M9-03/M9-04); a dedicated server's own file (M9-08 LAN).
+- world changes: FDM6 (test world): pad 10..20,99..104,1340..1348 holds rich soil, cave vines, signs, pies, board +
+  dispenser, tomato vines; random_tick_speed 3, time noon. Config files back to defaults. FDTest untouched. Game closed.
+- next: M9-02 (recipe book).

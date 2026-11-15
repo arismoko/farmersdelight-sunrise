@@ -11,9 +11,9 @@ use std::sync::{LazyLock, RwLock};
 const KNIVES: &str = "#farmersdelight:tools/knives";
 const STRAW_HARVESTERS: &str = "#farmersdelight:straw_harvesters";
 
-/// `ConfigurationGENERATE_FD_CHEST_LOOT` (`common.world.generateFDChestLoot`, default on).
+/// `Configuration.GENERATE_FD_CHEST_LOOT` (`world.generateFDChestLoot`, default on).
 pub fn chest_loot_enabled() -> bool {
-    true
+    crate::config::chest_loot_enabled()
 }
 
 /// Vanilla chest table → FD's nested table.

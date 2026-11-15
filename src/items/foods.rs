@@ -38,7 +38,17 @@ pub fn modify_default_components(
     item: &str,
     components: &mut mod_api::serde_json::Map<String, Value>,
 ) {
-    if config::stackable_soup_items_enabled() && config::soup_item_list().contains(&item) {
+    // Each entry is `Identifier.parse`d, so a bare path names a `minecraft:` item; any item in the list is
+    // affected (the BowlFoodItem restriction in the comment is not enforced).
+    if config::stackable_soup_items_enabled()
+        && config::soup_item_list().iter().any(|key| {
+            if key.contains(':') {
+                key == item
+            } else {
+                item.strip_prefix("minecraft:") == Some(key.as_str())
+            }
+        })
+    {
         components.insert("minecraft:max_stack_size".into(), json!(16));
     }
     let buff = config::rabbit_stew_buff_enabled() && item == "minecraft:rabbit_stew";

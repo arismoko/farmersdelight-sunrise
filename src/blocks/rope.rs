@@ -95,9 +95,28 @@ fn vertical_state(
     level.state_with_property(state, "waterlogged", bool_str(water))
 }
 
-/// The rope a tomato vine leaves (HangingTomatoBlock#placeRope with the default
-/// `defaultTomatoVineRope`, farmersdelight:rope): `getStateWithConnections(…, Direction.UP)`.
+/// The block a tomato vine leaves (HangingTomatoBlock#placeRope): config `defaultTomatoVineRope`. FD's rope
+/// gets `getStateWithConnections(…, Direction.UP)`, any other block its default state. An id naming no block
+/// leaves air (the block registry's default); an id `Identifier.parse` rejects throws in FD and leaves air here
+/// (delta A46).
 pub fn rope_state_for_vine(level: &dyn LevelHost, pos: [i32; 3]) -> Option<BlockState> {
+    let configured = crate::config::default_tomato_vine_rope();
+    let id = match configured.split_once(':') {
+        Some(_) => configured.clone(),
+        None => format!("minecraft:{configured}"),
+    };
+    if id == ROPE {
+        return fd_rope_state(level, pos);
+    }
+    let valid = mod_api::Identifier::parse(&id).is_ok();
+    valid
+        .then(|| level.block_state_id(&id))
+        .flatten()
+        .or_else(|| level.block_state_id("minecraft:air"))
+}
+
+/// FD's rope as a vine leaves it.
+fn fd_rope_state(level: &dyn LevelHost, pos: [i32; 3]) -> Option<BlockState> {
     let base = level.block_state_id(ROPE)?;
     let water = level
         .fluid_state(pos)

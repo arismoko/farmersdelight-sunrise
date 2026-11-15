@@ -42,6 +42,18 @@ impl Hooks for FarmersDelight {
         registry::register_load_conditions(event);
     }
 
+    fn register_configs(&self, _: HostSide<'_>, event: &mut RegisterConfigsEvent<'_>) {
+        config::register(ids::MOD_ID, event.configs);
+    }
+
+    fn config_loading(&self, host: HostSide<'_>, event: &mut ConfigLoadingEvent<'_>) {
+        config::on_file(host, ids::MOD_ID, event.config);
+    }
+
+    fn config_reloading(&self, host: HostSide<'_>, event: &mut ConfigReloadingEvent<'_>) {
+        config::on_file(host, ids::MOD_ID, event.config);
+    }
+
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
         effects::register(registrar);
@@ -219,6 +231,7 @@ impl Hooks for FarmersDelight {
 
     fn entity_place(&self, host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) -> Flow {
         blocks::tatami::on_placed(host, event);
+        blocks::canvas_sign::on_placed(host, event);
         Flow::Continue
     }
 
@@ -286,6 +299,7 @@ impl Hooks for FarmersDelight {
             blocks::rich_soil::drain(&self.boosts, host);
             blocks::wild::drain(&self.drops, host);
             enchant::drain(&self.backstabs, host);
+            blocks::canvas_sign::drain(host);
         }
     }
 
