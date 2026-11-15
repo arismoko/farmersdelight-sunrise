@@ -29,6 +29,7 @@ struct FarmersDelight {
     baskets: blocks::basket::Signals,
     container_names: blocks::basket::Names,
     sneaking: blocks::safety_net::Sneaking,
+    backstabs: enchant::Pending,
 }
 
 #[mod_api::horizon_mod]
@@ -228,6 +229,15 @@ impl Hooks for FarmersDelight {
         items::knife::on_right_click(host, event)
     }
 
+    fn living_incoming_damage(
+        &self,
+        _: &mut dyn LevelRandomHost,
+        event: &mut LivingIncomingDamageEvent<'_>,
+    ) -> Flow {
+        enchant::on_incoming(&self.backstabs, event);
+        Flow::Continue
+    }
+
     fn living_knockback(
         &self,
         _: &mut dyn LevelRandomHost,
@@ -250,6 +260,7 @@ impl Hooks for FarmersDelight {
         if matches!(event.phase, ServerTickPhase::ServerTickEnd { .. }) {
             blocks::rich_soil::drain(&self.boosts, host);
             blocks::wild::drain(&self.drops, host);
+            enchant::drain(&self.backstabs, host);
         }
     }
 

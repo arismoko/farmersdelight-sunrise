@@ -1310,3 +1310,22 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not covered: config off (M9-01 wires the config), trident carving render (angle coded, not looked at).
 - world changes: none left; user inventory/XP restored, survival at 22,160,22. Game left running.
 - next: M8-04 (backstabbing).
+
+## M8-04 Backstabbing — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/enchant.rs`. The carried enchantment JSON loads as is (`/enchant … farmersdelight:backstabbing 3`
+  works, the component is stored). `living_incoming_damage`: damage > 0, a causing entity, a source position, the
+  hit's weapon with Backstabbing, attacker in the back cone (`isLookingBehindTarget`: normalised offset, y zeroed,
+  dot with the victim's view < −0.5) → damage × (1.4 + 0.2·(level − 1)). The crit sound
+  (`entity.player.attack.crit`, BLOCKS, 1/1) at the attacker's hit position is queued and played at the end of the
+  server tick (the hook's level host cannot play sounds).
+- evidence (pad, NoAI pig with 200 health looking north, survival player, fully charged hits; `run/shots/m8-04/`):
+  - iron knife (3.5) with Backstabbing III: front 3.5, 3.5; behind 6.3, 6.3 (×1.8); subtitle "Critical attack"
+    (`behind.png`).
+  - Backstabbing I: front 3.5, behind 4.9 (×1.4), from the side 3.5.
+- deltas: **A41** the effect's value is computed from the shipped JSON's numbers (`multiply` by
+  `linear(1.4, 0.2)`), not by evaluating the enchantment's effect list, so a data pack changing the
+  `farmersdelight:backstabbing` effect is not followed; the weapon is the hook's (the direct entity's) rather than
+  `source.getEntity().getWeaponItem()` (same for melee); the crit sound is heard at the end of the tick (same tick).
+- world changes: none left; user inventory restored, survival at 22,160,22. Game left running.
+- next: M8-05 (loot hooks).
