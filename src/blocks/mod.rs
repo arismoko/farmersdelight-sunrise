@@ -10,6 +10,7 @@ pub mod pie;
 pub mod rice;
 pub mod rich_soil;
 pub mod rope;
+pub mod safety_net;
 pub mod skillet;
 pub mod storage;
 pub mod stove;

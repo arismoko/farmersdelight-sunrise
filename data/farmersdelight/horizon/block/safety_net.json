@@ -1,0 +1,34 @@
+{
+  "template": "minecraft:brown_wool",
+  "properties": {
+    "hardness": 0.2,
+    "explosion_resistance": 0.2,
+    "occludes": false
+  },
+  "state_properties": {
+    "waterlogged": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "waterlogged": "false"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.0,
+        0.4375,
+        0.0,
+        1.0,
+        0.5625,
+        1.0
+      ]
+    ]
+  },
+  "components": {
+    "minecraft:cooking_fuel": {
+      "burn_time": 200,
+      "speed_multiplier": 1.0
+    }
+  }
+}

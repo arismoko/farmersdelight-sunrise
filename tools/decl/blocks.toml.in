@@ -1303,3 +1303,27 @@ properties = { hardness = 0.2, explosion_resistance = 0.2, occludes = false, sou
 shapes = { default = [[0.0, 0.0, 0.0, 1.0, 0.0625, 1.0]] }
 [canvas_rug.components]
 "minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }
+
+# --- M7-08 safety net, straw bed ---
+
+[safety_net]
+source = "J/common/registry/ModBlocks.java:SAFETY_NET (ofFullCopy(CARPET.brown()).strength(0.2).sound(WOOL).bounceRestitution(0.6)); J/common/block/SafetyNetBlock.java:WATERLOGGED,SHAPE,fallOn; J/common/registry/ModItems.java:SAFETY_NET (fuel 200)"
+# Template minecraft:brown_wool (carpet's brown map colour, wool sounds, ignited by lava; SafetyNetBlock is a plain
+# Block, no carpet survival rule). Fire odds dropped, bounce 0.6, fall damage and water in code
+# (src/blocks/safety_net.rs).
+template = "minecraft:brown_wool"
+properties = { hardness = 0.2, explosion_resistance = 0.2, occludes = false }
+state_properties = { waterlogged = { type = "boolean" } }
+default_state = { waterlogged = "false" }
+shapes = { default = [[0.0, 0.4375, 0.0, 1.0, 0.5625, 1.0]] }
+[safety_net.components]
+"minecraft:cooking_fuel" = { burn_time = 200, speed_multiplier = 1.0 }
+
+[straw_bed]
+source = "J/common/registry/ModBlocks.java:STRAW_BED (vanilla StrawBedBlock; of().mapColor(COLOR_YELLOW).sound(STRAW_BED).strength(0.2).noOcclusion().ignitedByLava().pushReaction(POPPED)); J/common/registry/ModItems.java:STRAW_BED (BlockItem, stacksTo(16), compostable 0.85)"
+# FD registers vanilla 26.3's own StrawBedBlock class under its id: template minecraft:straw_bed (Q14).
+template = "minecraft:straw_bed"
+properties = { hardness = 0.2, explosion_resistance = 0.2, map_color = 18, push_reaction = "POPPED" }
+[straw_bed.components]
+"minecraft:max_stack_size" = 16
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85

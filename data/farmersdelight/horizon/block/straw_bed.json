@@ -1,0 +1,15 @@
+{
+  "template": "minecraft:straw_bed",
+  "properties": {
+    "hardness": 0.2,
+    "explosion_resistance": 0.2,
+    "map_color": 18,
+    "push_reaction": "POPPED"
+  },
+  "components": {
+    "minecraft:max_stack_size": 16,
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium_high"
+    }
+  }
+}

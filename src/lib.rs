@@ -28,6 +28,7 @@ struct FarmersDelight {
     drops: blocks::wild::Drops,
     baskets: blocks::basket::Signals,
     container_names: blocks::basket::Names,
+    sneaking: blocks::safety_net::Sneaking,
 }
 
 #[mod_api::horizon_mod]
@@ -55,6 +56,7 @@ impl Hooks for FarmersDelight {
         blocks::storage::register(registrar);
         blocks::basket::register(registrar, &self.baskets, &self.container_names);
         blocks::tatami::register(registrar);
+        blocks::safety_net::register(registrar, &self.sneaking);
         blocks::cabinet::register(registrar, &self.baskets, &self.container_names);
     }
 
@@ -218,6 +220,9 @@ impl Hooks for FarmersDelight {
 
     /// Rich soil boosts decided in this tick's random ticks land at its end.
     fn server_tick(&self, host: &mut dyn ServerHost, event: &mut ServerTickEvent<'_>) {
+        if matches!(event.phase, ServerTickPhase::ServerTickStart { .. }) {
+            self.sneaking.refresh(&*host);
+        }
         if matches!(event.phase, ServerTickPhase::ServerTickEnd { .. }) {
             blocks::rich_soil::drain(&self.boosts, host);
             blocks::wild::drain(&self.drops, host);

@@ -1157,3 +1157,31 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   combination step sounds (tag carried).
 - world changes: pad cleared and its floor restored. Player back at 22,160,22, creative, hotbar slot 9 restored.
 - next: M7-08 (safety net, straw bed, misc).
+
+## M7-08 Safety net, straw bed, misc — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `safety_net` declared (brown-wool template: carpet's brown map colour, wool sounds; 0.2 strength, FD's
+  7–9 px slab shape, `waterlogged`, fuel 200) with `src/blocks/safety_net.rs`: `bounce_restitution` 0.6 (FD
+  `Properties.bounceRestitution(0.6F)`), `fall_on` zeroes the fall damage unless the entity suppresses bounce,
+  waterlogging and water-on-removal as the basket, fire odds dropped. `fall_on`'s host cannot read the entity, so a
+  `server_tick` (start) keeps the set of players holding Shift (`Player.isSuppressingBounce` = `isShiftKeyDown`).
+  `straw_bed` declared on vanilla 26.3's own `minecraft:straw_bed` template (FD registers vanilla's StrawBedBlock
+  class; Q14) with FD's properties, item stack 16 and compost 0.85. With these, every FD block is declared (only the
+  knife items remain, M8).
+- evidence (pad, `run/shots/m7-08/`):
+  - a cow dropped from y 241 onto the net: bounced to ~224.9, then ~221.7, health 10/10; a control cow dropped on
+    stone died.
+  - player (survival) from y 233 onto the net: no damage (20/20), bounced to ~223.4. Holding Shift from y 226.5:
+    `hurt 2.0 minecraft:fall`, no bounce.
+  - straw bed placed from its item: foot + head `[facing=south]`; a stack of 16; sleeping in it works.
+- deltas / gaps:
+  - **E-32 (new)** the engine's straw-bed sleep rule (`StrawBedBlock.getSleepHeight`: lie on the foot's shape) is
+    keyed to the id `minecraft:straw_bed` (`horizon-client/src/bed_geometry.rs`), not the template → **A37** in
+    FD's straw bed the sleeper lies at the head's height (y +0.4375, vanilla straw bed +0.375), and a head whose
+    foot is gone can still be slept in.
+  - **A38** the sneaking test for the net reads the Shift key as of the start of the server tick, not at the landing
+    instant.
+- incident: the control cow's drops (2 beef, 2 leather) were picked up into the user's inventory; removed with
+  `item replace … air` (main slots 19–20). World time: changed by `time set night` + sleeping twice (now morning).
+- world changes: pad cleared. Player at 22,160,22, creative; hotbar slot 9 restored.
+- next: M7-09 (M7 demo).
