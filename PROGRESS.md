@@ -709,3 +709,13 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
     (wild_rice feature); record them in `tools/carry_rules.toml.in` and the manifest; `tools/test_carry.py` must cover them.
 - next: test M6-01 in game, then M6-02 as above, M6-03 (village pools/processors, `horizon:add_to`), M6-04 (trades,
   farmer POI probe), M6-05 (fresh-world demo).
+
+## Creative tab (user request) — NOT RUN in game — 2026-11-15
+- did: `tools/gen_tab_decl.py --fd <FD checkout>` writes `tools/decl/tabs.toml.in` (FD's tab: title
+  `itemGroup.farmersdelight`, icon the stove, 188 items in ModItems' register*WithTab order, dyed canvas signs
+  resolved); `tools/gen_decls.py` renders `data/farmersdelight/horizon/creative_tab/farmersdelight.json`. Items not
+  declared yet are listed too (Horizon leaves out items the game doesn't have).
+- to do: `run/rebuild.sh`, open the creative inventory, confirm the "Farmer's Delight" tab, its icon and order; check
+  the load log for refusals (if undeclared ids are refused rather than skipped, filter the list to declared items in
+  gen_tab_decl.py); add gen_tab_decl to CI drift checks.
+- next: test M6-01 in game (previous entry), then M6-02…M6-05.
