@@ -198,7 +198,10 @@ impl Hooks for FarmersDelight {
         {
             return Flow::Cancel;
         }
-        blocks::pie::predict_use(host, event)
+        if blocks::pie::predict_use(host.reborrow(), event) == Flow::Cancel {
+            return Flow::Cancel;
+        }
+        items::knife::predict_use(host, event)
     }
 
     fn entity_place(&self, host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) -> Flow {
@@ -212,6 +215,10 @@ impl Hooks for FarmersDelight {
         event: &mut ModContainerViewersEvent<'_>,
     ) {
         blocks::cabinet::on_viewers(host, event);
+    }
+
+    fn right_click_block(&self, host: HostSide<'_>, event: &mut RightClickBlockEvent<'_>) -> Flow {
+        items::knife::on_right_click(host, event)
     }
 
     fn living_knockback(

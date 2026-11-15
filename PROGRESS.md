@@ -1245,3 +1245,31 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   shepherd's pies, test books/knives removed), XP back to 11 levels, survival at 22,160,22, slot 8 selected.
   The game is left running (FDTest, agent mode). It was raining at night.
 - next: M8-02 (knife interactions).
+
+## M8-02 Knife interactions — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/items/knife.rs`:
+  - `KnifeItem#useOn` as an `ItemPart::use_on` on the six knives: a knife (`#farmersdelight:tools/knives`) on
+    `minecraft:pumpkin` plays `block.pumpkin.carve`, sets `carved_pumpkin[facing]` (clicked side; top/bottom →
+    toward the player), throws 4 pumpkin seeds 0.65 out of that face with FD's motion, damages the knife by 1.
+    Client prediction via `use_item_on_block` (ItemAfterBlock → SUCCESS, E-28 pattern).
+  - `KnifeEvents#onCakeInteraction` (Fabric `UseBlockCallback`) as `right_click_block`, decided the same way on
+    both sides, world changed on the server only: spectators pass; candle cakes (`#farmersdelight:drops_cake_slice`)
+    → `cake[bites=1]`, the candle cake's own loot popped (`block_drops` + `pop_resource` = `Block.dropResources`),
+    a slice; cake → bites + 1 or removed after bites 6, a slice at x + bites·0.1 with motion −0.05; wool break
+    sound 0.8/0.8. Result SUCCESS, CONSUME for a plain cake on the server, as FD.
+  - pie slicing (M7-02) and colony harvest (M5-07) already go through the knife tags and now cover every knife.
+- evidence (FDTest pad at 50200..50220,219,49990..50010 under `forceload`, survival, iron knife;
+  `run/shots/m8-02/`):
+  - pumpkin, front (north) face → `carved_pumpkin[facing=north]`; top face while looking south → `facing=north`;
+    east face → `facing=east`; 4 pumpkin seeds each, dropped on the carved side; knife 250 → 247 over three carvings.
+  - cake: 7 cuts → bites 1…6, then air; 7 cake slices; knife undamaged (as FD). (After 4 bites the cake's shape
+    no longer covers the block centre; the clicks were aimed at the remaining part.)
+  - lit red candle cake cut while holding Shift → `cake[bites=1]`, one red candle and one slice dropped, subtitle
+    "Block broken" (`candle-cake-cut.png`).
+  - apple pie with the iron knife → bites 1, one slice; red mushroom colony age 3 → age 0, 3 red mushrooms, knife −1.
+- deltas: none new. (FD also runs the cake change on the client as a prediction; here the client only answers
+  SUCCESS and the server's block update follows, no visible difference.)
+- world changes: none left (pad removed, forceload removed). User inventory restored, survival at 22,160,22,
+  slot 8 selected. The game was restarted once (rebuild) and is left running.
+- next: M8-03 (cutting board completion).
