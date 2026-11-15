@@ -1,0 +1,23 @@
+{
+  "template": "minecraft:short_grass",
+  "shapes": {
+    "default": [
+      [
+        0.125,
+        0.0,
+        0.125,
+        0.875,
+        0.8125,
+        0.875
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "default": []
+  },
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium"
+    }
+  }
+}

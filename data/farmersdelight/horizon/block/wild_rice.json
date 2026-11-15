@@ -1,0 +1,17 @@
+{
+  "template": "minecraft:tall_grass",
+  "state_properties": {
+    "waterlogged": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "half": "lower",
+    "waterlogged": "false"
+  },
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium"
+    }
+  }
+}

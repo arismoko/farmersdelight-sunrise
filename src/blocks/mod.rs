@@ -9,3 +9,4 @@ pub mod rope;
 pub mod skillet;
 pub mod stove;
 pub mod tomato;
+pub mod wild;

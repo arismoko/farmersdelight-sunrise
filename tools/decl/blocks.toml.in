@@ -235,3 +235,85 @@ pick_item = "minecraft:red_mushroom"
 
 [red_mushroom_colony.components]
 "minecraft:compostable" = { layers = "minecraft:compostable/always_add_one" }  # CompostableHelper 1.0
+
+# --- M6-01 wild crops ---
+# Template minecraft:short_grass: TALL_GRASS's properties as FD copies them (no collision, instant break, grass
+# sounds, XYZ offset, burns 60/100 like FD's FlammableBlockRegistry entry). Not in `#minecraft:replaceable`, so
+# not replaceable (WildCropBlock#canBeReplaced). Ground, bone meal spread and the mooshroom stew effect are code
+# (src/blocks/wild.rs).
+
+[wild_cabbages]
+source = "J/common/registry/ModBlocks.java:WILD_CABBAGES (WildCropBlock(STRENGTH, 6), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_cabbages.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[wild_onions]
+source = "J/common/registry/ModBlocks.java:WILD_ONIONS (WildCropBlock(FIRE_RESISTANCE, 6), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_onions.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[wild_tomatoes]
+source = "J/common/registry/ModBlocks.java:WILD_TOMATOES (WildCropBlock(POISON, 10), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_tomatoes.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[wild_carrots]
+source = "J/common/registry/ModBlocks.java:WILD_CARROTS (WildCropBlock(MINING_FATIGUE, 6), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_carrots.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[wild_potatoes]
+source = "J/common/registry/ModBlocks.java:WILD_POTATOES (WildCropBlock(NAUSEA, 8), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_potatoes.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[wild_beetroots]
+source = "J/common/registry/ModBlocks.java:WILD_BEETROOTS (WildCropBlock(WATER_BREATHING, 8), ofFullCopy(TALL_GRASS)); J/common/block/WildCropBlock.java:SHAPE"
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[wild_beetroots.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65
+
+[sandy_shrub]
+source = "J/common/registry/ModBlocks.java:SANDY_SHRUB (ofFullCopy(TALL_GRASS)); J/common/block/SandyShrubBlock.java:SHAPE,mayPlaceOn(SAND)"
+# Template minecraft:short_grass; on `#minecraft:sand` only, no bone meal (isValidBonemealTarget is false).
+template = "minecraft:short_grass"
+shapes = { default = [[0.125, 0.0, 0.125, 0.875, 0.8125, 0.875]] }
+collision_shapes = { default = [] }
+
+[sandy_shrub.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/low" }  # CompostableHelper 0.3
+
+[wild_rice]
+source = "J/common/registry/ModBlocks.java:WILD_RICE (ofFullCopy(TALL_GRASS)); J/common/block/WildRiceBlock.java:HALF,WATERLOGGED,canSurvive,getFluidState"
+# Template minecraft:tall_grass (DoublePlantBlock, its item places both halves) with a declared `waterlogged`
+# for the lower half's water. Default dry (FD's default is the waterlogged lower half; placement and worldgen
+# name the state). The outline stays tall grass's (FD's is DoublePlantBlock's full cube).
+template = "minecraft:tall_grass"
+state_properties = { waterlogged = { type = "boolean" } }
+default_state = { half = "lower", waterlogged = "false" }
+
+[wild_rice.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium" }  # CompostableHelper 0.65

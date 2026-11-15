@@ -25,6 +25,7 @@ struct FarmersDelight {
     pots: blocks::cooking_pot::SharedRef,
     boosts: blocks::rich_soil::Boosts,
     trample: blocks::rich_soil::Trample,
+    drops: blocks::wild::Drops,
 }
 
 #[mod_api::horizon_mod]
@@ -46,6 +47,7 @@ impl Hooks for FarmersDelight {
         blocks::rich_soil::register(registrar, &self.boosts, &self.trample);
         blocks::compost::register(registrar);
         blocks::colony::register(registrar);
+        blocks::wild::register(registrar, &self.drops);
     }
 
     fn block_entity_container(
@@ -97,6 +99,9 @@ impl Hooks for FarmersDelight {
         host: &mut dyn ServerHost,
         event: &mut EntityInteractEvent<'_>,
     ) -> Flow {
+        if blocks::wild::entity_interact(host, event) == Flow::Cancel {
+            return Flow::Cancel;
+        }
         items::foods::entity_interact(host, event)
     }
 
@@ -173,6 +178,7 @@ impl Hooks for FarmersDelight {
     fn server_tick(&self, host: &mut dyn ServerHost, event: &mut ServerTickEvent<'_>) {
         if matches!(event.phase, ServerTickPhase::ServerTickEnd { .. }) {
             blocks::rich_soil::drain(&self.boosts, host);
+            blocks::wild::drain(&self.drops, host);
         }
     }
 
