@@ -1011,3 +1011,37 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: pad at ~50128,220,50000 (crates, bag, bale fire remains, 3 campfires); player at 22,160,22,
   creative; time 1000. Test items: the pumpkin pies in hotbar slot 3 were replaced by rice bales, then campfires (4).
 - next: M7-04 (basket).
+
+## M7-04 Basket — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `wooden_basket`, `bamboo_basket` declared (oak-planks template, declared 6-way `facing`, `enabled`,
+  `waterlogged`; hollow-cube outline/collision per facing, full interaction shape, occludes nothing; fuel 300).
+  Code `src/blocks/basket.rs`: block entity (27 slots, `ModContainer` on every face, menu `minecraft:generic_9x3`),
+  placement opposite the nearest looking direction (Direction.orderedByNearest port) and waterlogged in water,
+  water kept on removal (E-13 as the board), `useWithoutItem` opens the menu, collection tick (TransferCooldown,
+  -1 default; 8 after a whole entity goes in; area per facing from Basket.COLLECTION_AREA_SHAPES; slot-order insert
+  with merge up to the stack's max; not when full), comparator (getRedstoneSignalFromContainer via the pot's
+  helper), not pathfindable, not flammable, client prediction for main-hand clicks (E-28).
+- `enabled`: FD writes it in `neighborChanged` with flag 4. The neighbour hook's host cannot write at the pin, so
+  the basket's tick reads `has_neighbor_signal` and writes `enabled` (flag 4) before its transfer: same transfer
+  outcome (the block update lands before the block-entity tick in vanilla too); clients never see the change,
+  as with FD.
+- evidence (FDTest pad ~50126,220,49996, creative; `run/shots/m7-04/`):
+  - placed from the item looking down north-west at a shallow angle → `facing=east`.
+  - item entities summoned in front of the opening: 12 carrots + 5 potatoes collected into slots 0–1; an apple behind
+    the basket stays.
+  - redstone block beside it: server state `enabled=false` (`execute if block`), client still `enabled=true`; beetroot
+    in front not collected; power removed → collected.
+  - use opens the 9×3 chest menu titled "Basket" with the contents (`basket-menu.png`); held basket not placed.
+  - hopper below pulls items out; comparator 0 when empty, 2 with two full cobblestone stacks (1 + ⌊2/27·14⌋).
+  - `setblock … destroy`: 128 cobblestone dropped plus the basket item.
+  - five separate sticks in front of an upward bamboo basket: collected one by one over ~1 s.
+- deltas: **A30** the menu title is the block's name ("Bamboo Basket"); FD titles both "Basket"
+  (`container.farmersdelight.basket`). Engine gap **E-29**: `PlayerRef::open_menu` takes no title. **A31** a hopper
+  (or other automation) inserting into an empty basket does not start FD's 8-tick cooldown (BasketInvWrapper); the
+  insert path has no mod hook. `farmersdelight:basket` alias not reproduced (accepted in the plan).
+- not covered: contents after save/restart (M7-09), waterlogged placement, loot-table fields (no FD structure
+  places a basket), exact 8-tick spacing (unit-tested; in-game polling too coarse).
+- world changes: bamboo basket with cobblestone + sticks, comparator and wire at ~50126,220,49996; player at
+  22,160,22, creative. Test items: wooden baskets 5 in hotbar slot 3 (replacing the campfires).
+- next: M7-05 (cabinets).

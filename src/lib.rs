@@ -26,6 +26,7 @@ struct FarmersDelight {
     boosts: blocks::rich_soil::Boosts,
     trample: blocks::rich_soil::Trample,
     drops: blocks::wild::Drops,
+    baskets: blocks::basket::Signals,
 }
 
 #[mod_api::horizon_mod]
@@ -51,6 +52,7 @@ impl Hooks for FarmersDelight {
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
         blocks::storage::register(registrar);
+        blocks::basket::register(registrar, &self.baskets);
     }
 
     fn block_entity_container(
@@ -183,7 +185,9 @@ impl Hooks for FarmersDelight {
         mut host: HostSide<'_>,
         event: &mut UseItemOnBlockEvent<'_>,
     ) -> Flow {
-        if blocks::feast::predict(host.reborrow(), event) == Flow::Cancel {
+        if blocks::feast::predict(host.reborrow(), event) == Flow::Cancel
+            || blocks::basket::predict(host.reborrow(), event) == Flow::Cancel
+        {
             return Flow::Cancel;
         }
         blocks::pie::predict_use(host, event)

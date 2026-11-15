@@ -143,6 +143,9 @@ pub fn container(block: &str) -> Option<ModContainer> {
                 menu: Some(MENU.into()),
             })
         }
+        crate::blocks::basket::WOODEN | crate::blocks::basket::BAMBOO => {
+            Some(crate::blocks::basket::container())
+        }
         _ => None,
     }
 }

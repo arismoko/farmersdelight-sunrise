@@ -1,4 +1,5 @@
 //! Blocks. See PORT_PLAN §6.1.
+pub mod basket;
 pub mod colony;
 pub mod compost;
 pub mod cooking_pot;

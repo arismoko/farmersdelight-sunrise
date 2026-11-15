@@ -510,3 +510,35 @@ template = "minecraft:white_wool"
 source = "J/common/registry/ModBlocks.java:STRAW_BALE (ofFullCopy(HAY_BLOCK)); J/common/block/StrawBaleBlock.java (HayBlock, flammability 20/60)"
 # Template minecraft:hay_block: HayBlock's axis placement, fall damage × 0.2, hay's fire odds (FD's are the same).
 template = "minecraft:hay_block"
+
+# --- M7-04 baskets ---
+# Template minecraft:oak_planks: a plain full block (BasketBlock is a BaseEntityBlock with no vanilla behaviour of
+# its own); its fire odds are dropped in code (FD registers none). Declared: 6-way `facing` (placed opposite the
+# nearest looking direction, in code), `enabled` (cleared by a redstone signal, flag 4 as FD), `waterlogged`.
+# Outline and collision: the hollow cube open toward `facing`; interaction: the full cube; occludes nothing
+# (FD's occlusion shape is the 1..15 inner box). Block entity (27 slots, generic_9x3 menu, pulls item entities):
+# src/blocks/basket.rs. The `farmersdelight:basket` alias of the bamboo basket is not reproduced (accepted delta).
+
+[wooden_basket]
+source = "J/common/registry/ModBlocks.java:WOODEN_BASKET (Properties.of().strength(1.5).sound(WOOD)); J/common/block/BasketBlock.java:FACING,ENABLED,WATERLOGGED,COLLISION_SHAPE_FACING,OUT_SHAPE; J/common/registry/ModItems.java:WOODEN_BASKET (fuel 300)"
+# See the M7-04 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 1.5, explosion_resistance = 1.5, requires_tool = false, sounds = "minecraft:oak_planks", map_color = 0, occludes = false }
+state_properties = { facing = { type = "enum", values = ["up", "down", "north", "south", "west", "east"] }, enabled = { type = "boolean" }, waterlogged = { type = "boolean" } }
+default_state = { facing = "up", enabled = "true", waterlogged = "false" }
+shapes = { properties = ["facing"], values = { "down" = [[0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.125, 0.875, 1.0], [0.875, 0.0, 0.0, 1.0, 0.875, 1.0], [0.125, 0.0, 0.0, 0.875, 0.875, 0.125], [0.125, 0.0, 0.875, 0.875, 0.875, 1.0]], "up" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.125, 0.0, 0.125, 1.0, 1.0], [0.875, 0.125, 0.0, 1.0, 1.0, 1.0], [0.125, 0.125, 0.0, 0.875, 1.0, 0.125], [0.125, 0.125, 0.875, 0.875, 1.0, 1.0]], "north" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.125, 0.125, 0.875, 0.875, 0.875, 1.0]], "south" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.125, 0.125, 0.0, 0.875, 0.875, 0.125]], "west" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.0, 0.125, 0.0, 0.875, 0.875, 0.125], [0.0, 0.125, 0.875, 0.875, 0.875, 1.0]], "east" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.125, 0.125, 0.0, 1.0, 0.875, 0.125], [0.125, 0.125, 0.875, 1.0, 0.875, 1.0]] } }
+interaction_shapes = { default = [[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] }
+[wooden_basket.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
+
+[bamboo_basket]
+source = "J/common/registry/ModBlocks.java:BAMBOO_BASKET (Properties.of().strength(1.5).sound(BAMBOO_WOOD)); J/common/block/BasketBlock.java:FACING,ENABLED,WATERLOGGED,COLLISION_SHAPE_FACING,OUT_SHAPE; J/common/registry/ModItems.java:BAMBOO_BASKET (fuel 300)"
+# See the M7-04 note above.
+template = "minecraft:oak_planks"
+properties = { hardness = 1.5, explosion_resistance = 1.5, requires_tool = false, sounds = "minecraft:bamboo_planks", map_color = 0, occludes = false }
+state_properties = { facing = { type = "enum", values = ["up", "down", "north", "south", "west", "east"] }, enabled = { type = "boolean" }, waterlogged = { type = "boolean" } }
+default_state = { facing = "up", enabled = "true", waterlogged = "false" }
+shapes = { properties = ["facing"], values = { "down" = [[0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.125, 0.875, 1.0], [0.875, 0.0, 0.0, 1.0, 0.875, 1.0], [0.125, 0.0, 0.0, 0.875, 0.875, 0.125], [0.125, 0.0, 0.875, 0.875, 0.875, 1.0]], "up" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.125, 0.0, 0.125, 1.0, 1.0], [0.875, 0.125, 0.0, 1.0, 1.0, 1.0], [0.125, 0.125, 0.0, 0.875, 1.0, 0.125], [0.125, 0.125, 0.875, 0.875, 1.0, 1.0]], "north" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.125, 0.125, 0.875, 0.875, 0.875, 1.0]], "south" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.125, 0.125, 0.0, 0.875, 0.875, 0.125]], "west" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.875, 0.125, 0.0, 1.0, 0.875, 1.0], [0.0, 0.125, 0.0, 0.875, 0.875, 0.125], [0.0, 0.125, 0.875, 0.875, 0.875, 1.0]], "east" = [[0.0, 0.0, 0.0, 1.0, 0.125, 1.0], [0.0, 0.875, 0.0, 1.0, 1.0, 1.0], [0.0, 0.125, 0.0, 0.125, 0.875, 1.0], [0.125, 0.125, 0.0, 1.0, 0.875, 0.125], [0.125, 0.125, 0.875, 1.0, 0.875, 1.0]] } }
+interaction_shapes = { default = [[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] }
+[bamboo_basket.components]
+"minecraft:cooking_fuel" = { burn_time = 300, speed_multiplier = 1.0 }
