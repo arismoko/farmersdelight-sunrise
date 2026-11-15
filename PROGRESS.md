@@ -719,3 +719,34 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   the load log for refusals (if undeclared ids are refused rather than skipped, filter the list to declared items in
   gen_tab_decl.py); add gen_tab_decl to CI drift checks.
 - next: test M6-01 in game (previous entry), then M6-02…M6-05.
+
+## M6-01 Wild crops — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- fixed while testing:
+  - wild rice broke right after placement and took its water: FD's lower half answers a water source itself
+    (getFluidState); the engine reads the tall_grass template's fluid (none), so the canSurvive water check failed.
+    canSurvive now counts a placed lower half as water; `remove_block` leaves water for the lower half (E-13).
+  - wild rice dropped rice when broken in creative (and from both halves in survival). Engine gap **E-23**: loot
+    `minecraft:location_check` reads only `predicate.biomes`; `offsetX/Y/Z` and the `block` predicate are ignored, so
+    FD's "other half must stand" pool conditions always pass. Workaround in `block_drops` (fires on every drop path;
+    `loot_drops` does not see neighbour pops): a wild rice half popped without a breaker whose partner is gone drops
+    nothing. Delta **A23**: a player's break always drops from the broken half (FD: only while the partner stands — a
+    lone half cannot occur through play); explosions taking both halves are not reproduced exactly. FD's
+    `advancement/main/harvest_ropelogged_tomato.json` also uses `location_check` (owner: its advancement task).
+- evidence (FDTest rig x=46..64, y=158..162, z=10..56; screenshots `run/shots/m6-01/`):
+  - placement: 6 wild crops placed on grass, dirt and sand, refused on stone; sandy shrub on sand only (refused on
+    grass, dirt, stone); sand replaced by stone under a wild cabbage → it popped (canSurvive).
+  - bone meal: on a 19×19 grass field one wild cabbage + 65 bone meals → exactly 10 cabbages in the 9×3×9 (cap holds;
+    first 5 uses gave +4, 80%); no tall grass appears (template's bone meal not used); sandy shrub: no change.
+  - wild rice: into a water source → `[half=lower,waterlogged=true]` + `[half=upper,waterlogged=false]`; dry spot
+    refused; breaking either half in creative and survival leaves `minecraft:water[level=0]`; drops creative 0/0,
+    survival 1 rice / 1 rice (FD: same). Bone meal ×40 on wild rice → 12 wild rice popped (30%), plant kept.
+  - brown mooshroom (survival): each crop eaten (stack −1), a second feed refused (stack kept); bowl → suspicious stew
+    with strength 120, fire_resistance 120, poison 200, mining_fatigue 120, nausea (160 default), water_breathing
+    (160 default) — FD's seconds×20. Eating the water-breathing stew → water_breathing 153 ticks left a moment later.
+  - loot (survival, bare hand): wild cabbages → cabbage_seeds; sandy shrub → nothing (12.5% beetroot seeds).
+    Shears give no wild crop item until `farmersdelight:can_item_perform_ability` exists (M8-05).
+  - creative tab: second tab page shows "Farmer's Delight" with the stove icon, FD's order (stove, cooking pot,
+    skillet, cutting board, …); no load warnings for the tab (creative-tabs-p2.png). Closes the creative-tab entry.
+- not covered: fire spread/burn odds of the wild crops (declared 60/100, not run).
+- next: M6-02 (design in the M6-01 IN PROGRESS entry above).

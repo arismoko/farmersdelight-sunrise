@@ -164,6 +164,11 @@ impl Hooks for FarmersDelight {
     /// `loot_drops` (blocks::skillet), where the block entity is still readable.
     fn loot_function(&self, _: &mut LootFunctionEvent<'_>) {}
 
+    fn block_drops(&self, level: &dyn LevelHost, event: &mut BlockDropsEvent<'_>) -> Flow {
+        blocks::wild::block_drops(level, event);
+        Flow::Continue
+    }
+
     fn loot_drops(&self, host: &mut dyn ServerHost, event: &mut LootDropsEvent<'_>) {
         blocks::skillet::on_loot_drops(&self.removed_skillets, host, event);
         blocks::cooking_pot::on_loot_drops(&self.recipes, &self.pots, host, event);

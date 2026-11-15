@@ -200,8 +200,16 @@ impl BlockPart for WildRice {
         let lower = level
             .state_string(event.state)
             .is_none_or(|s| state_value(&s, "half") != Some("upper"));
+        // FD's lower half reports a water source itself (getFluidState); the engine reads the
+        // tall grass template's fluid instead (none), so a placed lower half counts as water here.
+        let placed_lower = level.block_state(pos).is_some_and(|s| {
+            block_name(level, s) == WILD_RICE
+                && level
+                    .state_string(s)
+                    .is_some_and(|n| state_value(&n, "half") != Some("upper"))
+        });
         Some(if lower {
-            ground_in(level, pos, GROWS_WILD_CROPS) && full_water(level, pos)
+            ground_in(level, pos, GROWS_WILD_CROPS) && (placed_lower || full_water(level, pos))
         } else {
             level.block_state(up(pos, -1)).is_some_and(|s| {
                 block_name(level, s) == WILD_RICE
@@ -228,6 +236,19 @@ impl BlockPart for WildRice {
         event.success = draw(level, |r| r.next_float()).is_some_and(|f| f < 0.3);
     }
 
+    /// The lower half's water stays when it is removed (its getFluidState is a water source);
+    /// the engine reads the template's fluid instead (E-13).
+    fn remove_block(
+        &self,
+        level: &dyn LevelHost,
+        event: &mut RemoveBlockEvent,
+    ) -> Option<BlockState> {
+        let name = level.state_string(event.state)?;
+        (state_value(&name, "half") != Some("upper"))
+            .then(|| level.block_state_id("minecraft:water"))
+            .flatten()
+    }
+
     /// WildRiceBlock#performBonemeal: pops one wild rice.
     fn perform_bonemeal(&self, _: &mut dyn LevelWriteHost, event: &mut PerformBonemealEvent) {
         self.drops.lock().unwrap_or_else(|e| e.into_inner()).push((
@@ -235,6 +256,36 @@ impl BlockPart for WildRice {
             at(event.pos),
             WILD_RICE,
         ));
+    }
+}
+
+/// The wild rice table's pools need the other half in place (`location_check` with `offsetY`
+/// and a block predicate), which in FD leaves a broken plant one drop, from the half the
+/// player broke (DoublePlantBlock#playerWillDestroy rolls it while both halves stand). The
+/// engine's `location_check` reads only `biomes` (E-23), so the half that pops when its partner
+/// goes would drop too, in creative as well: a half popped without a breaker whose partner is
+/// gone drops nothing.
+pub fn block_drops(level: &dyn LevelHost, event: &mut BlockDropsEvent<'_>) {
+    if event.breaker.is_some() || block_name(level, event.state) != WILD_RICE {
+        return;
+    }
+    let half_of = |s: BlockState| {
+        level
+            .state_string(s)
+            .and_then(|n| state_value(&n, "half").map(str::to_owned))
+            .unwrap_or_default()
+    };
+    let pos = at(event.pos);
+    let (partner, half) = if half_of(event.state) == "upper" {
+        (up(pos, -1), "lower")
+    } else {
+        (up(pos, 1), "upper")
+    };
+    let paired = level
+        .block_state(partner)
+        .is_some_and(|s| block_name(level, s) == WILD_RICE && half_of(s) == half);
+    if !paired {
+        event.drops.clear();
     }
 }
 
@@ -266,7 +317,7 @@ pub fn entity_interact(host: &mut dyn ServerHost, event: &mut EntityInteractEven
     let at = cow.position(&*host).unwrap_or([0.0; 3]);
     let [_, height] = cow.dimensions(&*host).unwrap_or([0.9, 1.4]);
     let level = player.level(&*host);
-    let holds_effects = nbt.get(&"stew_effects".into()).is_some();
+    let holds_effects = nbt.contains_key(&"stew_effects".into());
     if holds_effects {
         // Two smoke puffs: it already holds effects.
         if let (Some(level), Some(smoke)) = (level, SMOKE.get()) {
