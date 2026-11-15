@@ -157,10 +157,12 @@ source = "J/common/registry/ModBlocks.java:RICE_CROP (ofFullCopy(WHEAT).mapColor
 # Template minecraft:kelp: a plant that always holds a water source (RiceBlock#getFluidState), takes no
 # other liquid, places only into a full water source and is not replaceable. Its `age` (0-25) carries
 # FD's AGE 0-3. Growth, placement age, survival, bone meal and `supporting` are code (src/blocks/rice.rs).
+# `waterlogged` (always true) is not FD's: the client draws a block's water from its name (vanilla's
+# kelp list) or this property, so without it the rice's own water is not drawn (engine gap E-21).
 template = "minecraft:kelp"
 properties = { hardness = 0.2, explosion_resistance = 0.2, sounds = "minecraft:wheat", map_color = 7, random_ticks = true }
-state_properties = { supporting = { type = "boolean" } }
-default_state = { age = "0", supporting = "false" }
+state_properties = { supporting = { type = "boolean" }, waterlogged = { type = "boolean" } }
+default_state = { age = "0", supporting = "false", waterlogged = "true" }
 shapes = { properties = ["age"], values = { "0" = [[0.1875, 0.0, 0.1875, 0.8125, 0.5, 0.8125]], "1" = [[0.1875, 0.0, 0.1875, 0.8125, 0.625, 0.8125]], "2" = [[0.125, 0.0, 0.125, 0.875, 0.75, 0.875]], "3" = [[0.0625, 0.0, 0.0625, 0.9375, 1.0, 0.9375]] }, default = [[0.0625, 0.0, 0.0625, 0.9375, 1.0, 0.9375]] }
 collision_shapes = { default = [] }
 item = false

@@ -23,6 +23,8 @@ struct FarmersDelight {
     recipes: std::sync::Arc<recipes::RecipeTables>,
     removed_skillets: blocks::skillet::Removed,
     pots: blocks::cooking_pot::SharedRef,
+    boosts: blocks::rich_soil::Boosts,
+    trample: blocks::rich_soil::Trample,
 }
 
 #[mod_api::horizon_mod]
@@ -41,6 +43,7 @@ impl Hooks for FarmersDelight {
         blocks::rope::register(registrar);
         blocks::tomato::register(registrar);
         blocks::rice::register(registrar);
+        blocks::rich_soil::register(registrar, &self.boosts, &self.trample);
     }
 
     fn block_entity_container(
@@ -162,6 +165,21 @@ impl Hooks for FarmersDelight {
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {
         items::skillet::on_attack(host, event);
         Flow::Continue
+    }
+
+    /// Rich soil boosts decided in this tick's random ticks land at its end.
+    fn server_tick(&self, host: &mut dyn ServerHost, event: &mut ServerTickEvent<'_>) {
+        if matches!(event.phase, ServerTickPhase::ServerTickEnd { .. }) {
+            blocks::rich_soil::drain(&self.boosts, host);
+        }
+    }
+
+    fn farmland_trample(&self, _: &dyn LoopContext, event: &mut FarmlandTrampleEvent) -> Flow {
+        self.trample.on_trample(event)
+    }
+
+    fn server_started(&self, host: &mut dyn ServerHost, _: &mut ServerStartedEvent) {
+        self.trample.predict(&*host);
     }
 
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {

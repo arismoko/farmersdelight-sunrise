@@ -10,11 +10,15 @@
   "state_properties": {
     "supporting": {
       "type": "boolean"
+    },
+    "waterlogged": {
+      "type": "boolean"
     }
   },
   "default_state": {
     "age": "0",
-    "supporting": "false"
+    "supporting": "false",
+    "waterlogged": "true"
   },
   "shapes": {
     "properties": [

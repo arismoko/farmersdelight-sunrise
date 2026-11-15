@@ -58,3 +58,8 @@ pub fn tomato_vine_climbing_tagged_ropes() -> bool {
 pub fn tomato_rope_permanence() -> bool {
     true
 }
+
+/// `farming.richSoilBoostChance` (Configuration.java:RICH_SOIL_BOOST_CHANCE), default 0.2.
+pub fn rich_soil_boost_chance() -> f64 {
+    0.2
+}
