@@ -1424,3 +1424,23 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDM6 (test world) has a planting pad at 10..34,99,1330..1348 and the player there in survival;
   FDTest untouched in this task.
 - next: M8-08 (M8 demo).
+
+## M8-08 M8 demo — PASS — 2026-11-15 — **M8 closed**
+- build pin: afe471cf | mod commit: (this commit; code as of eb85bb6)
+- recorded runs of every M8 Accept item: M8-01…M8-07 entries above (knife stats, anvil, knockback; carving,
+  cakes; board carving, recipes, fortune, comparator, hoppers, dispenser; backstabbing ratios; loot rows;
+  rotten tomato; 21 advancements). Screenshots under `run/shots/m8-0*/`.
+- restart (test world FDM6; `run/shots/m8-08/`): a trident carved into a board (Shift + use) → `IsItemCarved:1b`,
+  trident in `Items`/`Inventory`, drawn upright (`trident-before.png`); after `ctl quit` + relaunch the same
+  NBT and the same render (`trident-after.png`). All 21 FD advancements still granted after the restart.
+- second client (dedicated server re-exported with this build via `native-build --server-output`, synced over
+  `run/server-engine`; clients refreshed from `native-afe471c-9c75d86b611b`): Alice throws a rotten tomato at a
+  pig; Bob's client shows the pig's hurt flash and the subtitles "Rotten Tomato flies", "Pig hurts", "Rotten Tomato
+  splatters" (`bob-tomato-impact.png`). Server and clients stopped afterwards.
+- **M8 closed.** New in M8: deltas A39–A44, engine gaps E-33 (placed_block from mod code), E-34 (consume_item only
+  for consumables). Open M8 items: A40 (dispenser tool ignores Unbreaking), A41 (backstab value from shipped
+  numbers), A43 (8 crumbs, level random), A44 (skillet criteria via grant); not run: hostile-mob scavenging rows
+  (Peaceful FDTest), Looting on ham chance, `smoker_cook` (unused by data), config-off paths (M9-01).
+- world changes: FDM6 (test world) keeps the planting pad and boards at 10..34,99..103,1330..1348; the player
+  there in creative. FDTest: none (inventory/XP restored earlier). The game is left closed.
+- next: M9-01 (PORT_PLAN §11).
