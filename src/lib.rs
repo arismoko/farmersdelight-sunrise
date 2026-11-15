@@ -123,6 +123,7 @@ impl Hooks for FarmersDelight {
             (host, event.cause)
         {
             self.recipes.rebuild(&*host);
+            loot::refresh_smoking(&*host);
         }
     }
 
@@ -174,7 +175,17 @@ impl Hooks for FarmersDelight {
 
     /// Known kinds keep the rolled stack: `farmersdelight:copy_skillet`'s copy is made in
     /// `loot_drops` (blocks::skillet), where the block entity is still readable.
-    fn loot_function(&self, _: &mut LootFunctionEvent<'_>) {}
+    fn loot_function(&self, event: &mut LootFunctionEvent<'_>) {
+        loot::on_function(event);
+    }
+
+    fn loot_condition(&self, event: &mut LootConditionEvent<'_>) {
+        loot::on_condition(event);
+    }
+
+    fn loot_table_load(&self, _: &dyn DataLoadContext, event: &mut LootTableLoadEvent<'_>) {
+        loot::on_table_load(event.id, event.table);
+    }
 
     fn block_drops(&self, level: &dyn LevelHost, event: &mut BlockDropsEvent<'_>) -> Flow {
         blocks::wild::block_drops(level, event);

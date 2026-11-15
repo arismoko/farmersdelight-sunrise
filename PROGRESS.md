@@ -1329,3 +1329,46 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `source.getEntity().getWeaponItem()` (same for melee); the crit sound is heard at the end of the tick (same tick).
 - world changes: none left; user inventory restored, survival at 22,160,22. Game left running.
 - next: M8-05 (loot hooks).
+
+## M8-05 Loot hooks — PASS (rows checked below; smaller samples than the plan's n≥200) — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/loot.rs`.
+  - `loot_table_load` writes FD's `LootTableEvents.MODIFY` builders as 26.3 loot JSON (found in game: 26.3 uses
+    `type` discriminators, one `condition` per pool/entry — several become `all_of` —, `modifier` for functions,
+    `match_block` with `blocks`/`state`, entity predicates `minecraft:equipment` / `minecraft:flags`; the first,
+    pre-26.3-style version made the pumpkin table drop nothing): 14 chest tables get a pool nesting FD's chest table
+    (`generateFDChestLoot`, default on); knife scavenging (chicken feather, hoglin/pig ham and smoked ham with the
+    fire flag, pig with `random_chance_with_enchanted_bonus` 0.5 / looting linear 0.6+0.1, rabbit hide, shulker
+    shell, spider/cave spider string); pumpkin (old pools only without a knife or with Silk Touch, 4 slices
+    otherwise); pastry slicing for apple/chocolate/pumpkin pie, cheesecake and cake (old pools guarded by "not a
+    knife", one pool per bites value giving max − bites slices); straw (grass 0.3, sandy shrub 0.3, rice panicles
+    age 3, wheat age 7, all with `#farmersdelight:straw_harvesters`).
+  - FD's `MODIFY_DROPS` rows become tag-gated pools: every entity table gets "leather if the attacker holds a knife
+    and this is `#farmersdelight:drops_leather`", every block table "7 cake slices if the tool is a knife and the
+    block is `#farmersdelight:drops_cake_slice`" (the engine's loot predicates read both tags), which is the same
+    as FD's "its own table rolled" check.
+  - `loot_condition` `farmersdelight:can_item_perform_ability` (ability → its tag on the context's tool; it was
+    unanswered before, i.e. always false, so shears on wild crops never gave the crop); `loot_function`
+    `farmersdelight:smoker_cook` (the smoking recipe's result × count, from a table rebuilt on each server data
+    load; no carried table uses it).
+- evidence (FDTest pad; `/loot spawn … mine` for blocks and chests, real knife kills for mobs — `/loot … kill`
+  in this engine carries no attacker, so it cannot test attacker rows):
+  - lime and red candle cake + knife → 7 cake slices + candle; by hand → candle only.
+  - pumpkin + knife → 4 pumpkin slices; by hand → pumpkin.
+  - apple pie (bites 2) + knife → 2 slices, by hand → nothing; cake (bites 3) + knife → 4 slices, by hand → nothing.
+  - wheat age 7 + knife ×5 → 5 straw; age 6 → none. Short grass + knife ×100 → 37 straw (p 0.3, 99% 18–42);
+    by hand ×30 → none. Rice panicles age 3 + knife → rice + straw. Sandy shrub + shears → the shrub; + knife ×50
+    → 12 straw (p 0.3, 99% 7–24); by hand → nothing. Wild cabbages + shears → wild cabbages; by hand → seeds.
+  - chests ×15 each: plains house (tomato seeds, onions), simple dungeon (cabbage/tomato seeds, rope), shipwreck
+    supply (+ rice), butcher (bacon, minced beef, mutton chops, ham, flint and iron knives).
+  - knife kills: 6 rabbits all ≥ 1 hide (vanilla alone: 0 half the time); 6 + 6 cows all ≥ 1 leather, control
+    with an iron sword had a cow with none; 20 pigs → ham in 8 (p 0.5, 99% 4–16), 8 burning pigs → smoked ham in
+    3, never raw ham, plus 6 more pigs ham in 4.
+- not covered in game: spider/cave spider string, shulker shell, hoglin (hostile; the world is Peaceful — same
+  pool shape as the rabbit/pig rows), chicken feather (vanilla drops 0–2 feathers, not separable at small n),
+  `smoker_cook` (no table uses it), Looting raising the ham chance.
+- incident: in an early kill script the player stood close enough to pick up a feather and a raw chicken
+  (removed again); the test kills raised the player's XP to 15 levels, set back to 11 levels + 13 points (the
+  lifetime XP total stays 317 instead of 200).
+- world changes: none left. Game left running.
+- next: M8-06 (rotten tomato).
