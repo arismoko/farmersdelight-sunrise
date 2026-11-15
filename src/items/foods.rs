@@ -25,7 +25,7 @@ fn nourishment(duration: i32) -> Value {
 }
 
 /// `FoodValues.ConsumableValues.VANILLA_SOUP_EFFECTS`.
-fn soup_nourishment(item: &str) -> Option<i32> {
+pub fn soup_nourishment(item: &str) -> Option<i32> {
     match item {
         "minecraft:mushroom_stew" | "minecraft:beetroot_soup" => Some(3600),
         "minecraft:rabbit_stew" => Some(6000),

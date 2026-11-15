@@ -62,6 +62,10 @@ impl Hooks for FarmersDelight {
         client::hud::tick();
     }
 
+    fn item_tooltip(&self, host: &dyn ClientHost, event: &mut ItemTooltipEvent<'_>) {
+        items::tooltips::vanilla(host, event);
+    }
+
     fn gui_layer_draw(&self, host: &dyn ClientHost, event: &mut GuiLayerDrawEvent<'_>) {
         client::hud::draw(host, event);
     }
@@ -80,6 +84,7 @@ impl Hooks for FarmersDelight {
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
         items::knife::register(registrar);
+        items::tooltips::register(registrar);
         items::rotten_tomato::register(registrar);
         blocks::storage::register(registrar);
         blocks::basket::register(registrar, &self.baskets, &self.container_names);

@@ -1564,3 +1564,23 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not covered: LAN guest view (M9-08).
 - world changes: FDM6 player back in creative, effects cleared, health/food restored. Game running.
 - next: M9-04 (tooltips).
+
+## M9-04 Tooltips — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/items/tooltips.rs` + generated `src/items/food_tooltips.rs` (`tools/gen_food_tooltips.py [--check]`,
+  from each item's `minecraft:apply_effects` in `tools/decl/items.toml.in`; the item lists are ModItems'
+  `ConsumableItem(…, hasFoodEffectTooltip, hasCustomTooltip)` flags). Item parts on 46 effect foods, 3 custom-line
+  drinks (milk bottle, hot cocoa, melon juice: blue `tooltip.farmersdelight.<path>`) and the two pet foods (gray
+  "When fed to …" + ` effect[ potency][ (mm:ss)]`); `addFoodEffectTooltip` lines (`potion.withAmplifier`,
+  `potion.withDuration`, category colour, "When Applied:" with Speed/Absorption modifiers as vanilla's
+  `createModifiers`, `#.##` amounts); the global `item_tooltip` appends the pumpkin pie's Placeable / Placeable
+  when sneaking line and the vanilla soups' Nourishment line (TooltipEvents). All behind
+  `enableFoodEffectTooltip` (client, live); the soup line also needs `enableVanillaSoupExtraEffects`.
+- evidence (FDM6, chest of test foods; `run/shots/m9-04/`): Apple Cider "Absorption (01:00)", blank, "When Applied:",
+  "+4 Max Absorption" (`apple_cider.png`); Milk Bottle "Clears 1 Effect" blue; Beef Stew "Nourishment (03:00)";
+  Dog Food and Horse Feed lists ("Speed II (05:00)") (`montage1.png`, `montage2.png`); Mushroom Stew "Nourishment
+  (03:00)" and Pumpkin Pie "Placeable" after the advanced lines, as Fabric's callback appends; key off → no FD
+  lines (`off-montage.png`).
+- deltas: **A51** durations use 20 ticks per second (FD passes the level's tick rate, changed by `/tick rate`); the
+  effect category colours are a fixed list for the effects FD's foods use (harmful red, others blue).
+- next: M9-05 (particles & sounds).
