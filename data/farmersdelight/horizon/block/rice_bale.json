@@ -1,0 +1,24 @@
+{
+  "template": "minecraft:hay_block",
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "up",
+        "down",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "up"
+  },
+  "components": {
+    "minecraft:compostable": {
+      "layers": "minecraft:compostable/medium_high"
+    }
+  }
+}

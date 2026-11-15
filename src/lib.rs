@@ -50,6 +50,7 @@ impl Hooks for FarmersDelight {
         blocks::wild::register(registrar, &self.drops);
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
+        blocks::storage::register(registrar);
     }
 
     fn block_entity_container(

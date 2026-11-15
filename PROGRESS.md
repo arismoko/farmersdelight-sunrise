@@ -987,3 +987,27 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: pad with 4 pies and a comparator at ~50115,220,50000; time 1000; player at 22,160,22 in creative.
   Test items added to the inventory since M7-01: apple pie slices 4, pumpkin pies 2.
 - next: M7-03 (storage blocks).
+
+## M7-03 Storage blocks — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: 9 blocks declared: 6 crates (oak-planks template, strength 2.0/3.0), rice bale (hay template + declared 6-way
+  `facing`, compostable 0.85), rice bag (white-wool template), straw bale (hay template). Code
+  `src/blocks/storage.rs`: crates and rice bag not flammable (`NotFlammable`, FD registers no odds and `ofFullCopy`
+  copies none), rice bale faces the clicked face, `#farmersdelight:campfire_signal_smoke` makes a campfire above a
+  signal fire (`smoke_source`). Bales keep hay's fire odds (FD's 20/60 entry = hay's) and fall damage × 0.2.
+- evidence (FDTest pad 50122–50134,219,49994–50006, creative; `run/shots/m7-03/signal-smoke.png`):
+  - all 9 placed; rice bale from the item on a bale's east face → `facing=east`, on the floor → `facing=up`.
+  - campfires placed on straw bale and rice bale → `signal_fire=true`; on a crate → `signal_fire=false`.
+  - fire beside a crate, the rice bag and the straw bale: after 40 s straw bale burnt, crate and rice bag intact and
+    their fires out; the fire then spread to the rice bale (burnt), the rice bag beside it still intact after 80 s.
+  - config off (temporary build with `ENABLE_VANILLA_CROP_CRATES_DEFAULT = false`, run in the demo world FDM6 so
+    the user's recipe book is untouched): `recipe give` → "Unknown recipe" for carrot/potato/beetroot crate;
+    cabbage crate and carrot_from_crate still load (FD gives those no condition). Reverted; FDTest relaunched on the
+    config-on build (`carrot_crate` known again).
+- not covered: fall damage on bales (hay template behaviour, not exercised); structure rotation of the rice bale's
+  declared `facing` (no FD structure places one).
+- user data: a `recipe take` during the recipe check removed the user's unlocked `carrot_crate` recipe; it was
+  given back at once (`recipe give`, confirmed known after the restart).
+- world changes: pad at ~50128,220,50000 (crates, bag, bale fire remains, 3 campfires); player at 22,160,22,
+  creative; time 1000. Test items: the pumpkin pies in hotbar slot 3 were replaced by rice bales, then campfires (4).
+- next: M7-04 (basket).

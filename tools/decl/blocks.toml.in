@@ -454,3 +454,59 @@ default_state = { facing = "north", bites = "0" }
 shapes = { properties = ["facing", "bites"], values = { "north,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "east,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "west,0" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.875]], "north,1" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875], [0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,1" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5], [0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,1" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5], [0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,1" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875], [0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,2" = [[0.125, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,2" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.875]], "south,2" = [[0.125, 0.0, 0.5, 0.875, 0.25, 0.875]], "west,2" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.875]], "north,3" = [[0.5, 0.0, 0.125, 0.875, 0.25, 0.5]], "east,3" = [[0.5, 0.0, 0.5, 0.875, 0.25, 0.875]], "south,3" = [[0.125, 0.0, 0.5, 0.5, 0.25, 0.875]], "west,3" = [[0.125, 0.0, 0.125, 0.5, 0.25, 0.5]] } }
 item = false
 block_item = "farmersdelight:debug_pumpkin_pie"
+
+# --- M7-03 storage blocks ---
+# Crates: Block::new with ofFullCopy(OAK_PLANKS).strength(2.0, 3.0).sound(WOOD); the oak-planks template brings
+# the rest. FD registers no flammability for them (ofFullCopy does not copy FireBlock odds): a NotFlammable part
+# (src/blocks/storage.rs). The three vanilla-crop crates' recipes carry the vanilla_crates_enabled condition.
+
+[carrot_crate]
+source = "J/common/registry/ModBlocks.java:CARROT_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[potato_crate]
+source = "J/common/registry/ModBlocks.java:POTATO_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[beetroot_crate]
+source = "J/common/registry/ModBlocks.java:BEETROOT_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[cabbage_crate]
+source = "J/common/registry/ModBlocks.java:CABBAGE_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[tomato_crate]
+source = "J/common/registry/ModBlocks.java:TOMATO_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[onion_crate]
+source = "J/common/registry/ModBlocks.java:ONION_CRATE"
+template = "minecraft:oak_planks"
+properties = { hardness = 2.0, explosion_resistance = 3.0 }
+
+[rice_bale]
+source = "J/common/registry/ModBlocks.java:RICE_BALE (ofFullCopy(HAY_BLOCK)); J/common/block/RiceBaleBlock.java:FACING,fallOn,getStateForPlacement,flammability 20/60"
+# Template minecraft:hay_block: hay's properties, fall damage × 0.2 and fire odds (FD registers 60 ignite / 20 burn,
+# hay's own). Declared 6-way `facing` (default up) set to the clicked face in code; the template's `axis` is unused
+# by the model. Signal smoke under a campfire: #farmersdelight:campfire_signal_smoke (code).
+template = "minecraft:hay_block"
+state_properties = { facing = { type = "enum", values = ["up", "down", "north", "south", "west", "east"] } }
+default_state = { facing = "up" }
+[rice_bale.components]
+"minecraft:compostable" = { layers = "minecraft:compostable/medium_high" }  # CompostableHelper 0.85
+
+[rice_bag]
+source = "J/common/registry/ModBlocks.java:RICE_BAG (Block::new, ofFullCopy(WOOL.white()))"
+# Template minecraft:white_wool for wool's properties and sounds; not flammable (NotFlammable part, as FD registers none).
+template = "minecraft:white_wool"
+
+[straw_bale]
+source = "J/common/registry/ModBlocks.java:STRAW_BALE (ofFullCopy(HAY_BLOCK)); J/common/block/StrawBaleBlock.java (HayBlock, flammability 20/60)"
+# Template minecraft:hay_block: HayBlock's axis placement, fall damage × 0.2, hay's fire odds (FD's are the same).
+template = "minecraft:hay_block"
