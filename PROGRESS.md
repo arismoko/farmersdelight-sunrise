@@ -1541,3 +1541,26 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDM6 cooking pot at 12,100,1343; FDServer: a cooking pot at −532,81,70 and Alice's tomatoes. All
   games stopped.
 - next: M9-03 (HUD overlays).
+
+## M9-03 HUD overlays — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: `src/client/hud.rs`: two GUI layers `farmersdelight:comfort` and `farmersdelight:nourishment` registered
+  above vanilla's `minecraft:player_health` (FD draws them after the health and food bars); `gui_layer_draw` ports
+  `drawNourishmentOverlay` (background + gilded full/half icons from `textures/gui/fd_icons.png`, the
+  natural-healing set at +18 when hurt with food ≥ 18, jitter at zero saturation) and `drawComfortOverlay` (the
+  sheen over the bottom heart row, frame from `ticks % 50`, jitter at ≤ 4 health, regen bob), each gated by
+  `shouldRenderOverlay` (survival/adventure; the engine skips layers when the HUD is hidden) and its client config
+  key (`enableNourishmentHungerOverlay`, `enableComfortHealthOverlay`, read live). GUI ticks are counted in
+  `client_tick_post`; the jitter uses a `java.util.Random` port seeded `ticks * 312871` (unit test against values
+  printed by the system JDK).
+- evidence (FDM6, survival; `run/shots/m9-03/`): Nourishment → the ten drumsticks gilded
+  (`nourishment-full-crop.png`); `enableNourishmentHungerOverlay` false in the client file while playing → plain
+  drumsticks (`nourishment-off-crop.png`), back on → gilded. Comfort with saturation 0.0 and 14/20 health → the
+  sheen moves across the hearts frame by frame (`comfort-frames.png`: columns 0, 2–3, 6, 9); at full health
+  nothing is drawn.
+- deltas: **A50** the absorption amount is not readable on the client, so the Comfort overlay's row count ignores
+  absorption hearts (it sits on the wrong row when absorption adds a row). A15 (natural regeneration assumed on)
+  applies to the gilded set's healing variant.
+- not covered: LAN guest view (M9-08).
+- world changes: FDM6 player back in creative, effects cleared, health/food restored. Game running.
+- next: M9-04 (tooltips).

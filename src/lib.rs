@@ -54,6 +54,18 @@ impl Hooks for FarmersDelight {
         config::on_file(host, ids::MOD_ID, event.config);
     }
 
+    fn register_gui_layers(&self, _: &RegistrationContext, event: &mut RegisterGuiLayersEvent<'_>) {
+        client::hud::register(event.layers);
+    }
+
+    fn client_tick_post(&self, _: &mut dyn ClientHost, _: &mut ClientTickPostEvent) {
+        client::hud::tick();
+    }
+
+    fn gui_layer_draw(&self, host: &dyn ClientHost, event: &mut GuiLayerDrawEvent<'_>) {
+        client::hud::draw(host, event);
+    }
+
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
         effects::register(registrar);
