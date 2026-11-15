@@ -53,6 +53,7 @@ impl Hooks for FarmersDelight {
         blocks::wild::register(registrar, &self.drops);
         blocks::feast::register(registrar);
         blocks::pie::register(registrar);
+        items::knife::register(registrar);
         blocks::storage::register(registrar);
         blocks::basket::register(registrar, &self.baskets, &self.container_names);
         blocks::tatami::register(registrar);
@@ -211,6 +212,15 @@ impl Hooks for FarmersDelight {
         event: &mut ModContainerViewersEvent<'_>,
     ) {
         blocks::cabinet::on_viewers(host, event);
+    }
+
+    fn living_knockback(
+        &self,
+        _: &mut dyn LevelRandomHost,
+        event: &mut LivingKnockbackEvent<'_>,
+    ) -> Flow {
+        items::knife::on_knockback(event);
+        Flow::Continue
     }
 
     fn attack_entity(&self, host: &mut dyn ServerHost, event: &mut AttackEntityEvent<'_>) -> Flow {

@@ -1212,3 +1212,36 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - **M7 closed.** Open M7 items: A30/E-29 menu titles, A32 cabinet close timing, A33/E-30 custom name on level-side
   breaks, A34/E-31 sign editor on placement, A35 (M9-01), A36, A37/E-32 straw bed sleep height, A38.
 - next: M8-01 (PORT_PLAN §11).
+
+## M8-01 All knives — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: copper/iron/diamond/netherite/golden knives declared in `tools/decl/items.toml.in` as FD's
+  `knifeItem(material)` (damage 0.5 + material bonus, speed −2.0, tool rules incorrect-for-material / knife mineable at
+  material speed / instant-mine tag, weapon 1, enchantability and repair tag from the material, netherite
+  `damage_resistant #minecraft:is_fire`). Vanilla 26.3 material values read from the 26.3 datagen components report
+  (`<m>_sword`: damage = 3 + bonus, durability, enchantable, repairable; `<m>_pickaxe`: speed, incorrect tag) —
+  copper 190/5/1/13, iron 250/6/2/14, diamond 1561/8/3/10, netherite 2031/9/4/15, gold 32/12/0/22. New
+  `tools/test_knife_decls.py` checks all six against these. `src/items/knife.rs`: the six item keys (FD tests
+  `instanceof KnifeItem`, not the tag) and `living_knockback` → strength − 0.1F when the attacker's main hand
+  holds a knife. Sweeping Edge needs no code: knives are not in `#minecraft:enchantable/sweeping`.
+- evidence (FDTest pad 50200..50220,219,49990..50010, removed afterwards; `run/shots/m8-01/`):
+  - held attack damage / speed (`attribute get`): flint 2.5, copper 2.5, iron 3.5, diamond 4.5, netherite 5.5,
+    golden 1.5; speed 2.0 for all. Durability (inventory report) 131/190/250/1561/2031/32.
+  - `/enchant` Sweeping Edge → "cannot support that enchantment" on all six; Sharpness and Looting accepted. Anvil
+    (survival): iron knife + Sweeping Edge book → no result, red cross (`anvil-sweeping.png`); + Sharpness book →
+    Sharpness I knife, cost 1.
+  - lava: netherite knife item survived, diamond knife item burned. Smithing table: template + diamond knife +
+    netherite ingot → netherite knife (`smithing.png`). Recipes copper_knife, netherite_knife_smithing,
+    iron_nugget_from_smelting_knife known to `/recipe give`.
+  - knockback: a pig (slowness/resistance) hit by `damage … player_attack by @s` from the same spot, 3 rounds each:
+    bowl in hand → pushed 1.9886 blocks every time, iron knife → 1.3610 every time; ratio 0.684, vanilla motion
+    for strength 0.4 vs 0.3 predicts 0.679.
+- deltas: **A39** FD takes the knife from the victim's kill credit (`getKillCredit`: last hurting player first);
+  the engine's `living_knockback` names the hit's attacker (falling back to the last hurt-by mob). Differs only when
+  a knife-holding player hurt the entity and another entity then pushes it.
+- incident: the first teleport to the pad landed before its chunk had loaded; the creative player fell to the
+  ground (y 63) unhurt and was moved onto the pad after the fill.
+- world changes: none left (pad, anvil, smithing table removed). User inventory restored (hotbar slot 9 = 3
+  shepherd's pies, test books/knives removed), XP back to 11 levels, survival at 22,160,22, slot 8 selected.
+  The game is left running (FDTest, agent mode). It was raining at night.
+- next: M8-02 (knife interactions).

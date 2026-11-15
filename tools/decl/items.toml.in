@@ -22,6 +22,103 @@ max_stack_size = 1
 ], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
 "minecraft:weapon" = { item_damage_per_attack = 1 }
 
+[copper_knife]
+source = "J/common/registry/ModItems.java:COPPER_KNIFE,knifeItem(ToolMaterial.COPPER); vanilla 26.3 ToolMaterial.COPPER (datagen components report of copper_sword/copper_pickaxe); J/common/item/KnifeItem.java:createAttributes(0.5,-2.0)"
+template = "minecraft:stick"
+max_stack_size = 1
+[copper_knife.components]
+"minecraft:max_damage" = 190
+"minecraft:damage" = 0
+"minecraft:enchantable" = { value = 13 }
+"minecraft:repairable" = { items = "#minecraft:copper_tool_materials" }
+"minecraft:attribute_modifiers" = [
+  { type = "minecraft:attack_damage", id = "minecraft:base_attack_damage", amount = 1.5, operation = "add_value", slot = "mainhand" },
+  { type = "minecraft:attack_speed", id = "minecraft:base_attack_speed", amount = -2.0, operation = "add_value", slot = "mainhand" },
+]
+"minecraft:tool" = { rules = [
+  { blocks = "#minecraft:incorrect_for_copper_tool", correct_for_drops = false },
+  { blocks = "#farmersdelight:mineable/knife", speed = 5.0, correct_for_drops = true },
+  { blocks = "#farmersdelight:knife_instantly_mines", speed = 3.4028234663852886e38 },
+], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
+"minecraft:weapon" = { item_damage_per_attack = 1 }
+[iron_knife]
+source = "J/common/registry/ModItems.java:IRON_KNIFE,knifeItem(ToolMaterial.IRON); vanilla 26.3 ToolMaterial.IRON (datagen components report of iron_sword/iron_pickaxe); J/common/item/KnifeItem.java:createAttributes(0.5,-2.0)"
+template = "minecraft:stick"
+max_stack_size = 1
+[iron_knife.components]
+"minecraft:max_damage" = 250
+"minecraft:damage" = 0
+"minecraft:enchantable" = { value = 14 }
+"minecraft:repairable" = { items = "#minecraft:iron_tool_materials" }
+"minecraft:attribute_modifiers" = [
+  { type = "minecraft:attack_damage", id = "minecraft:base_attack_damage", amount = 2.5, operation = "add_value", slot = "mainhand" },
+  { type = "minecraft:attack_speed", id = "minecraft:base_attack_speed", amount = -2.0, operation = "add_value", slot = "mainhand" },
+]
+"minecraft:tool" = { rules = [
+  { blocks = "#minecraft:incorrect_for_iron_tool", correct_for_drops = false },
+  { blocks = "#farmersdelight:mineable/knife", speed = 6.0, correct_for_drops = true },
+  { blocks = "#farmersdelight:knife_instantly_mines", speed = 3.4028234663852886e38 },
+], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
+"minecraft:weapon" = { item_damage_per_attack = 1 }
+[diamond_knife]
+source = "J/common/registry/ModItems.java:DIAMOND_KNIFE,knifeItem(ToolMaterial.DIAMOND); vanilla 26.3 ToolMaterial.DIAMOND (datagen components report of diamond_sword/diamond_pickaxe); J/common/item/KnifeItem.java:createAttributes(0.5,-2.0)"
+template = "minecraft:stick"
+max_stack_size = 1
+[diamond_knife.components]
+"minecraft:max_damage" = 1561
+"minecraft:damage" = 0
+"minecraft:enchantable" = { value = 10 }
+"minecraft:repairable" = { items = "#minecraft:diamond_tool_materials" }
+"minecraft:attribute_modifiers" = [
+  { type = "minecraft:attack_damage", id = "minecraft:base_attack_damage", amount = 3.5, operation = "add_value", slot = "mainhand" },
+  { type = "minecraft:attack_speed", id = "minecraft:base_attack_speed", amount = -2.0, operation = "add_value", slot = "mainhand" },
+]
+"minecraft:tool" = { rules = [
+  { blocks = "#minecraft:incorrect_for_diamond_tool", correct_for_drops = false },
+  { blocks = "#farmersdelight:mineable/knife", speed = 8.0, correct_for_drops = true },
+  { blocks = "#farmersdelight:knife_instantly_mines", speed = 3.4028234663852886e38 },
+], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
+"minecraft:weapon" = { item_damage_per_attack = 1 }
+[netherite_knife]
+source = "J/common/registry/ModItems.java:NETHERITE_KNIFE,knifeItem(ToolMaterial.NETHERITE).fireResistant(); vanilla 26.3 ToolMaterial.NETHERITE (datagen components report of netherite_sword/netherite_pickaxe); J/common/item/KnifeItem.java:createAttributes(0.5,-2.0)"
+template = "minecraft:stick"
+max_stack_size = 1
+[netherite_knife.components]
+"minecraft:max_damage" = 2031
+"minecraft:damage" = 0
+"minecraft:enchantable" = { value = 15 }
+"minecraft:repairable" = { items = "#minecraft:netherite_tool_materials" }
+"minecraft:attribute_modifiers" = [
+  { type = "minecraft:attack_damage", id = "minecraft:base_attack_damage", amount = 4.5, operation = "add_value", slot = "mainhand" },
+  { type = "minecraft:attack_speed", id = "minecraft:base_attack_speed", amount = -2.0, operation = "add_value", slot = "mainhand" },
+]
+"minecraft:tool" = { rules = [
+  { blocks = "#minecraft:incorrect_for_netherite_tool", correct_for_drops = false },
+  { blocks = "#farmersdelight:mineable/knife", speed = 9.0, correct_for_drops = true },
+  { blocks = "#farmersdelight:knife_instantly_mines", speed = 3.4028234663852886e38 },
+], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
+"minecraft:weapon" = { item_damage_per_attack = 1 }
+"minecraft:damage_resistant" = { types = "#minecraft:is_fire" }
+[golden_knife]
+source = "J/common/registry/ModItems.java:GOLDEN_KNIFE,knifeItem(ToolMaterial.GOLD); vanilla 26.3 ToolMaterial.GOLD (datagen components report of golden_sword/golden_pickaxe); J/common/item/KnifeItem.java:createAttributes(0.5,-2.0)"
+template = "minecraft:stick"
+max_stack_size = 1
+[golden_knife.components]
+"minecraft:max_damage" = 32
+"minecraft:damage" = 0
+"minecraft:enchantable" = { value = 22 }
+"minecraft:repairable" = { items = "#minecraft:gold_tool_materials" }
+"minecraft:attribute_modifiers" = [
+  { type = "minecraft:attack_damage", id = "minecraft:base_attack_damage", amount = 0.5, operation = "add_value", slot = "mainhand" },
+  { type = "minecraft:attack_speed", id = "minecraft:base_attack_speed", amount = -2.0, operation = "add_value", slot = "mainhand" },
+]
+"minecraft:tool" = { rules = [
+  { blocks = "#minecraft:incorrect_for_gold_tool", correct_for_drops = false },
+  { blocks = "#farmersdelight:mineable/knife", speed = 12.0, correct_for_drops = true },
+  { blocks = "#farmersdelight:knife_instantly_mines", speed = 3.4028234663852886e38 },
+], default_mining_speed = 1.0, damage_per_block = 1, can_destroy_blocks_in_creative = false }
+"minecraft:weapon" = { item_damage_per_attack = 1 }
+
 [minced_beef]
 source = "J/common/registry/ModItems.java:MINCED_BEEF; J/common/FoodValues.java:MINCED_BEEF,ConsumableValues.FAST_FOOD"
 template = "minecraft:stick"
