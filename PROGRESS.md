@@ -1185,3 +1185,30 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `item replace … air` (main slots 19–20). World time: changed by `time set night` + sleeping twice (now morning).
 - world changes: pad cleared. Player at 22,160,22, creative; hotbar slot 9 restored.
 - next: M7-09 (M7 demo).
+
+## M7-09 M7 demo — PASS — 2026-11-15 — **M7 closed**
+- build pin: afe471cf | mod commit: 399cfe3 (no code change in this task)
+- single player (FDTest pad 50145..50155,219,49995..50005; `run/shots/m7-09/`): tour of every M7 block family —
+  honey glazed ham (one serving taken with a bowl in game, 4 → 3), rice roll medley, gleaming salad, apple pie
+  (bites 1), sweet berry cheesecake (bites 2), wooden basket (12 tomatoes, 3 onions), spruce cabinet (40 rice,
+  7 bowls), cabbage crate, rice bag, straw bale, red canvas sign with text, paired tatami, full mat (foot+head),
+  half mat, canvas rug, safety net, straw bed (`tour-before.png`). Per-feature behaviour: the M7-01…M7-08 entries.
+  - full restart (`ctl quit`, `launch.sh FDTest`): the 20 block states, both containers' `Items` and the sign text
+    read before and after are identical (`before.txt`, `after.txt`, `diff` empty).
+- dedicated server (re-exported with this build; clients Alice and Bob refreshed from it):
+  - Alice opens the oak cabinet → Bob reads `open=true`, sees the open model and hears "Cabinet opens"
+    (`bob-cabinet-open.png`); Alice closes → Bob reads `open=false`.
+  - both open it: stays `open=true` when Alice closes, `open=false` only when Bob closes too (opener count).
+  - Alice takes a roast chicken serving with a bowl → Bob reads `servings=3`; Alice eats a chocolate pie slice →
+    Bob reads `bites=1`, sees both and hears "Eating" (`bob-feast-pie.png`).
+- incidents: (1) a teleport to z 49993 was just off the pad; the creative player fell to the ground (y 70), no
+  damage; back on the pad at once. (2) Around 18:47 the single-player game and Alice's client exited with no save
+  and no crash report or OOM entry (window focus switched between the terminal and the game at that time); the last
+  save had my test bowl and a ham serving in the user's inventory and a bowl/stone slot swap. Relaunched FDTest,
+  restored the inventory to the pre-test baseline (hotbar slot 9 = 3 shepherd's pies, main slot 15 = 1 stone,
+  ham removed), player back at 22,160,22, saved and quit: **the game is left closed**.
+- world changes: the M7 tour stays on the FDTest pad at 50145..50155,220,49995..50005 (far from the player); the
+  server world FDServer has a stone pad at -536..-526,80,66..74 with a cabinet, a roast chicken and a chocolate pie.
+- **M7 closed.** Open M7 items: A30/E-29 menu titles, A32 cabinet close timing, A33/E-30 custom name on level-side
+  breaks, A34/E-31 sign editor on placement, A35 (M9-01), A36, A37/E-32 straw bed sleep height, A38.
+- next: M8-01 (PORT_PLAN §11).
