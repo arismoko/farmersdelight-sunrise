@@ -1584,3 +1584,17 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - deltas: **A51** durations use 20 ticks per second (FD passes the level's tick rate, changed by `/tick rate`); the
   effect category colours are a fixed list for the effects FD's foods use (harmful red, others blue).
 - next: M9-05 (particles & sounds).
+
+## M9-05 Particles & sounds — IN PROGRESS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit; no code yet)
+- found: all 20 FD sound events are registered (sounds.json). Played by the port: 16. FD itself never plays
+  `block.cutting_board.carve_tool`, `block.food.slice`, `block.food.take_portion` (only registered in ModSounds /
+  SoundDefinitions) → nothing to do beyond registration. **Missing: `block.skillet.sizzle`**:
+  (1) SkilletBlock#animateTick: while the skillet BE is cooking, 1/10 per client tick, local sound at
+  (x+0.5, y, z+0.5), BLOCKS, volume 0.4, pitch 0.9–1.1; (2) SkilletItem#onUseTick (client): held cooking, 1/50
+  per tick (and every tick in the last 3 of a flip), PLAYERS, 0.4, 0.9–1.1; the add_food sound at FLIP_TIME−8.
+- particles: `farmersdelight:star`, `steam`, `sparkle` types registered (registry.rs) with carried provider JSON;
+  still to verify in game and tick the 20-event checklist with subtitles.
+- next: implement the two sizzle paths (block: client BE tick or `block_entity_client_tick`; item: client use
+  tick), test in FDM6, write the checklist, then M9-06…M9-08, then M10 (user: no confirmation needed), then create
+  a private GitHub repo on the user's account and push (user request 2026-11-15).
