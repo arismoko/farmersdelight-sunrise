@@ -663,3 +663,49 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   only; the farmland's boost already uses level event 1505 in FD, sound included).
 - not covered here: compost → rich soil → tilled → crop as one continuous survival run (each step was run on its own).
 - next: M6-01
+
+## M6-01 Wild crops — IN PROGRESS (code written, NOT run in game) — 2026-11-15
+- build pin: afe471cf | mod commit: 1cfa305
+- done (builds, unit tests pass, decl tests pass; nothing verified in game):
+  - decls: 6 `wild_*` + `sandy_shrub` on template `minecraft:short_grass` (not in `#minecraft:replaceable`, burns 60/100
+    as FD registers), `wild_rice` on `minecraft:tall_grass` with a declared `waterlogged` (default dry lower half;
+    outline stays tall grass's, FD's is a full cube); compostable 0.65 (shrub 0.3).
+  - `src/blocks/wild.rs`: ground rules (`#grows_wild_crops` / `#minecraft:sand`), wild crop bone meal (80%, ≤10 in
+    9×3×9, FD's random walk), shrub not bonemealable, wild rice placement only into a full water block with air
+    above, canSurvive per half, bone meal 30% → pops one wild rice (queued, dropped at end of tick: a level write
+    cannot spawn items).
+  - stew effect: the game's flower→stew table is fixed to vanilla names (horizon-items flowers.rs), so
+    `entity_interact` handles a wild crop used on a **brown mooshroom** (reads the cow's NBT `Type`, merges
+    `stew_effects` [{id, duration = seconds×20}], eats one, eat sound; two smoke puffs if it already holds effects).
+    Vanilla's bowl path then gives the stew. 26.3 has no crafting route for FD's flowers (FD ships no stew recipes).
+- to test in game: place each on its ground / wrong ground; bone meal spread and the 10 cap; shrub on sand only;
+  wild rice in water (both halves, lower `waterlogged=true`, breaking either half, water left behind — E-13 may
+  apply); bone meal on wild rice; `/summon mooshroom ~ ~ ~ {Type:"brown"}`, feed each crop, bowl → stew, eat → effect;
+  loot (carried tables); whether `may_place_on`/`can_survive` parts are honoured for the short_grass template.
+- M6-02 findings so far (nothing written yet) — the port can be close to exact, better than the planned degraded form:
+  - `farmersdelight:in_order` == vanilla 26.3 `minecraft:overlay` (places every inline placed feature, true if any;
+    horizon-world worldgen/feature_graph.rs `Self::Overlay`). `minecraft:sequence` stops at the first failure — not it.
+  - `farmersdelight:biome_tag` (always `#minecraft:is_overworld`) → drop the placement entry and put
+    `#minecraft:is_overworld` into the biome modifier's `neoforge:and`.
+  - `farmersdelight:wild_rice` feature → `minecraft:simple_block` of `wild_rice[half=lower,waterlogged=true]`
+    (the placed feature already filters water / air above / substrate below; FD's extra "full source" check is lost).
+    Unknown: whether simple_block places the upper half for a tall_grass-template mod block, and whether worldgen
+    (worker threads, no mod parts) applies the **template's** canSurvive — short_grass on sand would then refuse wild
+    cabbages/beetroots/shrubs. Test with `/place feature` first.
+  - biome selection: `data/farmersdelight/neoforge/biome_modifier/*.json`, `neoforge:add_features`, step
+    `vegetal_decoration`, biomes = `neoforge:and` [#allow tag, `neoforge:not` #deny tag, `horizon:climate`
+    temperature {min,max}] (docs/modding content-mods.md "biome modifiers"; climate = base temperature, as
+    FDBiomeSelector). Ranges: carrots/onions 0.4–0.9, potatoes 0.1–0.3, rice/tomatoes −4..4 (= none), colonies /
+    cabbage / beetroots tag only.
+  - FD's biome tags reference Fabric convention biome tags the mod must ship (same generator as the item tags, new
+    table `tools/conventional/biome_tags.toml.in`, output `data/c/tags/worldgen/biome/`). Values read from the
+    user's local fabric-convention-tags-v2 4.10.4 jar (Prism 26.3 instance): is_mushroom = [mushroom_fields];
+    is_beach = [#minecraft:is_beach (optional)]; is_underground = [#c:is_cave (optional)]; is_cave = [lush_caves,
+    dripstone_caves, sulfur_caves, deep_dark]; is_wet/overworld = [swamp, mangrove_swamp, jungle, bamboo_jungle,
+    sparse_jungle, beach, lush_caves, dripstone_caves, sulfur_caves]; is_hot/overworld = [jungle, bamboo_jungle,
+    sparse_jungle, desert, badlands, wooded_badlands, eroded_badlands, savanna, savanna_plateau, windswept_savanna,
+    stony_peaks, mushroom_fields, warm_ocean].
+  - carry script needs two new scripted rules (worldgen type rename, placement-entry drop) + one override
+    (wild_rice feature); record them in `tools/carry_rules.toml.in` and the manifest; `tools/test_carry.py` must cover them.
+- next: test M6-01 in game, then M6-02 as above, M6-03 (village pools/processors, `horizon:add_to`), M6-04 (trades,
+  farmer POI probe), M6-05 (fresh-world demo).
