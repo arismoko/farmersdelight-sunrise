@@ -368,10 +368,28 @@ fn place(host: &mut dyn ServerHost, player: PlayerRef, event: &UseOnEvent<'_>) {
         1.0,
         0.8,
     );
+    // BlockItem#place fires `minecraft:placed_block`; a mod cannot fire a `minecraft:` trigger
+    // (E-33), so FD's own criterion for it is granted directly (A44).
+    grant_criterion(host, player, "farmersdelight:main/place_skillet", "skillet");
     if player.is_creative(&*host) != Some(true)
         && let Some(living) = host.living(player.entity())
     {
         let _ = living.set_hand_item(host, event.hand, event.stack.clone().shrink(1));
+    }
+}
+
+/// Grants one criterion of one of FD's advancements to `player` (the console's
+/// `advancement grant … only`), for vanilla triggers a mod cannot fire (E-33, E-34; A44).
+pub fn grant_criterion(
+    host: &mut dyn ServerHost,
+    player: PlayerRef,
+    advancement: &str,
+    criterion: &str,
+) {
+    if let Some(name) = player.name(&*host) {
+        let _ = host.commands().run_command(&format!(
+            "advancement grant {name} only {advancement} {criterion}"
+        ));
     }
 }
 
@@ -455,10 +473,14 @@ pub fn on_finish(host: HostSide<'_>, event: &mut LivingEntityUseItemFinishEvent<
     if event.stack.item().id(&*host) != ITEM {
         return;
     }
-    let Some(ingredient) = ingredient_of(&*host, event.stack) else {
+    let Some(player) = host.players().acting_player() else {
         return;
     };
-    let Some(player) = host.players().acting_player() else {
+    // ServerPlayer#completeUsingItem fires `minecraft:consume_item` for any finished use; the
+    // engine fires it for consumables only and a mod cannot fire a `minecraft:` trigger (E-34),
+    // so FD's own criterion for the skillet is granted directly (A44).
+    grant_criterion(host, player, "farmersdelight:main/use_skillet", "skillet");
+    let Some(ingredient) = ingredient_of(&*host, event.stack) else {
         return;
     };
     let Some(level) = player.level(&*host) else {

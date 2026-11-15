@@ -1392,3 +1392,35 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not covered: raider anger and the `hit_raider_with_rotten_tomato` advancement (M8-07), LAN view (M8-08).
 - world changes: none left. Game left running.
 - next: M8-07 (advancements).
+
+## M8-07 Advancements — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: nothing new needed for 19 of the 21 (carried data + the engine's vanilla triggers + the M1
+  `farmersdelight:use_cutting_board` trigger). Two FD criteria come from vanilla triggers that the engine does not
+  fire for mod-side actions, and a mod cannot fire a `minecraft:` trigger (`trigger_criterion` refuses them):
+  - **E-33** `minecraft:placed_block` is not fired when a mod places a block from its own code (the skillet's
+    sneak placement, `SkilletItem#place` → `BlockItem#place`).
+  - **E-34** `minecraft:consume_item` is fired only for consumables, not for any finished item use
+    (`ServerPlayer#completeUsingItem`: the skillet's held cooking).
+  - workaround **A44**: `items::skillet::grant_criterion` runs the console's
+    `advancement grant <player> only farmersdelight:main/place_skillet skillet` (resp. `use_skillet`) at those
+    two moments. Other advancements (data packs) with those triggers for the skillet are not fired. (A UUID
+    target is refused by this engine's `advancement` command, so the player's name is used.)
+- evidence (test world FDM6, Normal; all FD advancements revoked first: "Revoked 21 advancements"; checked with
+  `execute if entity @s[advancements={…=true}]`):
+  - `/give`: root (seeds), craft_knife, get_fd_seed, get_ham, get_mushroom_colony, get_rich_soil, harvest_straw,
+    obtain_netherite_knife.
+  - placements by the player: plant_all_crops (wheat, beetroots, carrots, potatoes, melon and pumpkin stems,
+    cabbages, onions, budding tomatoes on farmland; mushrooms on mycelium; chorus flower on end stone; cocoa on a
+    jungle log; glow berries under stone; nether wart on soul sand; sweet berries on grass; sugar cane beside
+    water; kelp and rice in water), plant_rice, place_campfire, place_cooking_pot, place_feast (gleaming salad
+    block), place_organic_compost, place_skillet (after the fix).
+  - use_cutting_board (beef cut with a knife), harvest_ropelogged_tomato (ripe tomatoes on rope picked → age 0),
+    hit_raider_with_rotten_tomato (NoAI pillager, health stays 24), eat_nourishing_food and master_chef (all 27
+    meals eaten in survival, hunger drained with a Hunger effect between), use_skillet (beef cooked in the held
+    skillet beside a campfire; after the fix).
+  - all 21 granted at the end; all 203 recipe advancement ids are known to `advancement` (an unknown id answers
+    "Unknown advancement").
+- world changes: FDM6 (test world) has a planting pad at 10..34,99,1330..1348 and the player there in survival;
+  FDTest untouched in this task.
+- next: M8-08 (M8 demo).
