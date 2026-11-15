@@ -675,3 +675,584 @@ template = "minecraft:oak_planks"
 properties = { hardness = 2.5, explosion_resistance = 2.5, requires_tool = false, sounds = "minecraft:crimson_planks", map_color = 13 }
 state_properties = { facing = { type = "enum", values = ["north", "south", "west", "east"] }, open = { type = "boolean" } }
 default_state = { facing = "north", open = "false" }
+
+# --- M7-06 canvas signs ---
+# 17 boards (plain + 16 dyes) × 4 forms. FD: StandingCanvasSignBlock / WallCanvasSignBlock /
+# CeilingHangingCanvasSignBlock / WallHangingCanvasSignBlock over WoodType.SPRUCE with ofFullCopy(SPRUCE_SIGN /
+# SPRUCE_HANGING_SIGN) → spruce sign templates. `wood_type` farmersdelight:canvas[_<dye>] is the editor background
+# (SignEditScreenMixin / HangingSignEditScreenMixin: textures/gui/{signs,hanging_signs}/canvas[_<dye>].png).
+# `sign_text_color` white for the default canvasSignDarkBackgroundList (gray, purple, blue, brown, green, red, black;
+# SignBlockEntityMixin), on both forms of a board. Wall forms drop through the engine's wall-variant loot fallback
+# (`_wall_` → `_`, `wall_` prefix dropped). Items: FD registers basicItem() (stack 64) for both item kinds.
+
+[canvas_sign]
+source = "J/common/registry/ModBlocks.java:CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas"
+wall_block = "farmersdelight:canvas_wall_sign"
+[canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:CANVAS_WALL_SIGN (WallCanvasSignBlock, loot canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas"
+item = false
+
+[hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas"
+wall_block = "farmersdelight:wall_hanging_canvas_sign"
+[hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas"
+item = false
+
+[white_canvas_sign]
+source = "J/common/registry/ModBlocks.java:WHITE_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:WHITE_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_white"
+wall_block = "farmersdelight:white_canvas_wall_sign"
+[white_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[white_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:WHITE_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot white_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_white"
+item = false
+
+[white_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:WHITE_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:WHITE_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_white"
+wall_block = "farmersdelight:white_wall_hanging_canvas_sign"
+[white_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[white_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:WHITE_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot white_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_white"
+item = false
+
+[orange_canvas_sign]
+source = "J/common/registry/ModBlocks.java:ORANGE_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:ORANGE_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_orange"
+wall_block = "farmersdelight:orange_canvas_wall_sign"
+[orange_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[orange_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:ORANGE_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot orange_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_orange"
+item = false
+
+[orange_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:ORANGE_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:ORANGE_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_orange"
+wall_block = "farmersdelight:orange_wall_hanging_canvas_sign"
+[orange_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[orange_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:ORANGE_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot orange_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_orange"
+item = false
+
+[magenta_canvas_sign]
+source = "J/common/registry/ModBlocks.java:MAGENTA_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:MAGENTA_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_magenta"
+wall_block = "farmersdelight:magenta_canvas_wall_sign"
+[magenta_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[magenta_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:MAGENTA_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot magenta_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_magenta"
+item = false
+
+[magenta_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:MAGENTA_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:MAGENTA_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_magenta"
+wall_block = "farmersdelight:magenta_wall_hanging_canvas_sign"
+[magenta_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[magenta_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:MAGENTA_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot magenta_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_magenta"
+item = false
+
+[light_blue_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_BLUE_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:LIGHT_BLUE_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_light_blue"
+wall_block = "farmersdelight:light_blue_canvas_wall_sign"
+[light_blue_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[light_blue_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_BLUE_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot light_blue_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_light_blue"
+item = false
+
+[light_blue_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_BLUE_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:LIGHT_BLUE_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_light_blue"
+wall_block = "farmersdelight:light_blue_wall_hanging_canvas_sign"
+[light_blue_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[light_blue_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_BLUE_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot light_blue_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_light_blue"
+item = false
+
+[yellow_canvas_sign]
+source = "J/common/registry/ModBlocks.java:YELLOW_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:YELLOW_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_yellow"
+wall_block = "farmersdelight:yellow_canvas_wall_sign"
+[yellow_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[yellow_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:YELLOW_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot yellow_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_yellow"
+item = false
+
+[yellow_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:YELLOW_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:YELLOW_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_yellow"
+wall_block = "farmersdelight:yellow_wall_hanging_canvas_sign"
+[yellow_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[yellow_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:YELLOW_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot yellow_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_yellow"
+item = false
+
+[lime_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIME_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:LIME_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_lime"
+wall_block = "farmersdelight:lime_canvas_wall_sign"
+[lime_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[lime_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:LIME_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot lime_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_lime"
+item = false
+
+[lime_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIME_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:LIME_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_lime"
+wall_block = "farmersdelight:lime_wall_hanging_canvas_sign"
+[lime_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[lime_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIME_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot lime_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_lime"
+item = false
+
+[pink_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PINK_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:PINK_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_pink"
+wall_block = "farmersdelight:pink_canvas_wall_sign"
+[pink_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[pink_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:PINK_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot pink_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_pink"
+item = false
+
+[pink_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PINK_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:PINK_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_pink"
+wall_block = "farmersdelight:pink_wall_hanging_canvas_sign"
+[pink_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[pink_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PINK_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot pink_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_pink"
+item = false
+
+[gray_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GRAY_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:GRAY_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_gray"
+sign_text_color = "white"
+wall_block = "farmersdelight:gray_canvas_wall_sign"
+[gray_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[gray_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:GRAY_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot gray_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_gray"
+sign_text_color = "white"
+item = false
+
+[gray_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GRAY_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:GRAY_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_gray"
+sign_text_color = "white"
+wall_block = "farmersdelight:gray_wall_hanging_canvas_sign"
+[gray_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[gray_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GRAY_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot gray_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_gray"
+sign_text_color = "white"
+item = false
+
+[light_gray_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_GRAY_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:LIGHT_GRAY_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_light_gray"
+wall_block = "farmersdelight:light_gray_canvas_wall_sign"
+[light_gray_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[light_gray_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_GRAY_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot light_gray_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_light_gray"
+item = false
+
+[light_gray_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_GRAY_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:LIGHT_GRAY_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_light_gray"
+wall_block = "farmersdelight:light_gray_wall_hanging_canvas_sign"
+[light_gray_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[light_gray_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:LIGHT_GRAY_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot light_gray_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_light_gray"
+item = false
+
+[cyan_canvas_sign]
+source = "J/common/registry/ModBlocks.java:CYAN_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:CYAN_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_cyan"
+wall_block = "farmersdelight:cyan_canvas_wall_sign"
+[cyan_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[cyan_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:CYAN_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot cyan_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_cyan"
+item = false
+
+[cyan_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:CYAN_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:CYAN_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_cyan"
+wall_block = "farmersdelight:cyan_wall_hanging_canvas_sign"
+[cyan_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[cyan_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:CYAN_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot cyan_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_cyan"
+item = false
+
+[purple_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PURPLE_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:PURPLE_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_purple"
+sign_text_color = "white"
+wall_block = "farmersdelight:purple_canvas_wall_sign"
+[purple_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[purple_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:PURPLE_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot purple_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_purple"
+sign_text_color = "white"
+item = false
+
+[purple_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PURPLE_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:PURPLE_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_purple"
+sign_text_color = "white"
+wall_block = "farmersdelight:purple_wall_hanging_canvas_sign"
+[purple_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[purple_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:PURPLE_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot purple_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_purple"
+sign_text_color = "white"
+item = false
+
+[blue_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLUE_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:BLUE_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_blue"
+sign_text_color = "white"
+wall_block = "farmersdelight:blue_canvas_wall_sign"
+[blue_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[blue_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:BLUE_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot blue_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_blue"
+sign_text_color = "white"
+item = false
+
+[blue_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLUE_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:BLUE_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_blue"
+sign_text_color = "white"
+wall_block = "farmersdelight:blue_wall_hanging_canvas_sign"
+[blue_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[blue_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLUE_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot blue_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_blue"
+sign_text_color = "white"
+item = false
+
+[brown_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BROWN_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:BROWN_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_brown"
+sign_text_color = "white"
+wall_block = "farmersdelight:brown_canvas_wall_sign"
+[brown_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[brown_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:BROWN_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot brown_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_brown"
+sign_text_color = "white"
+item = false
+
+[brown_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BROWN_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:BROWN_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_brown"
+sign_text_color = "white"
+wall_block = "farmersdelight:brown_wall_hanging_canvas_sign"
+[brown_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[brown_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BROWN_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot brown_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_brown"
+sign_text_color = "white"
+item = false
+
+[green_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GREEN_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:GREEN_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_green"
+sign_text_color = "white"
+wall_block = "farmersdelight:green_canvas_wall_sign"
+[green_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[green_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:GREEN_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot green_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_green"
+sign_text_color = "white"
+item = false
+
+[green_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GREEN_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:GREEN_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_green"
+sign_text_color = "white"
+wall_block = "farmersdelight:green_wall_hanging_canvas_sign"
+[green_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[green_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:GREEN_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot green_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_green"
+sign_text_color = "white"
+item = false
+
+[red_canvas_sign]
+source = "J/common/registry/ModBlocks.java:RED_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:RED_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_red"
+sign_text_color = "white"
+wall_block = "farmersdelight:red_canvas_wall_sign"
+[red_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[red_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:RED_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot red_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_red"
+sign_text_color = "white"
+item = false
+
+[red_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:RED_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:RED_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_red"
+sign_text_color = "white"
+wall_block = "farmersdelight:red_wall_hanging_canvas_sign"
+[red_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[red_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:RED_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot red_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_red"
+sign_text_color = "white"
+item = false
+
+[black_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLACK_CANVAS_SIGN (StandingCanvasSignBlock, ofFullCopy(SPRUCE_SIGN)); J/common/registry/ModItems.java:BLACK_CANVAS_SIGN (StandingAndWallBlockItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_sign"
+wood_type = "farmersdelight:canvas_black"
+sign_text_color = "white"
+wall_block = "farmersdelight:black_canvas_wall_sign"
+[black_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[black_canvas_wall_sign]
+source = "J/common/registry/ModBlocks.java:BLACK_CANVAS_WALL_SIGN (WallCanvasSignBlock, loot black_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_sign"
+wood_type = "farmersdelight:canvas_black"
+sign_text_color = "white"
+item = false
+
+[black_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLACK_HANGING_CANVAS_SIGN (CeilingHangingCanvasSignBlock, ofFullCopy(SPRUCE_HANGING_SIGN)); J/common/registry/ModItems.java:BLACK_HANGING_CANVAS_SIGN (HangingSignItem, basicItem)"
+# See the M7-06 note above.
+template = "minecraft:spruce_hanging_sign"
+wood_type = "farmersdelight:canvas_black"
+sign_text_color = "white"
+wall_block = "farmersdelight:black_wall_hanging_canvas_sign"
+[black_hanging_canvas_sign.components]
+"minecraft:max_stack_size" = 64
+
+[black_wall_hanging_canvas_sign]
+source = "J/common/registry/ModBlocks.java:BLACK_HANGING_CANVAS_WALL_SIGN (WallHangingCanvasSignBlock, loot black_hanging_canvas_sign)"
+# See the M7-06 note above.
+template = "minecraft:spruce_wall_hanging_sign"
+wood_type = "farmersdelight:canvas_black"
+sign_text_color = "white"
+item = false

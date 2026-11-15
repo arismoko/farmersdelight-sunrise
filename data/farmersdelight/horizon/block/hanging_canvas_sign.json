@@ -1,0 +1,8 @@
+{
+  "template": "minecraft:spruce_hanging_sign",
+  "wood_type": "farmersdelight:canvas",
+  "wall_block": "farmersdelight:wall_hanging_canvas_sign",
+  "components": {
+    "minecraft:max_stack_size": 64
+  }
+}

@@ -1087,3 +1087,41 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   inventory: 3 oak, 1 crimson, 3 cherry cabinets (main slots 16–18). Player returned to 22,160,22, creative;
   random_tick_speed 3. Game left running (restarted three times during the task).
 - next: M7-06 (canvas signs).
+
+## M7-06 Canvas signs — PASS — 2026-11-15
+- build pin: afe471cf | mod commit: (this commit)
+- did: 68 blocks declared (`tools/decl/blocks.toml.in`, no code): for the plain board and 16 dyes, `<c>canvas_sign`
+  (template `minecraft:spruce_sign`, `wall_block` → `<c>canvas_wall_sign`), `<c>canvas_wall_sign`
+  (`spruce_wall_sign`, `item = false`), `<c>hanging_canvas_sign` (`spruce_hanging_sign`, `wall_block` →
+  `<c>wall_hanging_canvas_sign`), `<c>wall_hanging_canvas_sign` (`spruce_wall_hanging_sign`, `item = false`).
+  FD's blocks are WoodType.SPRUCE with ofFullCopy(SPRUCE_SIGN / SPRUCE_HANGING_SIGN). `wood_type`
+  `farmersdelight:canvas[_<dye>]` gives the editor FD's `textures/gui/{signs,hanging_signs}/canvas[_<dye>].png`
+  (SignEditScreenMixin / HangingSignEditScreenMixin); `sign_text_color = "white"` on both forms of the default
+  dark list (gray, purple, blue, brown, green, red, black; SignBlockEntityMixin). Items stack to 64 (FD basicItem()).
+  Wall forms have no loot table of their own: the engine's wall-variant fallback (`_wall_` → `_`, leading `wall_`
+  dropped) reaches FD's `<c>canvas_sign` / `<c>hanging_canvas_sign` tables, as FD's overrideLootTable does.
+- evidence (pad 50145..50155,220,49995..50005; `run/shots/m7-06/`):
+  - black canvas sign placed on the floor → `rotation=8`; editor shows the black canvas background
+    (`editor-black.png`), text colour `white`; text saved via Done.
+  - plain canvas sign used on a wall → `canvas_wall_sign[facing=north]`, text colour `black`.
+  - blue hanging canvas sign under a ceiling → `blue_hanging_canvas_sign`, editor with the blue hanging canvas
+    (`editor-hanging-blue.png`), colour `white`; on a wall side → `blue_wall_hanging_canvas_sign`, colour `white`.
+  - all four boards drawn with their canvas textures (`boards.png`).
+  - `setblock … destroy` of the four: drops `black_canvas_sign`, `canvas_sign`, `blue_hanging_canvas_sign` ×2.
+  - hanging sign stack of 64 accepted; all 68 ids `setblock` successfully.
+- deltas / gaps:
+  - **A34** placing a standing canvas sign opens the text editor (the template's SignItem path). FD's item is a
+    StandingAndWallBlockItem, which never opens it on placement (the sign is edited by using it). Engine gap
+    **E-31**: a sign block's item always opens the editor; `player_open_sign` is a notice and cannot stop it.
+    Hanging canvas signs use HangingSignItem in FD too, so they match.
+  - **A35 (pending M9-01)**: the dark-background list is static in the declarations (`sign_text_color`), so
+    `canvasSignDarkBackgroundList` edits will not change it; to be revisited when the config is wired.
+- licence (D7): the boards, editor backgrounds and models are FD's own MIT assets (carried, attributed in
+  `LICENSE-farmersdelight`); the models' parents `minecraft:block/template_*sign*` are referenced, not shipped.
+- tooling note: `run/ctl close` does not close the sign editor (vanilla oak sign too); `ctl click-at 213 213`
+  presses Done at the 1280×720 window.
+- not covered: dyeing / glow ink on a canvas sign (vanilla code path), fuel values (vanilla `#minecraft:signs` /
+  `#minecraft:hanging_signs` tags list them).
+- world changes: pad cleared (leftover M7-05 cabinets removed too). The world time was set to noon to take the
+  screenshots (it was night). Player back at 22,160,22, creative; hotbar slot 9 holds the shepherd's pies again.
+- next: M7-07 (rug, tatami, mats).

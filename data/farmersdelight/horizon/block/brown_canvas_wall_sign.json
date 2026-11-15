@@ -1,0 +1,6 @@
+{
+  "template": "minecraft:spruce_wall_sign",
+  "wood_type": "farmersdelight:canvas_brown",
+  "sign_text_color": "white",
+  "item": false
+}

@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:spruce_sign",
+  "wood_type": "farmersdelight:canvas_brown",
+  "sign_text_color": "white",
+  "wall_block": "farmersdelight:brown_canvas_wall_sign",
+  "components": {
+    "minecraft:max_stack_size": 64
+  }
+}
