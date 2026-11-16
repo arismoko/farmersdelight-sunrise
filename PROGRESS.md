@@ -1712,3 +1712,22 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDServer test world: board, stove and cabinet near −530,81,70; Alice back in creative; dropped
   tomatoes left at −531,81,68. Server and clients stopped.
 - next: M10-03 (persistence).
+
+## M10-03 Persistence — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit; code as of 5faed22)
+- VALIDATION_PLAN §3.3 for the six block entities on the FDM6 pad (stove 12,100,1340 with beef; skillet on a lit
+  stove 14,101,1340 with beef; cooking pot on a stove 18,101,1347 with beef/carrot/potato → beef stew; cutting board
+  17,100,1343 with chicken; wooden basket 10,100,1340 with 7 carrots; oak cabinet 15,100,1346 with 5 apples):
+  - partial cooking without heat: the pot's stove set unlit → `CookTime` 178 → 132 in about a second (−2/tick);
+    relit, it climbs again. (Heat-source changes and hopper conductors: M2/M3.)
+  - chunk unload/reload: snapshot, `tp` 4000 blocks away for 10 s (spectator), back: stove progress +66 (the ~3 s
+    after returning, not the 10 s away), skillet and pot continued their cycles, board/basket/cabinet contents
+    identical; no double cooking.
+  - restart: `tick freeze`, snapshot, `ctl quit`, relaunch: skillet 38 → 52, pot 41 → 56 (≈15 ticks of normal
+    progress before the snapshot), pot ingredients identical, stove totals identical, board/basket/cabinet
+    identical; nothing cooked at once on load (the 3.6.30 "cooked immediately on reload" bug absent). Item
+    components across restart: carved board and skillet ingredient (M8-08, M10-02).
+- note: a finished stove slot keeps its progress number until a new item goes in (FD's `addItem` resets it), as
+  in the reference.
+- world changes: FDM6 pad 10..15,99..101,1338..1341 (stoves, skillet, basket). Game running.
+- next: M10-04 (performance).
