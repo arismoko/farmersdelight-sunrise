@@ -1886,3 +1886,13 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - On `moredelight-horizon/data/moredelight/recipe/cooking`: 12 parsed, all Meals / 400 t / 1.0 XP / bowl.
 - cargo test 92 + 1 ignored; clippy clean.
 - next: MD-07 (in moredelight-horizon).
+
+## E-39 Creative tab names overlap on page 2 (engine gap, user report) — recorded — 2026-11-16
+- report (user): tab-name tooltips in the creative menu overlap.
+- cause (read at the build pin, also present at the research pin c26fe59): `creative_screen.rs:275-289` draws the
+  hovered tab's name for tabs on the current page, then `:321-327` draws it again through `Creative::hovered_tab`
+  (`creative.rs:1000`), which does not filter by page. On page 2 (Farmer's Delight, More Delight) the cursor over a
+  mod tab also hits the page-1 vanilla tab at the same position, so two different names are drawn over each other.
+- no mod-side workaround: tab placement and the tooltip are engine code; a mod cannot keep its tab off page 2.
+  The fix is one engine line (filter `hovered_tab` by `on_page`, or drop the duplicate pass). Not filed upstream yet.
+- not reproducible with agent screenshots (agent mode draws no hover tooltips); identified by reading.
