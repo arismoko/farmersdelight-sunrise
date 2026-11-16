@@ -1648,3 +1648,21 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   корм / Если скормить прирученному волку: …" (`ru.png`); ja_jp → "リンゴサイダー / 衝撃吸収 (01:00) / 効果: /
   衝撃吸収レベルの上限 +4", "ビーフシチュー / 栄養 (03:00)" (`ja.png`). Language set back to en_us.
 - next: M9-08 (M9 demo).
+
+## M9-08 M9 demo — PASS — 2026-11-16 — **M9 closed**
+- build pin: afe471cf | mod commit: (this commit; code as of 494ceb0)
+- recorded runs of every M9 Accept item: M9-01 (each config key toggled with the reference effect), M9-02 (book
+  tabs/recipes; placement + ghosts on a server client), M9-03 (overlays + client keys), M9-04 (tooltips + key),
+  M9-05 (20-sound checklist, particles), M9-06 (creative tab order), M9-07 (lang key script; ru_ru and ja_jp in
+  game). Screenshots under `run/shots/m9-0*/`.
+- config edits survive restart: M9-01 — `canvasSignDarkBackgroundList ["white"]` written while running, read
+  after a restart (white board → white text, red → black); the recipe book's open state also survived a restart
+  (M9-02).
+- HUD overlays on a guest (dedicated server re-exported with this build, Alice; `run/shots/m9-08/guest-hud.png`):
+  Nourishment → gilded drumsticks; Comfort at 0 saturation, 15/20 health → the sheen moving over the hearts across
+  four frames. The windowed guest client presented one frame and stalled (window not shown on the desktop);
+  relaunched with `--offscreen` it rendered normally — a rig note, not a mod issue.
+- **M9 closed.** New in M9: deltas A45–A52, engine gaps E-35 (configs after item defaults), E-36 (single-player
+  mod-book placement), E-37 (property sets without recipes); fixed the creative-tab ids (onion, rice panicle,
+  seeds). Server and clients stopped; FDM6 game closed; language back to en_us.
+- next: M10-01 (PORT_PLAN §11).
