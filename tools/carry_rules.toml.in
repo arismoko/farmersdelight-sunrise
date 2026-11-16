@@ -51,7 +51,7 @@ sha256 = "3d639855211ba8de5ec35f837df9a8f9457133166c2837d7ff9f204ad4e90e70"
 
 [[overlay]]
 file = "tools/addon_overlays/corn_delight.json"
-sha256 = "63df1e087afdff4a483f0f360ed4ffc0bcd7b65e078970ca76ad5160007c089c"
+sha256 = "2483151afe5e442ec750885c8ef828fb415aeaa489cab6a3cd7b1ca42f4cf0b6"
 
 # Base-owned tags (MD-09, BX-03): generated with `values`, then add-on overlay entries are appended. Not FD data: FD
 # answers these questions in code (`instanceof`), which an add-on's content-only items cannot join.
