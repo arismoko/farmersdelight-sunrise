@@ -8,6 +8,7 @@
 //! conditions. A change that breaks any of them bumps `API_VERSION` and the manifest property
 //! `fd_port_api`.
 
+pub mod config;
 pub mod feast;
 pub mod wild_crop;
 

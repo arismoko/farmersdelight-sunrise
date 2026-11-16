@@ -6,6 +6,8 @@
   `take_serving`, `servings`, `decide` for blocks with their own interaction. FD's six feasts use it.
 - Public add-on API `api::wild_crop` (BX-05): `register` gives an add-on block FD's wild-crop behaviour
   (ground tag, bone-meal spread, brown-mooshroom stew effect); the pieces are public too. FD's wild crops use it.
+- Public add-on API `api::config` (BX-06): FD's boolean config keys by name; `farmers_buy_fd_crops()` is always
+  true (FD Refabricated has no such key; its farmer trades are unconditional).
 
 ## 3.6.30-horizon.2 — 2026-11-16
 

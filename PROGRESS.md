@@ -2003,3 +2003,19 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `WildCropBlock(MobEffects.SATURATION, 8, …)` is therefore 8 s, not the "8 ticks" the inventory says (cdinv§3.1).
 - deltas: none.
 - next: BX-06 (public API + load condition: FD config reads).
+
+## BX-06 Public API: FD config reads — PASS (unit; no gameplay change; used in CD-15) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- finding: FD Refabricated 26.3 has **no** `farmersBuyFDCrops` key (`Configuration.java` defines 19 common + 3
+  client keys, none about trades; FD's farmer/wandering trades are plain `villager_trade` data with no condition).
+  The key exists only in upstream FD 1.21.1, which Corn Delight reads (`VillagerTradeHandler.java:21`). By AD1
+  (behaviour inherited from FD follows FD Refabricated 26.3) farmers always buy FD crops, so the plan's load
+  condition `farmersdelight:farmers_buy_fd_crops` would be constant true and is **not** registered (a condition
+  must be in the mod-id namespace anyway, plan correction from M0); no FD config key is invented.
+- code: `pub mod api::config`: `common_bool(name)` / `client_bool(name)` read FD's boolean keys by name (live
+  values, `Values::bool_named`), `farmers_buy_fd_crops()` returns true and documents why. README lists it.
+- unit: `named_keys` (known keys present, ranged/unknown keys `None`, `farmersBuyFDCrops` unknown). cargo test 98
+  passed + 1 ignored, clippy/fmt clean.
+- deltas: CA9 (Corn Delight; recorded in CD-15 when it closes): CD's farmer corn trades are gated by
+  `villagersTradeCorn` only; upstream FD's `farmersBuyFDCrops` gate has no counterpart in FD Refabricated 26.3.
+- next: BX-09 (reusable worldgen rewrite).

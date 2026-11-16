@@ -171,6 +171,15 @@ impl Values {
         }
     }
 
+    /// The boolean key `name` (its last path segment, e.g. `generateFDChestLoot`), if this file has one.
+    pub fn bool_named(&self, name: &str) -> Option<bool> {
+        let index = self.keys.iter().position(|k| k.name == name)?;
+        match self.get(index) {
+            Val::Bool(b) => Some(b),
+            _ => None,
+        }
+    }
+
     /// Reads `text` over the current values and returns the normalised file text.
     pub fn load(&self, text: &str) -> String {
         let mut values = match self.values.write() {
