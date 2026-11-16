@@ -1748,3 +1748,13 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   gameplay path (players' items get their totals on insertion).
 - world changes: test field cleared (pots, stoves and dropped items removed). Game running.
 - next: M10-05 (wasm probe, non-blocking).
+
+## M10-05 Wasm probe (non-blocking) — build PASS / run NOT RUN — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit; code as of c64b2f6)
+- `cargo horizon-mod build --wasm` on the repo refuses ("native mod in wasm group": a mod carries native or wasm
+  code, not both). On a scratch copy (`git archive HEAD`) with the `[native]` table removed it builds in 1 m 41 s
+  with toolchain 1.99.1: `mod.wasm` 9.2 MB, `target/horizon-mod/ported_farmersdelight.hmod` 4.7 MB, `[wasm]` sha512
+  written. So the code stays within the wasm-compatible API subset (D3).
+- not run: loading the wasm package in a game and repeating the M1 script (needs a separate wasm instance; no
+  release gate).
+- next: M10-06 (release packaging).
