@@ -1,4 +1,5 @@
 //! Items. See PORT_PLAN §6.1.
+#[rustfmt::skip]
 pub mod food_tooltips;
 pub mod foods;
 pub mod knife;

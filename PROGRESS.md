@@ -1666,3 +1666,26 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   mod-book placement), E-37 (property sets without recipes); fixed the creative-tab ids (onion, rice panicle,
   seeds). Server and clients stopped; FDM6 game closed; language back to en_us.
 - next: M10-01 (PORT_PLAN §11).
+
+## M10-01 Parity sweep — PASS (layer 3) / oracle ENVIRONMENT-BLOCKED — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- layer 3 (VALIDATION_PLAN §2.3), all green: (a) `carry_fd.py --check` 2375 carried files equal the manifest;
+  (b) `test_fixtures`, `test_food_decls`, `test_knife_decls`, `test_compost_fuel_decls`, `test_gen_decls`,
+  `gen_decls --check` (237 files), `gen_worldgen --check`, `gen_conventional_tags --check` (34),
+  `gen_food_tooltips --check`, `test_lang` (307 keys, 44 locales), `test_carry`; (c) unit tests parse all 28
+  cooking and 117 cutting fixture recipes (`cargo test`: 88 passed); (d) tag membership in game: vanilla tags FD
+  extends resolve (`execute if items … #minecraft:enchantable/weapon` with an iron knife → passed;
+  `execute if block <stove> #minecraft:mineable/pickaxe` → passed); FD's own and `c:` tags were checked through
+  behaviour in their milestones (knives on the board M1/M8, heat sources M2/M3, `#farmersdelight:ropes` with a
+  test datapack M9-01).
+- fixed while sweeping: `src/items/food_tooltips.rs` is excluded from `cargo fmt` (`#[rustfmt::skip]`), which had
+  made its generator check fail.
+- engine gap **E-38**: command `#tag` arguments know only vanilla-namespace tags — `#c:tools/knife`,
+  `#farmersdelight:heat_sources` (and a world datapack's `#farmersdelight:ropes`) answer "Unknown item/block tag"
+  though gameplay resolves them. No mod impact; it only rules out a command-based tag dump.
+- layer 4 (Fabric 26.3 + FD reference oracle, §2.4): NOT RUN — ENVIRONMENT-BLOCKED: needs a user-supplied Fabric
+  26.3 install with the FD jar (the FD checkout may not be built or run here). Parity rests on source reading,
+  fixtures and the in-game checks of every milestone (risk R5).
+- triage: no unexplained differences; every known one is an A-delta in this log (A1–A52) with its E gap where
+  the engine is the cause.
+- next: M10-02 (multiplayer).
