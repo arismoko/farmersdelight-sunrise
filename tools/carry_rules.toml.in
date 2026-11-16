@@ -47,7 +47,7 @@ include_prefixes = ["data/c/tags/"]
 # overlay_tags). Copied from the add-on repo's generated tools/overlay/<addon>.json; the sha256 pins the copy.
 [[overlay]]
 file = "tools/addon_overlays/moredelight.json"
-sha256 = "c76b274f8bd4f393cc917145a7bf80ad17b4b291d2a3208fcdc810040f607157"
+sha256 = "3d639855211ba8de5ec35f837df9a8f9457133166c2837d7ff9f204ad4e90e70"
 
 [[overlay]]
 file = "tools/addon_overlays/corn_delight.json"

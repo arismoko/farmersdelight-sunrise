@@ -1896,3 +1896,21 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - no mod-side workaround: tab placement and the tooltip are engine code; a mod cannot keep its tab off page 2.
   The fix is one engine line (filter `hovered_tab` by `on_page`, or drop the duplicate pass). Not filed upstream yet.
 - not reproducible with agent screenshots (agent mode draws no hover tooltips); identified by reading.
+
+## MD-09 (base side) Base-owned knife_items tag; Knife part attached by tag — PASS (in game with MD) — 2026-11-16
+- build pin: afe471cf | mod commit: 356d9ef (code + carry), then (this commit: MD overlay copied, re-pinned)
+- FD answers "is a KnifeItem" with `instanceof` (pumpkin carving `KnifeItem#useOn`, knife knockback); DelightLib's
+  KnifeBuilder builds `new KnifeItem`, so MD's knives are KnifeItems in the reference. The Knife part was attached by
+  item key to FD's six knives only (noted in BX-02/BX-10).
+- carry: new rule `[[base_tag]]` generates base-owned tags that take add-on overlay entries:
+  `ported_farmersdelight:knife_items` (FD's six, then optional add-on knives) and `ported_farmersdelight:effect_tooltip`
+  (empty seed; BX-03 adds FD's ConsumableItems and the tooltip code; nothing reads it yet). Unit test
+  `test_base_tag_with_overlay`; clash with a carried file fails.
+- code: `items/knife.rs` attaches the Knife part with `item_part_tag(knife_items)` (an absent add-on is simply not in
+  the tag; an `item_part` on its key would refuse the world); `is_knife` and knockback read the tag (the knockback
+  hook's level host gives `tags()`). Test `knife_items_tag_lists_the_six_knives_first`.
+- `tools/addon_overlays/moredelight.json` = MD's generated overlay (knives, effect_tooltip 31, knife_items 2), sha re-pinned.
+- checks: cargo test 94 + 1 ignored, clippy/fmt clean, carry --check 2872 files, decl/food-tooltip/worldgen --check, tools/test_*.py OK.
+- in game: a flint knife still carves pumpkins through the tag-attached part; MD results in moredelight-horizon PROGRESS MD-09.
+- deltas: none (closer to the reference than before).
+- next: BX-03 (effect-tooltip opt-in tag), then MD-10.
