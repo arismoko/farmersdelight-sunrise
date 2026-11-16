@@ -8,6 +8,8 @@
 //! conditions. A change that breaks any of them bumps `API_VERSION` and the manifest property
 //! `fd_port_api`.
 
+pub mod feast;
+
 /// The add-on API version; equals `[properties] fd_port_api` in `horizon-mod.toml`.
 pub const API_VERSION: u32 = 1;
 

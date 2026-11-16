@@ -52,6 +52,8 @@ What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.to
 
 - the Rust module `api` for native add-ons (the launcher adds the base as the Cargo dependency
   `ported_farmersdelight`);
+  - `api::feast`: FD's `FeastBlock` behaviour for an add-on's feast block (`register`, `take_serving`,
+    `servings`, `decide`);
 - the add-on tag overlay format (`tools/addon_overlays/`), which adds an add-on's ids to FD's own tags;
 - the item tags `ported_farmersdelight:effect_tooltip` (food-effect tooltip lines) and
   `ported_farmersdelight:knife_items` (items that work as FD knives), and the base's load conditions.

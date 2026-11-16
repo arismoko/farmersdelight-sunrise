@@ -53,6 +53,64 @@ pub struct Kind {
     pub particles: bool,
 }
 
+/// An add-on's or FD's feast: what `FeastBlock`'s constructor and `getServingItem` decide
+/// (re-exported as `api::feast::FeastSpec`).
+#[derive(Clone, Copy, Debug)]
+pub struct FeastSpec {
+    /// `getServingItem(state)` by the servings left (> 0): an item id, or `None` for nothing.
+    pub serving_item: fn(u32) -> Option<&'static str>,
+    /// `hasLeftovers`: stays at 0 servings and breaks (dropping its loot) on the next use.
+    pub has_leftovers: bool,
+    /// `hasServingParticles`: three block particles each time a serving is taken.
+    pub serving_particles: bool,
+    /// The servings property name (`servings` for every FD feast).
+    pub servings_property: &'static str,
+}
+
+impl FeastSpec {
+    pub fn kind(&self) -> Kind {
+        Kind {
+            leftovers: self.has_leftovers,
+            particles: self.serving_particles,
+        }
+    }
+}
+
+/// Feasts registered through `api::feast::register` (FD's six and add-ons'), for the client
+/// prediction and the rigid-floor check, which see only a state.
+static REGISTERED: std::sync::RwLock<Vec<(&'static str, FeastSpec)>> =
+    std::sync::RwLock::new(Vec::new());
+
+/// The spec of a registered feast block id.
+pub fn registered(block: &str) -> Option<FeastSpec> {
+    REGISTERED
+        .read()
+        .ok()?
+        .iter()
+        .find(|(b, _)| *b == block)
+        .map(|(_, s)| *s)
+}
+
+/// FD's own six feasts.
+pub fn fd_spec(block: &str) -> Option<FeastSpec> {
+    let kind = kind(block)?;
+    let serving_item: fn(u32) -> Option<&'static str> = match block {
+        ROAST_CHICKEN => |_| Some("farmersdelight:roast_chicken"),
+        STUFFED_PUMPKIN => |_| Some("farmersdelight:stuffed_pumpkin"),
+        HONEY_GLAZED_HAM => |_| Some("farmersdelight:honey_glazed_ham"),
+        SHEPHERDS_PIE => |_| Some("farmersdelight:shepherds_pie"),
+        GLEAMING_SALAD => |_| Some("farmersdelight:gleaming_salad"),
+        RICE_ROLL_MEDLEY => |s| serving_item(RICE_ROLL_MEDLEY, s),
+        _ => return None,
+    };
+    Some(FeastSpec {
+        serving_item,
+        has_leftovers: kind.leftovers,
+        serving_particles: kind.particles,
+        servings_property: "servings",
+    })
+}
+
 pub fn kind(block: &str) -> Option<Kind> {
     match block {
         STUFFED_PUMPKIN => Some(Kind {
@@ -152,6 +210,7 @@ pub(crate) fn rigid_floor(floor: Option<&str>, in_tag: impl Fn(&str) -> bool) ->
         id,
         "minecraft:air" | "minecraft:cave_air" | "minecraft:void_air"
     ) || NOT_RIGID_BLOCKS.contains(&id)
+        || registered(id).is_some()
         || in_tag("minecraft:replaceable")
         || NOT_RIGID_TAGS.iter().any(|t| in_tag(t))
     {
@@ -171,9 +230,13 @@ pub(crate) fn supported(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
 }
 
 fn servings_of(state: Option<String>) -> u32 {
+    servings_in(state, "servings")
+}
+
+pub(crate) fn servings_in(state: Option<String>, property: &str) -> u32 {
     state
         .as_deref()
-        .and_then(|n| state_value(n, "servings"))
+        .and_then(|n| state_value(n, property))
         .and_then(|v| v.parse().ok())
         .unwrap_or(0)
 }
@@ -181,8 +244,7 @@ fn servings_of(state: Option<String>) -> u32 {
 // ---------------------------------------------------------------- the Part
 
 pub struct Feast {
-    pub block: &'static str,
-    pub kind: Kind,
+    pub spec: FeastSpec,
     /// `minecraft:block`, for `BlockParticleOption(ParticleTypes.BLOCK, state)`.
     pub block_particle: ParticleKey,
 }
@@ -212,7 +274,13 @@ impl BlockPart for Feast {
         host: &mut dyn ServerHost,
         event: &mut UseItemOnEvent<'_>,
     ) -> Option<InteractionResult> {
-        Some(self.take_serving(host, event.click, event.state))
+        Some(take_serving(
+            host,
+            event.click,
+            event.state,
+            &self.spec,
+            self.block_particle,
+        ))
     }
 
     /// FeastBlock keeps Block's `useWithoutItem` (PASS): the template's menu never opens.
@@ -230,7 +298,8 @@ impl BlockPart for Feast {
 
     /// `getAnalogOutputSignal`: the servings left (the medley's 8 is a signal of 8).
     fn analog_output(&self, level: &dyn LevelHost, event: &mut AnalogOutputEvent) {
-        event.output = servings_of(level.state_string(event.state)) as i32;
+        event.output =
+            servings_in(level.state_string(event.state), self.spec.servings_property) as i32;
     }
 
     /// `isPathfindable` is false for every type.
@@ -239,78 +308,93 @@ impl BlockPart for Feast {
     }
 }
 
-impl Feast {
-    fn take_serving(
-        &self,
-        host: &mut dyn ServerHost,
-        click: &BlockClick<'_>,
-        state: BlockState,
-    ) -> InteractionResult {
-        let Some(player) = host.players().acting_player() else {
-            return InteractionResult::Pass;
-        };
-        let Some(level) = host.level(click.dimension.key().id()) else {
-            return InteractionResult::Pass;
-        };
-        let pos = click.pos;
-        let at = [
-            pos[0] as f64 + 0.5,
-            pos[1] as f64 + 0.5,
-            pos[2] as f64 + 0.5,
-        ];
-        let servings = servings_of(host.block_state_string(state));
-        let serving = serving_item(self.block, servings).and_then(|id| stack_of(&*host, id));
-        let container = serving
-            .as_ref()
-            .and_then(|s| host.item_crafting_remainder(s));
-        let held = click.stack.cloned();
-        let holds_it = matches!((&held, &container), (Some(h), Some(c)) if h.same_item(c));
-        let creative = player.is_creative(&*host).unwrap_or(false);
-        match decide(self.kind, servings, container.is_some(), holds_it, creative) {
-            Outcome::BreakLeftovers => {
-                level.play_sound(host, SOUND_LEFTOVERS, at, SoundSource::Players, 0.8, 0.8);
+/// `FeastBlock#takeServing` for `spec` at the clicked block (server side). `block_particle` is
+/// `minecraft:block` (`Registrar::particle_key`).
+pub fn take_serving(
+    host: &mut dyn ServerHost,
+    click: &BlockClick<'_>,
+    state: BlockState,
+    spec: &FeastSpec,
+    block_particle: ParticleKey,
+) -> InteractionResult {
+    let Some(player) = host.players().acting_player() else {
+        return InteractionResult::Pass;
+    };
+    let Some(level) = host.level(click.dimension.key().id()) else {
+        return InteractionResult::Pass;
+    };
+    let pos = click.pos;
+    let at = [
+        pos[0] as f64 + 0.5,
+        pos[1] as f64 + 0.5,
+        pos[2] as f64 + 0.5,
+    ];
+    let servings = servings_in(host.block_state_string(state), spec.servings_property);
+    let serving = (servings > 0)
+        .then(|| (spec.serving_item)(servings))
+        .flatten()
+        .and_then(|id| stack_of(&*host, id));
+    let container = serving
+        .as_ref()
+        .and_then(|s| host.item_crafting_remainder(s));
+    let held = click.stack.cloned();
+    let holds_it = matches!((&held, &container), (Some(h), Some(c)) if h.same_item(c));
+    let creative = player.is_creative(&*host).unwrap_or(false);
+    match decide(
+        spec.kind(),
+        servings,
+        container.is_some(),
+        holds_it,
+        creative,
+    ) {
+        Outcome::BreakLeftovers => {
+            level.play_sound(host, SOUND_LEFTOVERS, at, SoundSource::Players, 0.8, 0.8);
+            let _ = level.destroy_block(host, pos, true, None, false);
+            InteractionResult::Success
+        }
+        Outcome::NeedContainer => {
+            if let Some(container) = &container {
+                let name = Text::translate(item_name_key(&*host, container), vec![]);
+                let _ = player.action_bar(host, Text::translate(USE_CONTAINER, vec![name]));
+            }
+            InteractionResult::TryWithEmptyHand
+        }
+        Outcome::Serve { shrink, vanish } => {
+            let Some(serving) = serving else {
+                return InteractionResult::Pass;
+            };
+            host.set_block_property_with(
+                pos,
+                spec.servings_property,
+                &(servings - 1).to_string(),
+                3,
+            );
+            if shrink
+                && let Some(held) = held
+                && let Some(living) = host.living(player.entity())
+            {
+                let _ = living.set_hand_item(host, click.hand, held.shrink(1));
+            }
+            let _ = host.transaction(|host, tx| {
+                crate::inventory::give_or_drop(host, tx, player, serving.clone());
+                Ok::<_, ()>(())
+            });
+            if vanish {
                 let _ = level.destroy_block(host, pos, true, None, false);
-                InteractionResult::Success
             }
-            Outcome::NeedContainer => {
-                if let Some(container) = &container {
-                    let name = Text::translate(item_name_key(&*host, container), vec![]);
-                    let _ = player.action_bar(host, Text::translate(USE_CONTAINER, vec![name]));
-                }
-                InteractionResult::TryWithEmptyHand
+            level.play_sound(host, SOUND_SERVE, at, SoundSource::Blocks, 1.0, 1.0);
+            if spec.serving_particles {
+                let _ = level.send_particles(
+                    host,
+                    &ParticleOptions::simple(block_particle),
+                    Some(state),
+                    at,
+                    [0.1, 0.1, 0.1],
+                    0.001,
+                    3,
+                );
             }
-            Outcome::Serve { shrink, vanish } => {
-                let Some(serving) = serving else {
-                    return InteractionResult::Pass;
-                };
-                host.set_block_property_with(pos, "servings", &(servings - 1).to_string(), 3);
-                if shrink
-                    && let Some(held) = held
-                    && let Some(living) = host.living(player.entity())
-                {
-                    let _ = living.set_hand_item(host, click.hand, held.shrink(1));
-                }
-                let _ = host.transaction(|host, tx| {
-                    crate::inventory::give_or_drop(host, tx, player, serving.clone());
-                    Ok::<_, ()>(())
-                });
-                if vanish {
-                    let _ = level.destroy_block(host, pos, true, None, false);
-                }
-                level.play_sound(host, SOUND_SERVE, at, SoundSource::Blocks, 1.0, 1.0);
-                if self.kind.particles {
-                    let _ = level.send_particles(
-                        host,
-                        &ParticleOptions::simple(self.block_particle),
-                        Some(state),
-                        at,
-                        [0.1, 0.1, 0.1],
-                        0.001,
-                        3,
-                    );
-                }
-                InteractionResult::Success
-            }
+            InteractionResult::Success
         }
     }
 }
@@ -346,26 +430,25 @@ pub fn predict(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow 
         return Flow::Continue;
     };
     let name = host.block_state_string(state);
-    let Some(block) = name.as_deref().and_then(|n| {
-        let id = n.split('[').next().unwrap_or(n);
-        FEASTS.into_iter().find(|f| *f == id)
-    }) else {
+    let Some(spec) = name
+        .as_deref()
+        .and_then(|n| registered(n.split('[').next().unwrap_or(n)))
+    else {
         return Flow::Continue;
     };
-    let Some(kind) = kind(block) else {
-        return Flow::Continue;
-    };
-    let servings = servings_of(name);
-    let container = serving_item(block, servings)
+    let servings = servings_in(name, spec.servings_property);
+    let container = (servings > 0)
+        .then(|| (spec.serving_item)(servings))
+        .flatten()
         .and_then(|id| stack_of(host, id))
         .and_then(|s| host.item_crafting_remainder(&s));
     let holds_it = matches!((event.click.stack, &container), (Some(h), Some(c)) if h.same_item(c));
-    *event.cancellation_result = match decide(kind, servings, container.is_some(), holds_it, false)
-    {
-        // TRY_WITH_EMPTY_HAND, then Block's useWithoutItem (PASS): on to the item.
-        Outcome::NeedContainer => InteractionResult::Pass,
-        _ => InteractionResult::Success,
-    };
+    *event.cancellation_result =
+        match decide(spec.kind(), servings, container.is_some(), holds_it, false) {
+            // TRY_WITH_EMPTY_HAND, then Block's useWithoutItem (PASS): on to the item.
+            Outcome::NeedContainer => InteractionResult::Pass,
+            _ => InteractionResult::Success,
+        };
     Flow::Cancel
 }
 
@@ -440,18 +523,26 @@ impl ItemPart for Placeable {
     }
 }
 
-pub fn register(registrar: &mut dyn Registrar) {
+/// `api::feast::register`: the feast Part on `block` and its client prediction.
+pub fn register_feast(registrar: &mut dyn Registrar, block: &'static str, spec: FeastSpec) {
     let block_particle = registrar.particle_key("minecraft:block");
+    let key = registrar.block_key(block);
+    registrar.block_part(
+        key,
+        Feast {
+            spec,
+            block_particle,
+        },
+    );
+    if let Ok(mut all) = REGISTERED.write() {
+        all.retain(|(b, _)| *b != block);
+        all.push((block, spec));
+    }
+}
+
+pub fn register(registrar: &mut dyn Registrar) {
     for block in FEASTS {
-        let key = registrar.block_key(block);
-        registrar.block_part(
-            key,
-            Feast {
-                block,
-                kind: kind(block).expect("feast kind"),
-                block_particle,
-            },
-        );
+        register_feast(registrar, block, fd_spec(block).expect("feast spec"));
         let item = registrar.item_key(block);
         registrar.item_part(item, Placeable);
     }
@@ -579,6 +670,53 @@ mod tests {
                 vanish: false
             }
         );
+    }
+
+    /// BX-04: FD's specs carry the constructor values, and an add-on spec registered through the
+    /// API is found by id (prediction, rigid floor) without touching FD's.
+    #[test]
+    fn specs_and_addon_registry() {
+        for block in FEASTS {
+            let spec = fd_spec(block).unwrap();
+            assert_eq!(spec.kind(), kind(block).unwrap());
+            assert_eq!(spec.servings_property, "servings");
+            for s in 1..=8 {
+                if block != RICE_ROLL_MEDLEY && s > 4 {
+                    break;
+                }
+                assert_eq!((spec.serving_item)(s), serving_item(block, s));
+            }
+        }
+        fn nachos(_: u32) -> Option<&'static str> {
+            Some("testaddon:nachos_bowl")
+        }
+        let spec = FeastSpec {
+            serving_item: nachos,
+            has_leftovers: true,
+            serving_particles: true,
+            servings_property: "servings",
+        };
+        REGISTERED
+            .write()
+            .unwrap()
+            .push(("testaddon:nachos_block", spec));
+        assert!(registered("testaddon:nachos_block").is_some());
+        assert!(!rigid_floor(
+            Some("testaddon:nachos_block[facing=north,servings=4]"),
+            |_| false
+        ));
+        assert_eq!(
+            decide(spec.kind(), 1, true, true, false),
+            Outcome::Serve {
+                shrink: true,
+                vanish: false
+            }
+        );
+        assert_eq!(
+            decide(spec.kind(), 0, true, false, false),
+            Outcome::BreakLeftovers
+        );
+        assert!(kind("testaddon:nachos_block").is_none());
     }
 
     /// BX-10: base feast hooks act only on FD's six feasts; another mod's block with a

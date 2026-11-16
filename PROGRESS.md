@@ -1961,3 +1961,25 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - deltas: none new.
 - next: BX-04 (base PROGRESS; user set the scope to all of Corn Delight on 2026-11-16), then BX-05, BX-06, BX-09,
   CD-01…CD-18 (`corndelight-horizon/PROGRESS.md`).
+
+## BX-04 Public API: feasts — PASS (FD feasts in game; add-on use in CD-11) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit) | package unchanged (`3.6.30-horizon.2`; next release `.3` in CD-18)
+- code: `blocks/feast.rs` is now spec-driven: `FeastSpec { serving_item: fn(u32) -> Option<&'static str>,
+  has_leftovers, serving_particles, servings_property }`; `take_serving(host, click, state, &spec, block_particle)`
+  is a free function (FD `FeastBlock#takeServing`), `register_feast(registrar, block, spec)` attaches the Part
+  (use, `can_survive`/`update_shape` rigid floor A28, comparator, not pathfindable) and records the spec in a
+  public, `RwLock`-guarded registry that the client prediction (E-28) and the rigid-floor check read, so an add-on
+  feast is predicted and is not a rigid floor either. FD's six feasts register through it (`fd_spec`); no duplicate
+  logic. `pub mod api::feast` re-exports `FeastSpec`, `Kind`, `Outcome`, `decide`, `take_serving` and adds
+  `register`, `servings(host, state, &spec)`, `spec_of(block)`; documented in the module and README.
+- unit: `specs_and_addon_registry` (FD specs equal the old constructor table and serving lists; a `testaddon`
+  feast registered through the registry is found, is not a rigid floor, serves/leaves leftovers by the decision
+  table, and FD's `kind` still ignores it). cargo test 96 passed + 1 ignored, clippy/fmt clean.
+- in game (fd-port with MD, world FDM6, survival; `../run/shots/bx-04/`): roast chicken with beef in hand →
+  "You need a Bowl to eat this." on the action bar, no change; with a bowl → servings 4→3, roast chicken +1, bowl −1;
+  beef in main hand + bowl in the off hand → served from the off hand (client prediction through the registry;
+  `offhand-serve.png`); rice roll medley with beef → servings 8→7, kelp roll slice (inventory full → dropped, as
+  `player.drop`); stuffed pumpkin at 1 serving with a bowl → serving given, block gone (inventory full: the pumpkin
+  was thrown off the pad edge, found falling at y 184); honey glazed ham at 0 → block broken, bowl + bone dropped.
+- deltas: none.
+- next: BX-05 (public API: wild crops).
