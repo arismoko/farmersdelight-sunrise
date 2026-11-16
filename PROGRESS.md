@@ -1758,3 +1758,19 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - not run: loading the wasm package in a game and repeating the M1 script (needs a separate wasm instance; no
   release gate).
 - next: M10-06 (release packaging).
+
+## M10-06 Release packaging — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- version `26.3-3.6.30-horizon.1` (horizon-mod.toml); README rewritten (features, install, multiplayer rule D9,
+  player-visible differences with their A/E ids, build checks), CHANGELOG.md added.
+- strict checks: `cargo fmt --all --check` clean; `cargo clippy --all-targets --locked -- -D warnings` clean after
+  two fixes (knife.rs late init; generated tooltip table now uses an `Effect` type alias); `cargo test --locked`
+  88 passed; all generator/test scripts green.
+- package: `cargo horizon-mod build` → `target/horizon-mod/ported_farmersdelight.hmod` (2.8 MB, SHA-256
+  2f1b7ba6…6f13); `cargo horizon-mod check` clean ("native-mod, format native-1/afe471cf…/e59da909…, for 26.3");
+  contains horizon-mod.toml, LICENSE, LICENSE-farmersdelight, NOTICE, README.md (third_party/ is not packaged; its
+  licence text ships as LICENSE-farmersdelight, M0 decision).
+- fresh-instance install: `instance create fd-fresh`; the .hmod copied into `horizon-native-mods/`;
+  `native-build --instance fd-fresh` built it; a new world `FDFresh` started (offscreen): FD stove given, cooking
+  recipe unlocked, a cooking pot placed, both config files written. Dedicated server export: M10-02.
+- next: M10-07 (published-jar recheck).

@@ -237,8 +237,7 @@ pub fn on_right_click(mut host: HostSide<'_>, event: &mut RightClickBlockEvent<'
 
 fn cut_cake(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3], cut: &CakeCut) {
     let flags = BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS;
-    let x;
-    match *cut {
+    let x = match *cut {
         CakeCut::Candle => {
             // Block.dropResources(state): the candle cake's own loot (its candle), no tool or entity.
             let drops = level
@@ -252,7 +251,7 @@ fn cut_cake(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3], cut: &Cak
             for drop in drops {
                 let _ = level.pop_resource(host, pos, drop);
             }
-            x = pos[0] as f64;
+            pos[0] as f64
         }
         CakeCut::Cake(bites) => {
             match cake_after_cut(bites) {
@@ -269,9 +268,9 @@ fn cut_cake(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3], cut: &Cak
                     }
                 }
             }
-            x = pos[0] as f64 + bites as f64 * 0.1;
+            pos[0] as f64 + bites as f64 * 0.1
         }
-    }
+    };
     if let Some(slice) = stack_of(&*host, CAKE_SLICE, 1) {
         let _ = level.spawn_item_with_motion(
             host,
