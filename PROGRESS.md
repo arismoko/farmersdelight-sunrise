@@ -1774,3 +1774,16 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `native-build --instance fd-fresh` built it; a new world `FDFresh` started (offscreen): FD stove given, cooking
   recipe unlocked, a cooking pot placed, both config files written. Dedicated server export: M10-02.
 - next: M10-07 (published-jar recheck).
+
+## M10-07 Published-jar recheck — PASS — 2026-11-16 — **M10 closed**
+- build pin: afe471cf | mod commit: (this commit)
+- the published `FarmersDelight-26.3-3.6.30+refabricated.jar` (Modrinth, sha512 099f7245… as recorded in M0-07)
+  downloaded to an isolated scratch folder and read as a zip only (never run). Every one of the 2375 carried files
+  (`tools/carry_manifest.json` sources, `src/main/resources/` and `src/generated/resources/`) is byte-identical
+  (SHA-256) to the jar's entry at the same path: 2375 same, 0 differ, 0 missing.
+- the jar's 86 data/asset files that are not carried are all outside the core scope (D8): integration recipes
+  (Create 11, Immersive Engineering 16, Silent Gear 1), recipe-viewer files (JEI/EMI/EIV textures, `rrv`, `emi`),
+  CraftTweaker scripts, Create/Create Addition/Serene Seasons/Sable/Origins/TConstruct tags and Create data,
+  `weapon_attributes/skillet.json` (Better Combat). Triaged: nothing to carry.
+- **M10 closed; the port's plan (M0–M10) is complete.** Open items stay recorded: Fabric oracle (M10-01, needs a
+  user-supplied Fabric+FD install), wasm run (M10-05, non-blocking), engine gaps E-01…E-38 with their deltas.
