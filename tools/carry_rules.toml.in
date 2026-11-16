@@ -73,9 +73,57 @@ values = [
 [[base_tag]]
 tag = "ported_farmersdelight:effect_tooltip"
 kind = "item"
-# FD's food-effect tooltip opt-in (BX-03). Seed values (FD's ConsumableItems) and the tooltip code come with BX-03;
-# until then only add-on overlay entries are listed and nothing reads the tag.
-values = []
+# FD's food-effect tooltip opt-in (BX-03): the ConsumableItems built with hasFoodEffectTooltip (= EFFECT_TOOLTIPS in
+# src/items/food_tooltips.rs, checked by tools/test_carry.py) + add-on overlay entries. FD's own items keep their
+# FoodTooltip part; the tooltip code reads the tag for every other member (src/items/tooltips.rs `tagged`).
+values = [
+  "farmersdelight:apple_cider",
+  "farmersdelight:tomato_sauce",
+  "farmersdelight:melon_popsicle",
+  "farmersdelight:glow_berry_custard",
+  "farmersdelight:fruit_salad",
+  "farmersdelight:mixed_salad",
+  "farmersdelight:nether_salad",
+  "farmersdelight:barbecue_stick",
+  "farmersdelight:egg_sandwich",
+  "farmersdelight:chicken_sandwich",
+  "farmersdelight:hamburger",
+  "farmersdelight:bacon_sandwich",
+  "farmersdelight:mutton_wrap",
+  "farmersdelight:dumplings",
+  "farmersdelight:stuffed_potato",
+  "farmersdelight:cabbage_rolls",
+  "farmersdelight:salmon_roll",
+  "farmersdelight:cod_roll",
+  "farmersdelight:kelp_roll",
+  "farmersdelight:kelp_roll_slice",
+  "farmersdelight:cooked_rice",
+  "farmersdelight:bone_broth",
+  "farmersdelight:beef_stew",
+  "farmersdelight:chicken_soup",
+  "farmersdelight:vegetable_soup",
+  "farmersdelight:fish_stew",
+  "farmersdelight:fried_rice",
+  "farmersdelight:pumpkin_soup",
+  "farmersdelight:baked_cod_stew",
+  "farmersdelight:noodle_soup",
+  "farmersdelight:onion_soup",
+  "farmersdelight:bacon_and_eggs",
+  "farmersdelight:pasta_with_meatballs",
+  "farmersdelight:pasta_with_mutton_chop",
+  "farmersdelight:mushroom_rice",
+  "farmersdelight:roasted_mutton_chops",
+  "farmersdelight:vegetable_noodles",
+  "farmersdelight:steak_and_potatoes",
+  "farmersdelight:ratatouille",
+  "farmersdelight:squid_ink_pasta",
+  "farmersdelight:grilled_salmon",
+  "farmersdelight:roast_chicken",
+  "farmersdelight:stuffed_pumpkin",
+  "farmersdelight:honey_glazed_ham",
+  "farmersdelight:shepherds_pie",
+  "farmersdelight:gleaming_salad",
+]
 
 # Only rewrite: fabric:load_conditions -> neoforge:conditions with a mod-registered condition.
 # Any fabric:load_conditions value not listed here makes the script fail.

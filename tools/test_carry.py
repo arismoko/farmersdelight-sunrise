@@ -190,6 +190,15 @@ class CarryTest(unittest.TestCase):
         m = carry_fd.carry(self.fd, self.out, dict(RULES, base_tag=base_tag))
         self.assertEqual({e["dest"]: e["rule"] for e in m["files"]}[rel], "base_tag")
 
+    def test_effect_tooltip_seed_is_fd_effect_tooltip_list(self):
+        import re
+
+        rules = carry_fd.load_rules(carry_fd.RULES)
+        seed = next(t for t in rules["base_tag"] if t["tag"] == "ported_farmersdelight:effect_tooltip")["values"]
+        src = (carry_fd.REPO / "src/items/food_tooltips.rs").read_text("utf-8")
+        table = src.split("pub const EFFECT_TOOLTIPS")[1].split("];")[0]
+        self.assertEqual(seed, re.findall(r'\("(farmersdelight:[a-z_]+)", &\[', table))
+
 
 if __name__ == "__main__":
     unittest.main()

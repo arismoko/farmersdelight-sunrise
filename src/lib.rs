@@ -64,6 +64,7 @@ impl Hooks for FarmersDelight {
     }
 
     fn item_tooltip(&self, host: &dyn ClientHost, event: &mut ItemTooltipEvent<'_>) {
+        items::tooltips::tagged(host, event);
         items::tooltips::vanilla(host, event);
     }
 

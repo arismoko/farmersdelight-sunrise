@@ -145,7 +145,7 @@ pub fn consume_effect(host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<
 
 /// A numeric tag as f32: data-driven payloads keep JSON numbers in the narrowest NBT type
 /// (`2.0` arrives as a byte).
-fn number(tag: &Tag) -> Option<f32> {
+pub(crate) fn number(tag: &Tag) -> Option<f32> {
     Some(match tag {
         Tag::Byte(v) => *v as f32,
         Tag::Short(v) => *v as f32,

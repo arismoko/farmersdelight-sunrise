@@ -172,6 +172,97 @@ pub fn register(registrar: &mut dyn Registrar) {
     }
 }
 
+/// The opt-in tag (BX-03): an item in it gets `addFoodEffectTooltip`'s lines, as an FD `ConsumableItem` built with
+/// `hasFoodEffectTooltip` (DelightLib's `FoodBuilder` builds every add-on food that way).
+pub const EFFECT_TOOLTIP_TAG: &str = "ported_farmersdelight:effect_tooltip";
+
+/// `ApplyStatusEffectsConsumeEffect` entries of a `minecraft:consumable` value, in order: (effect, duration,
+/// amplifier); `MobEffectInstance`'s codec defaults duration and amplifier to 0. Other consume effects are skipped.
+pub fn consume_effects(consumable: &Tag) -> Vec<(String, i32, i32)> {
+    let key = |c: &Compound, k: &str| c.get(&k.into()).cloned();
+    let Tag::Compound(c) = consumable else {
+        return Vec::new();
+    };
+    let Some(Tag::List(list)) = key(c, "on_consume_effects") else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for entry in &list {
+        let Tag::Compound(e) = entry else { continue };
+        let is_apply = matches!(key(e, "type"), Some(Tag::String(t))
+            if matches!(t.to_string_lossy().as_str(), "minecraft:apply_effects" | "apply_effects"));
+        if !is_apply {
+            continue;
+        }
+        let Some(Tag::List(effects)) = key(e, "effects") else {
+            continue;
+        };
+        for effect in &effects {
+            let Tag::Compound(f) = effect else { continue };
+            let Some(Tag::String(id)) = key(f, "id") else {
+                continue;
+            };
+            let int = |k| {
+                key(f, k)
+                    .and_then(|t| crate::effects::number(&t))
+                    .unwrap_or(0.0) as i32
+            };
+            let mut id = id.to_string_lossy();
+            if !id.contains(':') {
+                id = format!("minecraft:{id}");
+            }
+            out.push((id, int("duration"), int("amplifier")));
+        }
+    }
+    out
+}
+
+/// Items whose lines come from [`FoodTooltip`] (FD's own); the tag path skips them so nothing is listed twice.
+fn has_own_part(item: &str) -> bool {
+    CUSTOM_TOOLTIPS.contains(&item)
+        || EFFECT_TOOLTIPS.iter().any(|(id, _)| *id == item)
+        || super::foods::pet_food(item).is_some()
+}
+
+/// BX-03: the tag members' food-effect lines, inserted after the name, read from the stack's `minecraft:consumable` (its own patch, else
+/// the item's default) as `TextUtils.addFoodEffectTooltip` does.
+pub fn tagged(host: &dyn ClientHost, event: &mut ItemTooltipEvent<'_>) {
+    if !crate::config::food_effect_tooltip() {
+        return;
+    }
+    let stack = event.stack;
+    let item = stack.item().id(host);
+    if has_own_part(&item) {
+        return;
+    }
+    let tags = host.tags();
+    let tagged = Identifier::parse(EFFECT_TOOLTIP_TAG)
+        .ok()
+        .and_then(|id| tags.key(&id))
+        .and_then(|key| tags.is_in_tag(stack.item(), key))
+        == Some(true);
+    if !tagged {
+        return;
+    }
+    let consumable = stack
+        .components()
+        .and_then(|p| p.as_nbt().get(&"minecraft:consumable".into()).cloned())
+        .or_else(|| host.item_default_component(stack.item(), "minecraft:consumable"));
+    let Some(consumable) = consumable else { return };
+    let owned = consume_effects(&consumable);
+    let effects: Vec<(&str, i32, i32)> = owned
+        .iter()
+        .map(|(id, d, a)| (id.as_str(), *d, *a))
+        .collect();
+    // `appendHoverText`'s place: right after the name, before component and advanced lines (where a Part's lines
+    // go; this global event sees the finished list).
+    let at = event.lines.len().min(1);
+    event.lines.splice(
+        at..at,
+        effect_lines(&effects).into_iter().map(|l| (l, KEEP)),
+    );
+}
+
 /// `TooltipEvents#addTooltipToVanillaSoups`, at the end of the tooltip: the pumpkin pie's "Placeable" line (or
 /// "Placeable when sneaking"), then, with soup effects and the food tooltip on, the soups' Nourishment line.
 pub fn vanilla(host: &dyn ClientHost, event: &mut ItemTooltipEvent<'_>) {
@@ -227,5 +318,57 @@ mod tests {
             effect_lines(&[("farmersdelight:nourishment", 3600, 0)]).len(),
             1
         );
+    }
+
+    #[test]
+    fn consume_effects_read_apply_effects_only() {
+        let effect = |id: &str, extra: Vec<(&str, Tag)>| {
+            let mut c = Compound::new();
+            c.insert("id".into(), Tag::String(id.into()));
+            for (k, v) in extra {
+                c.insert(k.into(), v);
+            }
+            Tag::Compound(c)
+        };
+        let mut apply = Compound::new();
+        apply.insert("type".into(), Tag::String("minecraft:apply_effects".into()));
+        apply.insert(
+            "effects".into(),
+            Tag::List(vec![
+                effect(
+                    "farmersdelight:nourishment",
+                    vec![("duration", Tag::Int(3600))],
+                ),
+                effect(
+                    "regeneration",
+                    vec![("duration", Tag::Int(100)), ("amplifier", Tag::Byte(1))],
+                ),
+            ]),
+        );
+        let mut clear = Compound::new();
+        clear.insert(
+            "type".into(),
+            Tag::String("minecraft:clear_all_effects".into()),
+        );
+        let mut consumable = Compound::new();
+        consumable.insert(
+            "on_consume_effects".into(),
+            Tag::List(vec![Tag::Compound(clear), Tag::Compound(apply)]),
+        );
+        assert_eq!(
+            consume_effects(&Tag::Compound(consumable)),
+            vec![
+                ("farmersdelight:nourishment".to_string(), 3600, 0),
+                ("minecraft:regeneration".to_string(), 100, 1),
+            ]
+        );
+        assert!(consume_effects(&Tag::Compound(Compound::new())).is_empty());
+    }
+
+    #[test]
+    fn fd_items_keep_their_part() {
+        assert!(has_own_part("farmersdelight:vegetable_soup"));
+        assert!(has_own_part("farmersdelight:milk_bottle"));
+        assert!(!has_own_part("moredelight:carrot_soup"));
     }
 }

@@ -1914,3 +1914,25 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - in game: a flint knife still carves pumpkins through the tag-attached part; MD results in moredelight-horizon PROGRESS MD-09.
 - deltas: none (closer to the reference than before).
 - next: BX-03 (effect-tooltip opt-in tag), then MD-10.
+
+## BX-03 Effect-tooltip opt-in tag — PASS (in game with MD) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit) | package `3.6.30-horizon.2` unchanged
+- carry: the `[[base_tag]]` `ported_farmersdelight:effect_tooltip` is seeded with FD's 46 `hasFoodEffectTooltip`
+  ConsumableItems (= `EFFECT_TOOLTIPS`; `tools/test_carry.py` checks the seed against `src/items/food_tooltips.rs`),
+  then MD's 31 overlay entries (optional). carry --check 2872 files.
+- code: `items/tooltips.rs` `tagged` (global `item_tooltip`): with `enableFoodEffectTooltip` on, a tag member without
+  an FD FoodTooltip part gets `TextUtils.addFoodEffectTooltip`'s lines, read from the stack's `minecraft:consumable`
+  (its own patch, else `item_default_component`): every `apply_effects` entry, other consume effects skipped, through
+  the same `effect_lines` as FD's foods. The lines are spliced in after the name (`appendHoverText`'s place), not
+  appended after the advanced lines. FD's own items keep their part (no duplicate). Tests
+  `consume_effects_read_apply_effects_only`, `fd_items_keep_their_part`; `effects::number` made `pub(crate)`.
+- in game (fd-port, FDM6, chest at 59994,200,59992; `../run/shots/bx-03/`, F3+H on): `moredelight:carrot_soup`
+  "Nourishment (03:00)", `potato_salad` and `chicken_salad` "Regeneration (00:05)", the 3 rice and 2 creamy pasta meals
+  "Nourishment (03:00)", each right under the name (`montage1.png`, `montage3.png`); omelette, toast, mashed potatoes,
+  loaded hamburger show no effect line; FD vegetable soup "Nourishment (03:00)" as before (`montage2.png`). Client key
+  `enableFoodEffectTooltip=false` (live): no line on carrot soup, potato salad or vegetable soup (`off-montage.png`);
+  key restored.
+- note: MD has 8 effect foods (MoreDelight.java `withEffect` ×8), not the 7 the plan's MD-10 says.
+- checks: cargo test 95 + 1 ignored, clippy/fmt clean, decl/food-tooltip/worldgen --check, tools/test_*.py OK.
+- deltas: none.
+- next: MD-10 (moredelight-horizon), then MD-11, MD-12.

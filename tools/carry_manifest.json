@@ -4,7 +4,7 @@
  "fapi_repo": "https://github.com/FabricMC/fabric",
  "fapi_tag": "0.160.4+26.3",
  "fapi_sha": "542047fffa4f49d96d4863d2c7abf0b508554f70",
- "rules_sha256": "6f3aa4bb95975e94c3a101e15241ec253716346daeb413ecba18050532592628",
+ "rules_sha256": "e2655b9734f0127e1c976a57722354eac83b9b57782026f88d8ae606ee9395fa",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -20099,8 +20099,8 @@
   {
    "source": "base_tag:ported_farmersdelight:effect_tooltip",
    "dest": "data/ported_farmersdelight/tags/item/effect_tooltip.json",
-   "sha256_source": "f74498097708215ee46031db7467ce3abed880ed8188eff156e81993d9787e31",
-   "sha256_dest": "8ac59b22ef0dbab6d97deeb3f3d7c02971cd8d92d2d74ebc159aa7d46825b6a4",
+   "sha256_source": "ce0dcc108dd84a5777c5c3af579f3ad16259a3bb13a45672746040c8c211ca5b",
+   "sha256_dest": "c8085c0dd6f5c85d2e3aabaf1efbdfee77633710718d708014c472a43ab0e946",
    "rule": "overlay"
   },
   {
