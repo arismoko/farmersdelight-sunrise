@@ -493,6 +493,7 @@ mod tests {
                 "minecraft:bone_meal",
                 "minecraft:bowl",
                 "minecraft:glass_bottle",
+                "testaddon:mash",
             ];
             fake.registries
                 .resolve_items(ids.iter().map(|i| Identifier::parse(i).unwrap()))
@@ -552,5 +553,23 @@ mod tests {
         );
         let skipped: Vec<_> = skipped.iter().map(|(id, _)| id.as_str()).collect();
         assert_eq!(skipped, ["test:empty", "test:unknown"]);
+    }
+
+    /// BX-10: an add-on's `farmersdelight:cooking` recipe (own namespace, `fabric:any` ingredient,
+    /// foreign result) is read like FD's own; the `fabric:any` child naming an empty tag drops out.
+    #[test]
+    fn addon_namespace_recipe_builds() {
+        let host = host::data(&[(
+            "testaddon:cooking/mash",
+            json!({"type": "farmersdelight:cooking", "ingredients": [
+                    {"fabric:type": "fabric:any", "ingredients": ["minecraft:bone_meal", "#empty"]},
+                    "minecraft:bowl"],
+                "result": {"id": "testaddon:mash"}, "container": {"id": "minecraft:bowl"}}),
+        )]);
+        let (table, skipped) = build(&host);
+        assert!(skipped.is_empty(), "{skipped:?}");
+        assert_eq!(table[0].id, "testaddon:cooking/mash");
+        assert_eq!(table[0].ingredients[0].len(), 1);
+        assert_eq!(table[0].result.item(), host::key("testaddon:mash").unwrap());
     }
 }

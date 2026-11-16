@@ -1863,3 +1863,17 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - noted for MD-09: FD's knife behaviour that is code (`items/knife.rs` Part on FD's 6 knife keys: cake/pumpkin use,
   knockback) is keyed on ids, not on the tag, so MD knives will need the base to attach the Part to overlay knives.
 - next: BX-10 (foreign-namespace regression fixtures).
+
+## BX-10 Foreign-namespace regression fixtures — PASS (unit; client sync in MD-08) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- unit fixtures: `recipes::cutting::addon_namespace_recipe_builds_and_matches` (a `testaddon:cutting/potato` recipe,
+  `fabric:any` tool of `#c:tools/knife` and `#farmersdelight:tools/knives`, foreign result: built and found);
+  `recipes::cooking::addon_namespace_recipe_builds` (`testaddon:cooking/mash`, `fabric:any` ingredient with an
+  empty-tag child dropped, foreign result and container); `blocks::feast::foreign_feast_blocks_are_ignored`
+  (another mod's block with `servings` is not an FD feast). cargo test 92, fmt and clippy clean.
+- checked by reading: the base reads both recipe types with `recipes_of_type`, which returns every namespace (no id
+  filter in `cutting::build`/`cooking::build`); FD's knife code (`items/knife.rs`) checks the knives **tag** for cake
+  cutting and pumpkin prediction, but the `KnifeItem` Part (pumpkin carving use, knockback) is attached by item key
+  to FD's six knives only — the MD-09 question recorded in BX-02.
+- the client-sync half (an add-on cutting recipe works for a LAN guest) runs in MD-08.
+- next: MD-01 (More Delight repository skeleton).

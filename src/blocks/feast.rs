@@ -580,4 +580,13 @@ mod tests {
             }
         );
     }
+
+    /// BX-10: base feast hooks act only on FD's six feasts; another mod's block with a
+    /// `servings` property is left to its own mod.
+    #[test]
+    fn foreign_feast_blocks_are_ignored() {
+        assert!(kind("testaddon:nachos_block").is_none());
+        assert!(serving_item("testaddon:nachos_block", 4).is_none());
+        assert!(kind(ROAST_CHICKEN).is_some());
+    }
 }

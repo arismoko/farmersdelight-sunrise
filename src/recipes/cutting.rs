@@ -364,7 +364,11 @@ mod tests {
 
         pub fn key(id: &str) -> Option<ItemKey> {
             let mut fake = mod_api::testing::FakeHost::new();
-            let ids = ["farmersdelight:minced_beef", "minecraft:bone_meal"];
+            let ids = [
+                "farmersdelight:minced_beef",
+                "minecraft:bone_meal",
+                "testaddon:diced_potato",
+            ];
             fake.registries
                 .resolve_items(ids.iter().map(|i| Identifier::parse(i).unwrap()))
                 .unwrap();
@@ -441,5 +445,29 @@ mod tests {
         // ...and removing it.
         tables.rebuild(&host::data(&[]));
         assert!(tables.cutting.snapshot().is_empty());
+    }
+
+    /// BX-10: an add-on's `farmersdelight:cutting` recipe (own namespace, `fabric:any` tool, foreign
+    /// result) is read and matched like FD's own.
+    #[test]
+    fn addon_namespace_recipe_builds_and_matches() {
+        let host = host::data(&[(
+            "testaddon:cutting/potato",
+            json!({"type": "farmersdelight:cutting", "ingredients": ["minecraft:potato"],
+                "tool": {"fabric:type": "fabric:any", "ingredients": ["#c:tools/knife", "#farmersdelight:tools/knives"]},
+                "result": [{"item": {"id": "testaddon:diced_potato", "count": 1}}]}),
+        )]);
+        let (table, skipped) = build(&host);
+        assert!(skipped.is_empty(), "{skipped:?}");
+        assert_eq!(table[0].id, "testaddon:cutting/potato");
+        assert_eq!(
+            table[0].results[0].stack.item(),
+            host::key("testaddon:diced_potato").unwrap()
+        );
+        let has = |s: &'static str| move |i: &Ingredient| i.items.contains(s);
+        assert!(matches!(
+            find(&table, has("minecraft:potato"), has("#farmersdelight:tools/knives")),
+            Lookup::Found(r) if r.id == "testaddon:cutting/potato"
+        ));
     }
 }
