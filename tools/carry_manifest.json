@@ -4,7 +4,7 @@
  "fapi_repo": "https://github.com/FabricMC/fabric",
  "fapi_tag": "0.160.4+26.3",
  "fapi_sha": "542047fffa4f49d96d4863d2c7abf0b508554f70",
- "rules_sha256": "a87a91a0e9cab1c28b35cb9691fa7e85708e6e68db4aeddcb6d2d3fc9cdf03c4",
+ "rules_sha256": "c6b652b6660e594809c657d9f041ab643ca491d4ad87b811385bc387729883a3",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -19225,8 +19225,8 @@
    "source": "src/generated/resources/data/farmersdelight/tags/block/wild_crops.json",
    "dest": "data/farmersdelight/tags/block/wild_crops.json",
    "sha256_source": "3ddfd8785d3cd2526be88ca6cf9c34cea5dd4c6e2eadc4319adc137a895660c6",
-   "sha256_dest": "3ddfd8785d3cd2526be88ca6cf9c34cea5dd4c6e2eadc4319adc137a895660c6",
-   "rule": "copy"
+   "sha256_dest": "430ee07f8616ecf000747e0f27b6a923de4ed7b672bbd71043ea3043a9f15adb",
+   "rule": "overlay"
   },
   {
    "source": "src/generated/resources/data/farmersdelight/tags/entity_type/dog_food_users.json",
@@ -19372,15 +19372,15 @@
    "source": "src/generated/resources/data/farmersdelight/tags/item/tools/knives.json",
    "dest": "data/farmersdelight/tags/item/tools/knives.json",
    "sha256_source": "5e41a3ed28c365092cea13640c7a0118e283727a3d510556211e5d43871933e1",
-   "sha256_dest": "5e41a3ed28c365092cea13640c7a0118e283727a3d510556211e5d43871933e1",
-   "rule": "copy"
+   "sha256_dest": "3ebc7642590add3cce79f10e0b65cf26548503884cbdf0ec1d38091d22b09b30",
+   "rule": "overlay"
   },
   {
    "source": "src/generated/resources/data/farmersdelight/tags/item/wild_crops.json",
    "dest": "data/farmersdelight/tags/item/wild_crops.json",
    "sha256_source": "3ddfd8785d3cd2526be88ca6cf9c34cea5dd4c6e2eadc4319adc137a895660c6",
-   "sha256_dest": "3ddfd8785d3cd2526be88ca6cf9c34cea5dd4c6e2eadc4319adc137a895660c6",
-   "rule": "copy"
+   "sha256_dest": "430ee07f8616ecf000747e0f27b6a923de4ed7b672bbd71043ea3043a9f15adb",
+   "rule": "overlay"
   },
   {
    "source": "src/generated/resources/data/farmersdelight/tags/mob_effect/ignored/hot_cocoa.json",

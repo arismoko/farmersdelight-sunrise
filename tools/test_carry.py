@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import carry_fd  # noqa: E402
 
-RULES = carry_fd.load_rules(carry_fd.RULES)
+RULES = {k: v for k, v in carry_fd.load_rules(carry_fd.RULES).items() if k != "overlay"}
 
 
 def write(root: Path, rel: str, text: str) -> None:
@@ -127,6 +127,42 @@ class CarryTest(unittest.TestCase):
             (self.out / "data/farmersdelight/worldgen/feature/plain.json").read_text("utf-8"),
             '{"type":"minecraft:simple_block"}',
         )
+
+    def test_addon_overlay(self):
+        write(
+            self.fd,
+            "src/generated/resources/data/farmersdelight/tags/item/tools/knives.json",
+            '{"values":["farmersdelight:flint_knife"]}',
+        )
+        overlay = Path(self.tmp.name) / "md.json"
+        overlay.write_text(
+            json.dumps(
+                {
+                    "addon": "moredelight",
+                    "entries": [
+                        {
+                            "tag": "farmersdelight:tools/knives",
+                            "kind": "item",
+                            "ids": ["moredelight:stone_knife", "farmersdelight:flint_knife"],
+                        }
+                    ],
+                }
+            ),
+            "utf-8",
+        )
+        pin = carry_fd.lib.sha256(overlay.read_bytes())
+        rules = dict(RULES, overlay=[{"file": str(overlay), "sha256": pin}])
+        m = carry_fd.carry(self.fd, self.out, rules)
+        tag = json.loads((self.out / "data/farmersdelight/tags/item/tools/knives.json").read_text("utf-8"))
+        self.assertEqual(
+            tag["values"], ["farmersdelight:flint_knife", {"id": "moredelight:stone_knife", "required": False}]
+        )
+        self.assertIn("overlay", [e["rule"] for e in m["files"]])
+        with self.assertRaises(carry_fd.CarryError):  # the pinned hash no longer matches
+            carry_fd.carry(self.fd, self.out, dict(RULES, overlay=[{"file": str(overlay), "sha256": "0" * 64}]))
+        (self.fd / "src/generated/resources/data/farmersdelight/tags/item/tools/knives.json").unlink()
+        with self.assertRaises(carry_fd.CarryError):  # a tag the base does not carry
+            carry_fd.carry(self.fd, self.out, rules)
 
 
 if __name__ == "__main__":

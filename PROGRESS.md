@@ -1845,3 +1845,21 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - carry check ok: 2870 files; cargo test 89; `.hmod` built and checked.
 - evidence: `run/shots/bx-01/` (tag reports, screenshot).
 - next: BX-02 (add-on tag overlay for FD-namespace tags).
+
+## BX-02 Add-on tag overlay for FD-namespace tags — PASS (base alone; with add-ons in MD-09 / CD-07) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- `tools/addon_overlays/{moredelight,corn_delight}.json`: entries `{tag, kind, ids, source: {repo, commit, file,
+  sha256}}`; pinned in `carry_rules.toml.in` `[[overlay]] file/sha256`; `carry_lib.overlay_tags` (hash check) +
+  `append_optional`; `carry_fd.py` fails when an overlay names a tag the base does not carry or a hash differs
+  (unit test `test_addon_overlay`). Initial content from the upstream files: `farmersdelight:tools/knives` +=
+  `moredelight:wooden_knife`, `moredelight:stone_knife`; `farmersdelight:wild_crops` (block and item) +=
+  `corn_delight:wild_corn`. MD-02/CD-03 regenerate these files from their carries.
+- design change from the plan: entries are written as `{"id": …, "required": false}` rather than plain ids, so a
+  missing add-on leaves the tag valid by vanilla's rules too (Horizon's item/block tag reader takes both forms,
+  `horizon-items/src/items.rs` tag walk). Rule `overlay`, 3 files.
+- in game (fd-port, FDM6, base only): no tag error for the add-on ids in the log (the 5 damage-tag warnings were
+  there before BX-01); a flint knife still takes Sharpness (`minecraft:enchantable/sharp_weapon` ⊇
+  `#farmersdelight:tools/knives`) and Backstabbing; a stick is refused.
+- noted for MD-09: FD's knife behaviour that is code (`items/knife.rs` Part on FD's 6 knife keys: cake/pumpkin use,
+  knockback) is keyed on ids, not on the tag, so MD knives will need the base to attach the Part to overlay knives.
+- next: BX-10 (foreign-namespace regression fixtures).

@@ -43,6 +43,16 @@ sha = "542047fffa4f49d96d4863d2c7abf0b508554f70"
 root = "fabric-convention-tags-v2/src/generated/resources"
 include_prefixes = ["data/c/tags/"]
 
+# Add-on tag overlays (BX-02): each file lists add-on ids for FD-namespace tags the base carries (format: carry_lib
+# overlay_tags). Copied from the add-on repo's generated tools/overlay/<addon>.json; the sha256 pins the copy.
+[[overlay]]
+file = "tools/addon_overlays/moredelight.json"
+sha256 = "c76b274f8bd4f393cc917145a7bf80ad17b4b291d2a3208fcdc810040f607157"
+
+[[overlay]]
+file = "tools/addon_overlays/corn_delight.json"
+sha256 = "63df1e087afdff4a483f0f360ed4ffc0bcd7b65e078970ca76ad5160007c089c"
+
 # Only rewrite: fabric:load_conditions -> neoforge:conditions with a mod-registered condition.
 # Any fabric:load_conditions value not listed here makes the script fail.
 [[load_condition]]

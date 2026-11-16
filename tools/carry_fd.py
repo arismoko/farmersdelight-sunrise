@@ -12,6 +12,9 @@ Files are copied byte for byte; content changes are the fabric:load_conditions r
 The second source is Fabric API's convention tags ([fapi], BX-01): on Fabric, Fabric API ships them beside FD; Horizon
 ships none. A `c` tag file both define is written once with FD's entries followed by Fabric's missing ones (rule
 `merge_fapi`), as the two files merge on Fabric.
+
+Add-on overlays ([[overlay]], BX-02, `tools/addon_overlays/*.json`, sha256-pinned) append add-on ids to FD-namespace
+tags the base carries, as `required: false` entries (rule `overlay`): add-ons cannot ship files in FD's namespace.
 """
 from __future__ import annotations
 
@@ -66,6 +69,10 @@ def merge_fapi(rel: str, fd_bytes: bytes, fapi_bytes: bytes) -> bytes:
 def carry(fd: Path, out: Path, rules: dict, fapi: Path | None = None) -> dict:
     files = collect(fd, rules)
     fapi_files = collect_fapi(fapi, rules) if fapi is not None else {}
+    overlays = lib.overlay_tags([(REPO / o["file"], o["sha256"]) for o in rules.get("overlay", [])])
+    missing = sorted(set(overlays) - set(files))
+    if missing:
+        raise lib.CarryError(f"overlay names tags the base does not carry: {', '.join(missing)}")
     entries = []
     for rel in sorted(files):
         root, src = files[rel]
@@ -92,6 +99,11 @@ def carry(fd: Path, out: Path, rules: dict, fapi: Path | None = None) -> dict:
             if merged != result:
                 result = merged
                 rule = "merge_fapi"
+        if rel in overlays:
+            appended = lib.append_optional(result, [i for i, _ in overlays[rel]])
+            if appended != result:
+                result = appended
+                rule = "overlay"
         dest = out / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists() or dest.read_bytes() != result:
@@ -181,6 +193,8 @@ def counts(manifest: dict) -> list[tuple[str, int]]:
             c["overridden"] += 1
         if e["rule"] == "rewrite":
             c["rewritten (worldgen)"] += 1
+        if e["rule"] == "overlay":
+            c["add-on overlay"] += 1
         if e["rule"] == "merge_fapi":
             c["merged with Fabric API"] += 1
         if e["source"].startswith("fapi:"):

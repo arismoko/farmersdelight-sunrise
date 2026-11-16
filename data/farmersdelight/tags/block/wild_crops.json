@@ -6,6 +6,10 @@
     "farmersdelight:wild_cabbages",
     "farmersdelight:wild_tomatoes",
     "farmersdelight:wild_onions",
-    "farmersdelight:wild_rice"
+    "farmersdelight:wild_rice",
+    {
+      "id": "corn_delight:wild_corn",
+      "required": false
+    }
   ]
 }

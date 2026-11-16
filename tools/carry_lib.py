@@ -7,6 +7,8 @@ this file from a base checkout at their pinned commit (`--base <checkout>`).
 - `apply_rewrite` / `rewrite_json`: the `[[rewrite]]` rules (type rename, placement drop, tag-entry flattening).
 - `collect`: files of several source roots, selected by prefix/exclude, failing on a path two roots share.
 - manifest helpers (`write_manifest`, `read_manifest`, `remove_stale`) and `git_head`.
+- `overlay_tags` / `append_optional`: the add-on tag overlay (BX-02): add-on ids appended to a tag file the base
+  carries, as optional entries.
 - `fence_violations`: the package namespace fence (Horizon refuses a package with a file in a namespace it does not
   own, except `data/minecraft/tags/**` and `data/c/tags/**`).
 - tag universe: `tags_in_tree` / `tags_in_zip` list defined tags, `tag_references` lists the required `#ns:path`
@@ -235,3 +237,32 @@ def undefined_tags(references: dict[str, set[str]], defined: set[tuple[str, str]
         if missing:
             out[rel] = missing
     return out
+
+
+def overlay_tags(files: list[tuple[Path, str]]) -> dict[str, list[tuple[str, str]]]:
+    """Overlay files (path, pinned sha256) → carried dest path → [(id, addon)] in file order. An overlay entry is
+    `{tag: "ns:path", kind: "item"|"block"|…, ids: [...], source: {repo, commit, file, sha256}}`."""
+    out: dict[str, list[tuple[str, str]]] = {}
+    for path, pinned in files:
+        data = path.read_bytes()
+        if sha256(data) != pinned:
+            raise CarryError(f"{path.name}: sha256 {sha256(data)} does not match the pinned {pinned}")
+        overlay = json.loads(data.decode("utf-8"))
+        for entry in overlay["entries"]:
+            ns, tag = entry["tag"].split(":", 1)
+            dest = f"data/{ns}/tags/{entry['kind']}/{tag}.json"
+            out.setdefault(dest, []).extend((i, overlay["addon"]) for i in entry["ids"])
+    return out
+
+
+def append_optional(data: bytes, ids) -> bytes:
+    """A tag file with `ids` it lacks appended as `{"id": x, "required": false}`: an add-on that is not installed
+    leaves the tag as it was."""
+    obj = json.loads(data.decode("utf-8"))
+    have = {v["id"] if isinstance(v, dict) else v for v in obj["values"]}
+    extra = [{"id": i, "required": False} for i in ids if i not in have]
+    if not extra:
+        return data
+    obj = dict(obj)
+    obj["values"] = obj["values"] + extra
+    return dump_json(obj)

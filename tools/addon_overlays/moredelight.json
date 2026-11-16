@@ -1,0 +1,20 @@
+{
+  "addon": "moredelight",
+  "note": "Initial overlay from the upstream file (BX-02); MD-02's carry regenerates it.",
+  "entries": [
+    {
+      "tag": "farmersdelight:tools/knives",
+      "kind": "item",
+      "ids": [
+        "moredelight:wooden_knife",
+        "moredelight:stone_knife"
+      ],
+      "source": {
+        "repo": "https://github.com/axperty/moredelight",
+        "commit": "360e61172756e8b22d4d647753321002c7452d35",
+        "file": "src/main/generated/data/farmersdelight/tags/item/tools/knives.json",
+        "sha256": "8c19aa1d882ff1ed10b9eb2e8e378fa34a52f71b5dac1bd9e5c8dda9559ebd12"
+      }
+    }
+  ]
+}
