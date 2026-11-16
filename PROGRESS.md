@@ -1896,6 +1896,10 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - no mod-side workaround: tab placement and the tooltip are engine code; a mod cannot keep its tab off page 2.
   The fix is one engine line (filter `hovered_tab` by `on_page`, or drop the duplicate pass). Not filed upstream yet.
 - not reproducible with agent screenshots (agent mode draws no hover tooltips); identified by reading.
+- **reproduced in game (2026-11-16, user request; FDM6, creative screen page 2/2, `../run/shots/e-39/`):** with the
+  cursor on the Farmer's Delight tab, page 1's "Building Blocks" is drawn over "Farmer's Delight" (only its last "t"
+  shows); on the More Delight tab, "Colored Blocks" fully covers "More Delight" (`e39-overlap.png`). (Hover tooltips do
+  show in agent screenshots after a click at the position: the line above was wrong.)
 
 ## MD-09 (base side) Base-owned knife_items tag; Knife part attached by tag — PASS (in game with MD) — 2026-11-16
 - build pin: afe471cf | mod commit: 356d9ef (code + carry), then (this commit: MD overlay copied, re-pinned)
