@@ -8,6 +8,7 @@
   (ground tag, bone-meal spread, brown-mooshroom stew effect); the pieces are public too. FD's wild crops use it.
 - Public add-on API `api::config` (BX-06): FD's boolean config keys by name; `farmers_buy_fd_crops()` is always
   true (FD Refabricated has no such key; its farmer trades are unconditional).
+- Public add-on API `api::crop` (CD-06): vanilla crop growth speed and draws from the level's random, as FD's crops use.
 
 ## 3.6.30-horizon.2 — 2026-11-16
 

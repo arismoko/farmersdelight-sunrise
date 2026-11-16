@@ -9,6 +9,7 @@
 //! `fd_port_api`.
 
 pub mod config;
+pub mod crop;
 pub mod feast;
 pub mod wild_crop;
 

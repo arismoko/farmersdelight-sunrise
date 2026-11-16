@@ -58,6 +58,8 @@ What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.to
     `suspicious_stew_effect`, …);
   - `api::config`: FD's boolean config keys by name (`common_bool`, `client_bool`), and
     `farmers_buy_fd_crops()` for add-ons written against upstream FD (always true here);
+  - `api::crop`: vanilla `CropBlock.getGrowthSpeed` and draws from the level's random (`growth_speed`,
+    `next_int`, `next_float`);
 - the add-on tag overlay format (`tools/addon_overlays/`), which adds an add-on's ids to FD's own tags;
 - the item tags `ported_farmersdelight:effect_tooltip` (food-effect tooltip lines) and
   `ported_farmersdelight:knife_items` (items that work as FD knives), and the base's load conditions.

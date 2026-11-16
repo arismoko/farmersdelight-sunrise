@@ -2048,3 +2048,12 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   the note differs); sha256 re-pinned in `tools/carry_rules.toml.in`. carry re-run: carried files unchanged,
   `--check` ok (2872 files); tools/test_*.py OK.
 - next: CD-03 continues in corndelight-horizon (carry pinned to this commit).
+
+## CD-06 (base side) Public API: crop helpers — PASS (used by Corn Delight's corn crop in game) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- `pub mod api::crop`: `growth_speed(level, state, pos)` (vanilla `CropBlock.getGrowthSpeed`, the function FD's
+  crops use, `blocks/tomato.rs`), `next_int(level, bound)` / `next_float(level)` drawing from the level's own
+  random stream. Thin wrappers over existing base code; no behaviour change for FD. README/CHANGELOG list it.
+- checks: cargo test 98 passed + 1 ignored, clippy clean. In game: corn growth and bone meal through it
+  (corndelight-horizon PROGRESS CD-06).
+- next: CD-07 (corndelight-horizon).
