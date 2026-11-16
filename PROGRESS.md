@@ -1731,3 +1731,20 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   in the reference.
 - world changes: FDM6 pad 10..15,99..101,1338..1341 (stoves, skillet, basket). Game running.
 - next: M10-04 (performance).
+
+## M10-04 Performance — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit; code as of 5faed22)
+- method: FDM6 single player (server thread), player parked at the test field (20,110,1340); `/tick query`
+  (100-tick samples) three times 6 s apart per phase, read in one session for an A/B against the same world state.
+  The world's own load moved between ~4 ms (first sample) and ~10–11 ms (later, rain + nearby village/entities), so
+  each phase is compared with a baseline taken next to it.
+- results (average ms/tick; P50/P95/P99 in the log lines of this session):
+  - no FD block entities in the field: 10.4 / 10.5 / 8.1; later 11.5 / 10.8 / 10.1.
+  - 200 idle cooking pots (no heat, `fill`): 11.7 / 11.1 / 10.3 → ≈ +0.6 ms (target < 2 ms idle: met).
+  - 200 lit stoves each cooking 3 raw meats (progress 42 → 529 during the samples): 8.2 / 11.5 / 10.3 → no
+    difference beyond noise (target < 5 ms active: met).
+- incidental: stoves filled with item NBT but no `CookingTimes` totals cook everything on the first tick and pop
+  it (604 item entities, +7 ms from the items); FD reads the same NBT the same way (totals default to 0). Not a
+  gameplay path (players' items get their totals on insertion).
+- world changes: test field cleared (pots, stoves and dropped items removed). Game running.
+- next: M10-05 (wasm probe, non-blocking).
