@@ -1877,3 +1877,12 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   to FD's six knives only — the MD-09 question recorded in BX-02.
 - the client-sync half (an add-on cutting recipe works for a LAN guest) runs in MD-08.
 - next: MD-01 (More Delight repository skeleton).
+
+## BX-10a Add-on recipe directory fixture (MD-06 harness) — PASS (unit) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- `recipes::cooking::addon_dir_recipes_parse` (`#[ignore]`, opt-in): runs `shape()` (the cooking codec) on every
+  `*.json` in `$FD_ADDON_COOKING_DIR` and prints tab/time/xp/result/container per recipe. Run:
+  `FD_ADDON_COOKING_DIR=<dir> cargo test addon_dir -- --ignored --nocapture`.
+- On `moredelight-horizon/data/moredelight/recipe/cooking`: 12 parsed, all Meals / 400 t / 1.0 XP / bowl.
+- cargo test 92 + 1 ignored; clippy clean.
+- next: MD-07 (in moredelight-horizon).

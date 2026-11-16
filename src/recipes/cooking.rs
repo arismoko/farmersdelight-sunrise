@@ -572,4 +572,38 @@ mod tests {
         assert_eq!(table[0].ingredients[0].len(), 1);
         assert_eq!(table[0].result.item(), host::key("testaddon:mash").unwrap());
     }
+
+    /// Add-on fixture harness (MD-06/CD-10): every `*.json` in `$FD_ADDON_COOKING_DIR` passes
+    /// the cooking codec. Opt-in: `FD_ADDON_COOKING_DIR=<dir> cargo test addon_dir -- --ignored --nocapture`.
+    #[test]
+    #[ignore = "needs FD_ADDON_COOKING_DIR"]
+    fn addon_dir_recipes_parse() {
+        let dir = std::env::var("FD_ADDON_COOKING_DIR").expect("set FD_ADDON_COOKING_DIR");
+        let mut files: Vec<_> = std::fs::read_dir(&dir)
+            .unwrap()
+            .map(|e| e.unwrap().path())
+            .filter(|p| p.extension().is_some_and(|x| x == "json"))
+            .collect();
+        files.sort();
+        assert!(!files.is_empty(), "no recipes in {dir}");
+        for path in &files {
+            let json: Value =
+                serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+            assert_eq!(json["type"], TYPE, "{path:?}");
+            let s = shape(&json).unwrap_or_else(|e| panic!("{path:?}: {e}"));
+            println!(
+                "{} tab={:?} time={} xp={} ingredients={} result={} container={}",
+                path.file_stem().unwrap().to_string_lossy(),
+                s.tab,
+                s.cooking_time,
+                s.experience,
+                s.ingredients.len(),
+                s.result["id"],
+                s.container
+                    .as_ref()
+                    .map_or(Value::Null, |c| c["id"].clone()),
+            );
+        }
+        println!("parsed {} recipes", files.len());
+    }
 }
