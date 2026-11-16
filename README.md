@@ -35,7 +35,8 @@ recorded as an accepted delta (A-nn) with its engine gap (E-nn) in `PROGRESS.md`
   E-36, A48); the book's tabs are ordered Drinks, Meals, Misc (A49);
 - the Comfort overlay ignores absorption hearts (A50); tooltip durations assume 20 ticks per second (A51);
 - standing canvas signs open the text editor when placed (E-31, A34); a custom name is lost when a cabinet or
-  basket is broken by something other than a player (E-30, A33).
+  basket is broken by something other than a player (E-30, A33);
+- on page 2 of the creative inventory, the hovered tab's name can be drawn under a page-1 tab name (engine, E-39).
 
 ## For add-on authors
 
@@ -52,7 +53,8 @@ What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.to
 - the Rust module `api` for native add-ons (the launcher adds the base as the Cargo dependency
   `ported_farmersdelight`);
 - the add-on tag overlay format (`tools/addon_overlays/`), which adds an add-on's ids to FD's own tags;
-- the item tag `ported_farmersdelight:effect_tooltip` and the base's load conditions.
+- the item tags `ported_farmersdelight:effect_tooltip` (food-effect tooltip lines) and
+  `ported_farmersdelight:knife_items` (items that work as FD knives), and the base's load conditions.
 
 A change that breaks any of these raises `fd_port_api`. Every base release changes the version, so add-ons are
 re-released against it. FD's recipe types (`farmersdelight:cooking`, `farmersdelight:cutting`) accept recipes from

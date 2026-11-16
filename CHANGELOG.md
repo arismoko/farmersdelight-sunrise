@@ -1,9 +1,19 @@
 # Changelog
 
-## 3.6.30-horizon.2 — unreleased
+## 3.6.30-horizon.2 — 2026-11-16
 
-- Add-on support: the version is now semver (`26.3-3.6.30-horizon.1` could not be parsed as a dependency
-  requirement target); `[properties] fd_port_api = 1` and the public `api` module (README "For add-on authors").
+Add-on support; validated with More Delight (Horizon port) `26.9.16-horizon.1`.
+
+- The version is now semver (`26.3-3.6.30-horizon.1` could not be parsed as a dependency requirement target);
+  `[properties] fd_port_api = 1` and the public `api` module (README "For add-on authors").
+- Fabric API convention tags (`c:`) shipped and merged with FD's own `c` tags.
+- Add-on tag overlays: add-ons add their ids to FD-namespace tags through `tools/addon_overlays/` (optional
+  entries); the More Delight overlay is included.
+- New base-owned item tags: `ported_farmersdelight:knife_items` (FD knife behaviour by tag: carving, cake and pie
+  slicing, straw and rice, scavenging, Backstabbing) and `ported_farmersdelight:effect_tooltip` (food-effect tooltip
+  lines read from the item's consume effects).
+- Cooking and cutting recipes and feasts from other namespaces are covered by regression fixtures.
+- Engine gap recorded: creative tab names overlap on page 2 (E-39).
 
 ## 26.3-3.6.30-horizon.1 — 2026-11-16
 

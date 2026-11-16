@@ -1940,3 +1940,24 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - checks: cargo test 95 + 1 ignored, clippy/fmt clean, decl/food-tooltip/worldgen --check, tools/test_*.py OK.
 - deltas: none.
 - next: MD-10 (moredelight-horizon), then MD-11, MD-12.
+
+## MD-12 (base side) Release 3.6.30-horizon.2; base-only matrix row V1 — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit; code as 2b4487d, README/CHANGELOG only) | tag `v3.6.30-horizon.2`
+- release: CHANGELOG entry dated; README lists `ported_farmersdelight:knife_items` among the stable add-on surfaces
+  and E-39 among the player-visible differences. Package `ported_farmersdelight-3.6.30-horizon.2.hmod` in `../dist/`
+  (2941266 bytes, SHA-256 767d6a76…a9ed; `cargo horizon-mod check` clean: native-1/afe471cf…/e59da909…, for 26.3).
+  More Delight `26.9.16-horizon.1` is validated against this commit (moredelight-horizon PROGRESS MD-12).
+- checks: cargo test 95 passed + 1 ignored; carry --check 2872 files; decl/food-tooltip/worldgen/fixture --check;
+  tools/test_*.py all OK.
+- ADDONS_VALIDATION §4 V1 (base only; fd-port with `mod.ported_moredelight:false`, new survival world `MDV8`;
+  `../run/shots/md-12/`): "content from 1 mod(s)"; the startup WARN/ERROR lines are identical, line for line, to the
+  previous start with More Delight on (the 3 known crate-recipe client-view lines, the engine's damage-tag lines), so
+  the overlay's optional More Delight entries are inert; FD vegetable soup tooltip: name + one "Nourishment (03:00)"
+  line (`v1-veg-soup.png`, no duplicate from the tag path); a cabbage cut on the cutting board with the flint knife
+  → 2 cabbage leaves, knife 131 → 130. Not replayed: the full M10 demo tour (code unchanged since the BX tasks'
+  in-game checks; fixtures green).
+- tool note: this engine's command parser does not know mod item tags (`execute if items … #farmersdelight:…` →
+  "Unknown item tag"), so tag membership was checked by behaviour.
+- deltas: none new.
+- next: none in the base for the More Delight scope; Corn Delight BX tasks (BX-04, BX-05, BX-06, BX-09) when the user
+  asks for Corn Delight.
