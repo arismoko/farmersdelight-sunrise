@@ -1615,3 +1615,24 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - world changes: FDM6 pad: stove + cooking pot at 18,100..101,1347, rope gate 16,100,1345, oak cabinet
   15,100,1346; weather cleared, time noon. Game running.
 - next: M9-06 (property sets & creative tab).
+
+## M9-06 Property sets & creative tab — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- creative tab: bug fixed in `tools/gen_tab_decl.py` — FD's `BlockItemId id("block", "item")` names the item
+  second, the generator took the block id, so the tab listed `onions`, `rice_panicles`, `cabbages`, `tomatoes`
+  (blocks, no items) and the engine left them out: Onion, Rice Panicle, Cabbage Seeds and Tomato Seeds were
+  missing (since M6-01, which checked only the first page). Regenerated `tools/decl/tabs.toml.in` + decls; every
+  one of the 188 ids now names a declared item (script check).
+- evidence (FDM6 creative inventory, page 2; `run/shots/m9-06/`): tab "Farmer's Delight" with the stove icon
+  (`page2.png`); five scroll positions (`v0`…`v20.png`) read row by row against the reference list: rows 1–5
+  (stove … pink canvas sign), row 11 now "colonies, cabbage, tomato, onion, rice panicle, rice, cabbage seeds,
+  tomato seeds", row 12 rotten tomato … raw pasta, last row shepherd's pie block … straw bed; 20 full rows + 8 =
+  188 = the reference.
+- property sets: engine gap **E-37** — `recipe_property_sets` runs inside the data load with a
+  `DataLoadContext` that can read neither the load's recipes nor item tags, and the mod's recipe tables are rebuilt
+  after it (`tags_updated`), so FD's 9 sets (`cooking_pot_input_one…six`, `cooking_pot_container`,
+  `cutting_board_input`, `cutting_board_tool`) cannot be filled from the recipes. Delta **A52**: the 9 sets are not
+  provided. FD's only reader is the client's knife-on-board prediction
+  (`CuttingBoardBlockEntity#processStoredItemUsingTool` client branch: swing or not); the port's client takes the
+  engine's default prediction, the server result is unchanged. `farmersdelight:serving_containers` (M3) stays.
+- next: M9-07 (lang).

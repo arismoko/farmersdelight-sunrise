@@ -18,7 +18,9 @@ J = "src/main/java/vectorwing/farmersdelight/common"
 
 
 def constants(path: Path) -> dict[str, str]:
-    return dict(re.findall(r'(\w+)\s*=\s*(?:id|key)\(\s*"([a-z0-9_]+)"', path.read_text()))
+    # `id("block", "item")` (ModBlockItemIds.BlockItemId) names the item second: the tab holds the item.
+    pairs = re.findall(r'(\w+)\s*=\s*(?:id|key)\(\s*"([a-z0-9_]+)"(?:\s*,\s*"([a-z0-9_]+)")?', path.read_text())
+    return {name: item or first for name, first, item in pairs}
 
 
 def main() -> int:
