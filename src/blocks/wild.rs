@@ -57,17 +57,111 @@ fn is_air(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
     })
 }
 
+/// Wild crops registered through `api::wild_crop::register` (FD's six and add-ons'): block id,
+/// suspicious stew effect, seconds.
+static REGISTERED: std::sync::RwLock<Vec<(&'static str, &'static str, i32)>> =
+    std::sync::RwLock::new(Vec::new());
+
+/// `WildCropBlock#mayPlaceOn`: the ground is in `#farmersdelight:grows_wild_crops`.
+pub fn may_place_on(level: &dyn LevelHost, ground: BlockState) -> bool {
+    level.block_in_tag(ground.block(), GROWS_WILD_CROPS) == Some(true)
+}
+
+/// `canSurvive` of a wild crop at `pos`: the block below may hold it.
+pub fn can_survive_at(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
+    ground_in(level, pos, GROWS_WILD_CROPS)
+}
+
+/// The suspicious stew effect and its seconds of a registered wild crop (its block id, which is
+/// also its item id).
+pub fn stew_effect(block: &str) -> Option<(&'static str, i32)> {
+    REGISTERED
+        .read()
+        .ok()?
+        .iter()
+        .find(|(b, _, _)| *b == block)
+        .map(|&(_, e, s)| (e, s))
+}
+
+/// Attaches the wild-crop Part to `block` and records its stew effect (`api::wild_crop::register`).
+pub fn register_wild_crop(
+    registrar: &mut dyn Registrar,
+    block: &'static str,
+    stew_effect: &'static str,
+    seconds: i32,
+) {
+    let key = registrar.block_key(block);
+    registrar.block_part(key, WildCrop);
+    if let Ok(mut all) = REGISTERED.write() {
+        all.retain(|(b, _, _)| *b != block);
+        all.push((block, stew_effect, seconds));
+    }
+}
+
+/// `WildCropBlock#performBonemeal`: unless ten of the same block stand in the 9×3×9 around
+/// `origin`, one more `state` appears at the end of a short random walk over free spots it can
+/// stand on.
+pub fn bonemeal_spread(level: &mut dyn LevelWriteHost, origin: [i32; 3], state: BlockState) {
+    let block = state.block();
+    let mut limit = 10;
+    for dx in -4..=4 {
+        for dy in -1..=1 {
+            for dz in -4..=4 {
+                let p = [origin[0] + dx, origin[1] + dy, origin[2] + dz];
+                if level.block_state(p).is_some_and(|s| s.block() == block) {
+                    limit -= 1;
+                    if limit <= 0 {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    let free = |level: &dyn LevelHost, p: [i32; 3]| {
+        is_air(level, p) && ground_in(level, p, GROWS_WILD_CROPS)
+    };
+    let step = |level: &mut dyn LevelWriteHost, from: [i32; 3]| {
+        draw(level, |r| {
+            let x = r.next_int_bound(3).unwrap_or(1) - 1;
+            let y = r.next_int_bound(2).unwrap_or(0) - r.next_int_bound(2).unwrap_or(0);
+            let z = r.next_int_bound(3).unwrap_or(1) - 1;
+            [from[0] + x, from[1] + y, from[2] + z]
+        })
+    };
+    let mut pos = origin;
+    let Some(mut random_pos) = step(level, pos) else {
+        return;
+    };
+    for _ in 0..4 {
+        if free(level, random_pos) {
+            pos = random_pos;
+        }
+        match step(level, pos) {
+            Some(next) => random_pos = next,
+            None => return,
+        }
+    }
+    if free(level, random_pos) {
+        level.set_block(random_pos, state, BlockUpdateFlags::CLIENTS);
+    }
+}
+
+/// `WildCropBlock#isBonemealSuccess`: 80%.
+pub fn bonemeal_success(level: &mut dyn LevelRandomHost) -> bool {
+    draw(level, |r| r.next_float()).is_some_and(|f| f < 0.8)
+}
+
 pub struct WildCrop;
 
 #[mod_api::horizon_part]
 impl BlockPart for WildCrop {
     /// WildCropBlock#mayPlaceOn: `#farmersdelight:grows_wild_crops`.
     fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
-        Some(level.block_in_tag(event.ground.block(), GROWS_WILD_CROPS) == Some(true))
+        Some(may_place_on(level, event.ground))
     }
 
     fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
-        Some(ground_in(level, at(event.pos), GROWS_WILD_CROPS))
+        Some(can_survive_at(level, at(event.pos)))
     }
 
     fn is_valid_bonemeal_target(
@@ -83,55 +177,12 @@ impl BlockPart for WildCrop {
         level: &mut dyn LevelRandomHost,
         event: &mut IsBonemealSuccessEvent,
     ) {
-        event.success = draw(level, |r| r.next_float()).is_some_and(|f| f < 0.8);
+        event.success = bonemeal_success(level);
     }
 
-    /// WildCropBlock#performBonemeal: unless ten of them stand in the 9×3×9 around, one more
-    /// appears at the end of a short random walk over free spots it can stand on.
+    /// WildCropBlock#performBonemeal.
     fn perform_bonemeal(&self, level: &mut dyn LevelWriteHost, event: &mut PerformBonemealEvent) {
-        let origin = at(event.pos);
-        let block = event.state.block();
-        let mut limit = 10;
-        for dx in -4..=4 {
-            for dy in -1..=1 {
-                for dz in -4..=4 {
-                    let p = [origin[0] + dx, origin[1] + dy, origin[2] + dz];
-                    if level.block_state(p).is_some_and(|s| s.block() == block) {
-                        limit -= 1;
-                        if limit <= 0 {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-        let free = |level: &dyn LevelHost, p: [i32; 3]| {
-            is_air(level, p) && ground_in(level, p, GROWS_WILD_CROPS)
-        };
-        let step = |level: &mut dyn LevelWriteHost, from: [i32; 3]| {
-            draw(level, |r| {
-                let x = r.next_int_bound(3).unwrap_or(1) - 1;
-                let y = r.next_int_bound(2).unwrap_or(0) - r.next_int_bound(2).unwrap_or(0);
-                let z = r.next_int_bound(3).unwrap_or(1) - 1;
-                [from[0] + x, from[1] + y, from[2] + z]
-            })
-        };
-        let mut pos = origin;
-        let Some(mut random_pos) = step(level, pos) else {
-            return;
-        };
-        for _ in 0..4 {
-            if free(level, random_pos) {
-                pos = random_pos;
-            }
-            match step(level, pos) {
-                Some(next) => random_pos = next,
-                None => return,
-            }
-        }
-        if free(level, random_pos) {
-            level.set_block(random_pos, event.state, BlockUpdateFlags::CLIENTS);
-        }
+        bonemeal_spread(level, at(event.pos), event.state);
     }
 }
 
@@ -299,7 +350,7 @@ pub fn entity_interact(host: &mut dyn ServerHost, event: &mut EntityInteractEven
         return Flow::Continue;
     };
     let id = stack.item().id(&*host);
-    let Some(&(_, effect, seconds)) = WILD_CROPS.iter().find(|(crop, _, _)| *crop == id) else {
+    let Some((effect, seconds)) = stew_effect(&id.to_string()) else {
         return Flow::Continue;
     };
     let Some(cow) = host.entity(event.entity as u32) else {
@@ -364,9 +415,8 @@ static SMOKE: std::sync::OnceLock<ParticleKey> = std::sync::OnceLock::new();
 
 pub fn register(registrar: &mut dyn Registrar, drops: &Drops) {
     let _ = SMOKE.set(registrar.particle_key("minecraft:smoke"));
-    for (crop, _, _) in WILD_CROPS {
-        let key = registrar.block_key(crop);
-        registrar.block_part(key, WildCrop);
+    for (crop, effect, seconds) in WILD_CROPS {
+        register_wild_crop(registrar, crop, effect, seconds);
     }
     let shrub = registrar.block_key(SANDY_SHRUB);
     registrar.block_part(shrub, SandyShrub);
@@ -377,4 +427,33 @@ pub fn register(registrar: &mut dyn Registrar, drops: &Drops) {
             drops: drops.clone(),
         },
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// BX-05: an add-on wild crop recorded through the registry gives its stew effect; FD's own
+    /// table is unchanged and replacing an entry keeps one.
+    #[test]
+    fn stew_registry() {
+        if let Ok(mut all) = REGISTERED.write() {
+            for (crop, effect, seconds) in WILD_CROPS {
+                all.retain(|(b, _, _)| *b != crop);
+                all.push((crop, effect, seconds));
+            }
+            all.push(("testaddon:wild_corn", "minecraft:speed", 1));
+            all.retain(|(b, _, _)| *b != "testaddon:wild_corn");
+            all.push(("testaddon:wild_corn", "minecraft:saturation", 8));
+        }
+        assert_eq!(
+            stew_effect("testaddon:wild_corn"),
+            Some(("minecraft:saturation", 8))
+        );
+        assert_eq!(
+            stew_effect("farmersdelight:wild_tomatoes"),
+            Some(("minecraft:poison", 10))
+        );
+        assert_eq!(stew_effect("minecraft:dandelion"), None);
+    }
 }

@@ -9,6 +9,7 @@
 //! `fd_port_api`.
 
 pub mod feast;
+pub mod wild_crop;
 
 /// The add-on API version; equals `[properties] fd_port_api` in `horizon-mod.toml`.
 pub const API_VERSION: u32 = 1;

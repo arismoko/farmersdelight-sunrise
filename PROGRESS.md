@@ -1983,3 +1983,23 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   was thrown off the pad edge, found falling at y 184); honey glazed ham at 0 → block broken, bowl + bone dropped.
 - deltas: none.
 - next: BX-05 (public API: wild crops).
+
+## BX-05 Public API: wild crops — PASS (FD wild crops in game; add-on use in CD-07) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- code: `blocks/wild.rs` exposes the `WildCropBlock` pieces as functions — `may_place_on(level, ground)`,
+  `can_survive_at`, `bonemeal_success` (0.8), `bonemeal_spread(level, origin, state)` (the 9×3×9 ≤ 10 count + the
+  4-step random walk, moved verbatim from the Part) — and `register_wild_crop(registrar, block, stew_effect,
+  seconds)`, which attaches the `WildCrop` Part and records the stew effect in a public `RwLock` registry; the brown
+  mooshroom path (`entity_interact`) now reads that registry instead of FD's fixed table, so an add-on's wild crop
+  feeds a mooshroom too. FD's six wild crops register through it. `pub mod api::wild_crop`: `register`,
+  `may_place_on`, `can_survive`, `bonemeal_success`, `bonemeal_spread`, `suspicious_stew_effect`; README lists it.
+- unit: `stew_registry` (add-on entry found, re-registering replaces it, FD's table unchanged, vanilla flowers not
+  matched). cargo test 97 passed + 1 ignored, clippy/fmt clean.
+- in game (fd-port with MD, FDM6, grass pad 60004..60014,199,59986..59996; `../run/shots/bx-05/`): bone meal on a
+  wild cabbage → copies appear nearby (1 → 4 over 14 uses; FD's walk often ends at y±1, which is never free on a
+  flat pad); wild onions refused on stone, placed on grass; brown mooshroom fed wild tomatoes →
+  `stew_effects: [{duration: 200, id: "minecraft:poison"}]` (FD: Poison 10 s).
+- note for CD-07: FD's `WildCropBlock` passes the duration to `FlowerBlock` as **seconds**; Corn Delight's
+  `WildCropBlock(MobEffects.SATURATION, 8, …)` is therefore 8 s, not the "8 ticks" the inventory says (cdinv§3.1).
+- deltas: none.
+- next: BX-06 (public API + load condition: FD config reads).
