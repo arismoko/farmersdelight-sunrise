@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.6.30-horizon.2 — unreleased
+
+- Add-on support: the version is now semver (`26.3-3.6.30-horizon.1` could not be parsed as a dependency
+  requirement target); `[properties] fd_port_api = 1` and the public `api` module (README "For add-on authors").
+
 ## 26.3-3.6.30-horizon.1 — 2026-11-16
 
 First release: a native Horizon port of Farmer's Delight Refabricated 3.6.30 for Minecraft 26.3, built for

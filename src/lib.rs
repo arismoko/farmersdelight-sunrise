@@ -1,6 +1,7 @@
 //! Farmer's Delight — native Horizon port. `Hooks` only dispatches; logic lives in modules.
 #![allow(dead_code)] // skeleton: modules are filled in by later milestones
 
+pub mod api;
 mod blocks;
 mod client;
 mod config;

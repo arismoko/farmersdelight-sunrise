@@ -1787,3 +1787,21 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   `weapon_attributes/skillet.json` (Better Combat). Triaged: nothing to carry.
 - **M10 closed; the port's plan (M0–M10) is complete.** Open items stay recorded: Fabric oracle (M10-01, needs a
   user-supplied Fabric+FD install), wasm run (M10-05, non-blocking), engine gaps E-01…E-38 with their deltas.
+
+# Add-on base extensions (addons/ADDONS_PLAN.md §6; user approved all BX tasks on 2026-11-16)
+
+## BX-07 Release and API-version contract — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- found: the M10-06 version `26.3-3.6.30-horizon.1` is not semver (Horizon `parse_version` →
+  `semver::Version::parse` fails on `26.3-…`), so no mod could depend on the base. Version is now `3.6.30-horizon.2`
+  (AD13 proposal; a pre-release tag, so add-ons pin it with `=`).
+- `[properties] fd_port_api = 1`; `pub mod api` with `API_VERSION = 1` (unit test: property = constant);
+  README "For add-on authors" (exact pin, what is stable, bump rule); CHANGELOG entry.
+- in game (fd-port instance, world FDM6, offscreen): a scratch content mod `fdaddon_probe` with
+  `ported_farmersdelight = "=3.6.30-horizon.2"` loads ("content from 2 mod(s)"); with `=3.6.30-horizon.1` startup is
+  refused: "fdaddon_probe requires ported_farmersdelight =3.6.30-horizon.1, but installed version is
+  3.6.30-horizon.2" (the client reports it as a crash with a crash report, the engine's behaviour). The probe was
+  removed from the instance afterwards. Worlds saved earlier log "mod ported_farmersdelight was 0.1.0 when the world
+  was saved" once (warning only).
+- evidence: `run/shots/bx-07/` (accepted.log, refusal.log, crash report).
+- next: BX-08 (base carry library).

@@ -1,6 +1,6 @@
 id = "ported_farmersdelight"
 name = "Farmer's Delight (Horizon port)"
-version = "26.3-3.6.30-horizon.1"
+version = "3.6.30-horizon.2"
 description = "Native Horizon port of Farmer's Delight Refabricated 3.6.30 (Minecraft 26.3)"
 authors = []
 license = "MIT"
@@ -9,6 +9,9 @@ api = "0.2"
 side = "both"
 capabilities = ["registries"]
 namespaces = ["farmersdelight"]
+
+[properties]
+fd_port_api = 1
 
 [native]
 game = "26.3"

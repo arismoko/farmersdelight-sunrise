@@ -7,7 +7,7 @@ drinks and pet foods with Nourishment and Comfort, storage blocks, baskets, cabi
 net, rotten tomatoes, the Backstabbing enchantment, loot additions, advancements, the cooking pot recipe book, HUD
 overlays, tooltips, config files and FD's 44 translations.
 
-Version `26.3-3.6.30-horizon.1`, built for Horizon `afe471cf15df56439f23cd991d0d4b85563a14fc`.
+Version `3.6.30-horizon.2` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Horizon `afe471cf15df56439f23cd991d0d4b85563a14fc`.
 
 ## Install
 
@@ -36,6 +36,27 @@ recorded as an accepted delta (A-nn) with its engine gap (E-nn) in `PROGRESS.md`
 - the Comfort overlay ignores absorption hearts (A50); tooltip durations assume 20 ticks per second (A51);
 - standing canvas signs open the text editor when placed (E-31, A34); a custom name is lost when a cabinet or
   basket is broken by something other than a player (E-30, A33).
+
+## For add-on authors
+
+Depend on the exact base version, as the API may change in any release:
+
+```toml
+[dependencies]
+ported_farmersdelight = "=3.6.30-horizon.2"
+```
+
+What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.toml`, also
+`ported_farmersdelight::api::API_VERSION`) is unchanged:
+
+- the Rust module `api` for native add-ons (the launcher adds the base as the Cargo dependency
+  `ported_farmersdelight`);
+- the add-on tag overlay format (`tools/addon_overlays/`), which adds an add-on's ids to FD's own tags;
+- the item tag `ported_farmersdelight:effect_tooltip` and the base's load conditions.
+
+A change that breaks any of these raises `fd_port_api`. Every base release changes the version, so add-ons are
+re-released against it. FD's recipe types (`farmersdelight:cooking`, `farmersdelight:cutting`) accept recipes from
+any namespace.
 
 ## Building from source
 
