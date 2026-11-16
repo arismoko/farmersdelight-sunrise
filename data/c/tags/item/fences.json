@@ -1,5 +1,13 @@
 {
   "values": [
-    "farmersdelight:rope_fence"
+    "farmersdelight:rope_fence",
+    {
+      "id": "#c:fences/wooden",
+      "required": false
+    },
+    {
+      "id": "#c:fences/nether_brick",
+      "required": false
+    }
   ]
 }

@@ -9,8 +9,8 @@ this file from a base checkout at their pinned commit (`--base <checkout>`).
 - manifest helpers (`write_manifest`, `read_manifest`, `remove_stale`) and `git_head`.
 - `fence_violations`: the package namespace fence (Horizon refuses a package with a file in a namespace it does not
   own, except `data/minecraft/tags/**` and `data/c/tags/**`).
-- tag universe: `tags_in_tree` / `tags_in_zip` list defined tags, `tag_references` lists the `#ns:path` references
-  of a JSON file, `undefined_tags` reports the references no definer has.
+- tag universe: `tags_in_tree` / `tags_in_zip` list defined tags, `tag_references` lists the required `#ns:path`
+  references of a JSON file, `undefined_tags` reports the references no definer has.
 """
 from __future__ import annotations
 
@@ -206,9 +206,12 @@ def tags_in_zip(jar: Path) -> set[tuple[str, str]]:
 
 
 def tag_references(node) -> set[str]:
-    """Every `#ns:path` string and `{"tag": "ns:path"}` value in a JSON tree, as "ns:path"."""
+    """Every `#ns:path` string and `{"tag": "ns:path"}` value in a JSON tree, as "ns:path". A tag entry
+    `{"id": "#x", "required": false}` is optional (an undefined one is skipped) and not reported."""
     found: set[str] = set()
     if isinstance(node, dict):
+        if node.get("required") is False and "id" in node:
+            return found
         for key, value in node.items():
             if key == "tag" and isinstance(value, str):
                 found.add(value.removeprefix("#"))

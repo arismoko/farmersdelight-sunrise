@@ -64,7 +64,8 @@ class TagUniverseTest(unittest.TestCase):
     def test_references_and_report(self):
         recipe = json.loads(
             '{"ingredients":["#c:eggs",{"tag":"c:foods/bread"},"minecraft:bread",["#minecraft:planks"]],'
-            '"tool":"#c:tools/knife","result":{"id":"moredelight:x"}}'
+            '"tool":"#c:tools/knife","result":{"id":"moredelight:x"},'
+            '"values":[{"id":"#c:optional","required":false}]}'
         )
         refs = lib.tag_references(recipe)
         self.assertEqual(refs, {"c:eggs", "c:foods/bread", "minecraft:planks", "c:tools/knife"})

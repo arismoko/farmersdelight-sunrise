@@ -3,6 +3,11 @@
     "#c:foods/cooked_chicken",
     "#c:foods/cooked_pork",
     "#c:foods/cooked_beef",
-    "#c:foods/cooked_mutton"
+    "#c:foods/cooked_mutton",
+    "minecraft:cooked_beef",
+    "minecraft:cooked_porkchop",
+    "minecraft:cooked_chicken",
+    "minecraft:cooked_rabbit",
+    "minecraft:cooked_mutton"
   ]
 }

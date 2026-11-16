@@ -33,6 +33,16 @@ exclude = [
   "*.java",
 ]
 
+# Second source (BX-01): Fabric API's convention tags, which Fabric ships beside FD and Horizon does not. Every file
+# under data/c/tags/ is carried; one FD also carries is merged (FD's entries, then Fabric's missing ones).
+# Licence Apache-2.0: third_party/fabric-api/LICENSE, NOTICE.
+[fapi]
+repo = "https://github.com/FabricMC/fabric"
+tag = "0.160.4+26.3"
+sha = "542047fffa4f49d96d4863d2c7abf0b508554f70"
+root = "fabric-convention-tags-v2/src/generated/resources"
+include_prefixes = ["data/c/tags/"]
+
 # Only rewrite: fabric:load_conditions -> neoforge:conditions with a mod-registered condition.
 # Any fabric:load_conditions value not listed here makes the script fail.
 [[load_condition]]

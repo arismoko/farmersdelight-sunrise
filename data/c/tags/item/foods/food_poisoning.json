@@ -3,6 +3,11 @@
     "farmersdelight:wheat_dough",
     "farmersdelight:raw_pasta",
     "farmersdelight:chicken_cuts",
-    "farmersdelight:nether_salad"
+    "farmersdelight:nether_salad",
+    "minecraft:poisonous_potato",
+    "minecraft:pufferfish",
+    "minecraft:spider_eye",
+    "minecraft:chicken",
+    "minecraft:rotten_flesh"
   ]
 }

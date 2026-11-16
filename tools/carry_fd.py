@@ -2,12 +2,16 @@
 """Deterministically carry core Farmer's Delight data/assets into this repo (PORT_PLAN D6, M0-05).
 
 Usage:
-  carry_fd.py --fd <FarmersDelightRefabricated checkout>            # write into the repo
-  carry_fd.py --fd <checkout> --check                               # verify the repo matches (CI)
-  carry_fd.py --fd <checkout> --out <dir>                           # write into another tree
+  carry_fd.py --fd <FarmersDelightRefabricated checkout> --fapi <fabric checkout>   # write into the repo
+  carry_fd.py --fd <checkout> --fapi <checkout> --check                             # verify the repo matches (CI)
+  carry_fd.py --fd <checkout> --fapi <checkout> --out <dir>                         # write into another tree
 
 Files are copied byte for byte; content changes are the fabric:load_conditions rewrite, the scripted
 [[rewrite]] rules and the [[override]] files listed in tools/carry_rules.toml.in. tools/carry_manifest.json records every carried file.
+
+The second source is Fabric API's convention tags ([fapi], BX-01): on Fabric, Fabric API ships them beside FD; Horizon
+ships none. A `c` tag file both define is written once with FD's entries followed by Fabric's missing ones (rule
+`merge_fapi`), as the two files merge on Fabric.
 """
 from __future__ import annotations
 
@@ -35,8 +39,33 @@ def collect(fd: Path, rules: dict) -> dict[str, tuple[str, Path]]:
     return lib.collect(fd, src["roots"], src["include_prefixes"], src["exclude"])
 
 
-def carry(fd: Path, out: Path, rules: dict) -> dict:
+def collect_fapi(fapi: Path, rules: dict) -> dict[str, tuple[str, Path]]:
+    src = rules["fapi"]
+    return lib.collect(fapi, [src["root"]], src["include_prefixes"], [])
+
+
+def entry_key(v) -> str:
+    return v["id"] if isinstance(v, dict) else v
+
+
+def merge_fapi(rel: str, fd_bytes: bytes, fapi_bytes: bytes) -> bytes:
+    """FD's tag file with Fabric's entries it lacks appended, in Fabric's order."""
+    ours = json.loads(fd_bytes.decode("utf-8"))
+    theirs = json.loads(fapi_bytes.decode("utf-8"))
+    if ours.get("replace") or theirs.get("replace"):
+        raise lib.CarryError(f"{rel}: cannot merge a replace tag")
+    have = {entry_key(v) for v in ours["values"]}
+    extra = [v for v in theirs["values"] if entry_key(v) not in have]
+    if not extra:
+        return fd_bytes
+    merged = dict(ours)
+    merged["values"] = ours["values"] + extra
+    return lib.dump_json(merged)
+
+
+def carry(fd: Path, out: Path, rules: dict, fapi: Path | None = None) -> dict:
     files = collect(fd, rules)
+    fapi_files = collect_fapi(fapi, rules) if fapi is not None else {}
     entries = []
     for rel in sorted(files):
         root, src = files[rel]
@@ -58,6 +87,11 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
         if rel in overrides:
             result = (REPO / "tools" / "carry_overrides" / rel).read_bytes()
             rule = "override"
+        if rel in fapi_files:
+            merged = merge_fapi(rel, result, fapi_files[rel][1].read_bytes())
+            if merged != result:
+                result = merged
+                rule = "merge_fapi"
         dest = out / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists() or dest.read_bytes() != result:
@@ -71,12 +105,33 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
                 "rule": rule,
             }
         )
+    for rel in sorted(set(fapi_files) - set(files)):
+        root, src = fapi_files[rel]
+        data = src.read_bytes()
+        dest = out / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if not dest.exists() or dest.read_bytes() != data:
+            dest.write_bytes(data)
+        entries.append(
+            {
+                "source": f"fapi:{root}/{rel}",
+                "dest": rel,
+                "sha256_source": lib.sha256(data),
+                "sha256_dest": lib.sha256(data),
+                "rule": "copy",
+            }
+        )
+    entries.sort(key=lambda e: e["dest"])
     manifest = {
         "fd_repo": rules["source"]["repo"],
         "fd_sha": rules["source"]["sha"],
-        "rules_sha256": lib.sha256(RULES.read_bytes()),
-        "files": entries,
     }
+    if fapi is not None:
+        manifest["fapi_repo"] = rules["fapi"]["repo"]
+        manifest["fapi_tag"] = rules["fapi"]["tag"]
+        manifest["fapi_sha"] = rules["fapi"]["sha"]
+    manifest["rules_sha256"] = lib.sha256(RULES.read_bytes())
+    manifest["files"] = entries
     return manifest
 
 
@@ -126,6 +181,10 @@ def counts(manifest: dict) -> list[tuple[str, int]]:
             c["overridden"] += 1
         if e["rule"] == "rewrite":
             c["rewritten (worldgen)"] += 1
+        if e["rule"] == "merge_fapi":
+            c["merged with Fabric API"] += 1
+        if e["source"].startswith("fapi:"):
+            c["from Fabric API"] += 1
     c["total files"] = len(manifest["files"])
     return sorted(c.items())
 
@@ -143,10 +202,10 @@ def read_manifest(out: Path) -> dict | None:
     return lib.read_manifest(out / MANIFEST_REL)
 
 
-def check(fd: Path, rules: dict) -> int:
+def check(fd: Path, rules: dict, fapi: Path | None) -> int:
     with tempfile.TemporaryDirectory() as tmp:
         tmpdir = Path(tmp)
-        manifest = carry(fd, tmpdir, rules)
+        manifest = carry(fd, tmpdir, rules, fapi)
         write_manifest(tmpdir, manifest)
         problems = []
         if (REPO / MANIFEST_REL).read_bytes() != (tmpdir / MANIFEST_REL).read_bytes():
@@ -169,6 +228,7 @@ def check(fd: Path, rules: dict) -> int:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--fd", required=True, type=Path, help="FarmersDelightRefabricated checkout")
+    ap.add_argument("--fapi", type=Path, help="FabricMC/fabric checkout with the convention tags ([fapi] pin)")
     ap.add_argument("--out", type=Path, default=REPO)
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--rules", type=Path, default=RULES)
@@ -178,11 +238,19 @@ def main(argv: list[str] | None = None) -> int:
     if head != rules["source"]["sha"]:
         print(f"FD checkout is at {head}, rules pin {rules['source']['sha']}", file=sys.stderr)
         return 2
+    if "fapi" in rules:
+        if args.fapi is None:
+            print("--fapi is required: the rules carry Fabric API convention tags", file=sys.stderr)
+            return 2
+        head = lib.git_head(args.fapi)
+        if head != rules["fapi"]["sha"]:
+            print(f"Fabric checkout is at {head}, rules pin {rules['fapi']['sha']}", file=sys.stderr)
+            return 2
     try:
         if args.check:
-            return check(args.fd, rules)
+            return check(args.fd, rules, args.fapi)
         old = read_manifest(args.out)
-        manifest = carry(args.fd, args.out, rules)
+        manifest = carry(args.fd, args.out, rules, args.fapi)
         stale = remove_stale(args.out, old, manifest)
         write_manifest(args.out, manifest)
     except CarryError as e:

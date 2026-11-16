@@ -1,5 +1,9 @@
 {
   "values": [
-    "farmersdelight:rope_fence_gate"
+    "farmersdelight:rope_fence_gate",
+    {
+      "id": "#c:fence_gates/wooden",
+      "required": false
+    }
   ]
 }

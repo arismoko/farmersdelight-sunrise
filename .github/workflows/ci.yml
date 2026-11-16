@@ -11,6 +11,7 @@ jobs:
       # Matches the pinned Horizon launcher's native-build toolchain.
       RUSTUP_TOOLCHAIN: '1.99.1'
       FD_SHA: 1b85d66f5e2aba88592d7f4fb203d582f4d3cbe3
+      FAPI_SHA: 542047fffa4f49d96d4863d2c7abf0b508554f70
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,12 +25,17 @@ jobs:
         run: |
           git clone --filter=blob:none --branch fabric/latest/26.3 https://github.com/MehVahdJukaar/FarmersDelightRefabricated ../fd
           git -C ../fd checkout "$FD_SHA"
+      - name: Fabric API convention tags (read only, sparse)
+        run: |
+          git clone --filter=blob:none --no-checkout --branch 0.160.4+26.3 https://github.com/FabricMC/fabric ../fapi
+          git -C ../fapi sparse-checkout set --no-cone 'fabric-convention-tags-v2/src/generated/resources/data/c/tags/' '/LICENSE'
+          git -C ../fapi checkout "$FAPI_SHA"
       - run: python3 tools/test_carry.py
       - run: python3 tools/test_gen_decls.py
       - run: python3 tools/test_fixtures.py
-      - run: python3 tools/carry_fd.py --fd ../fd --check
+      - run: python3 tools/carry_fd.py --fd ../fd --fapi ../fapi --check
       - run: python3 tools/gen_decls.py --check
-      - run: python3 tools/gen_conventional_tags.py --check
+      - run: python3 tools/test_carry_lib.py
       - run: python3 tools/extract_fixtures.py --fd ../fd --check
       - run: cargo fetch --locked
       - run: cargo fmt --all --check

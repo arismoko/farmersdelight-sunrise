@@ -25,3 +25,13 @@ shipped as Farmer's Delight ships them under MIT, but may derive from Mojang
 assets.
 
 No vanilla Minecraft assets are extracted or redistributed.
+
+Fabric API convention tags
+--------------------------
+The data/c/tags/ files are carried from Fabric API's conventional tags v2
+(https://github.com/FabricMC/fabric, tag 0.160.4+26.3, commit
+542047fffa4f49d96d4863d2c7abf0b508554f70,
+fabric-convention-tags-v2/src/generated/resources), Apache License 2.0,
+Copyright FabricMC. 24 of them are merged with Farmer's Delight's own file of
+the same name (tools/carry_manifest.json, rule merge_fapi).
+Full licence text: LICENSE-fabric-api (also third_party/fabric-api/LICENSE).

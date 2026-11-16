@@ -1818,3 +1818,30 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   jar, references/report, writer format). Add-on carries will import it with `--base <checkout>` and compare
   `git_head` with their pinned base commit (MD-02).
 - next: BX-01 (convention tags for MD/CD).
+
+## BX-01 Ship Fabric API convention tags — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- second carry source `[fapi]` in `tools/carry_rules.toml.in`: FabricMC/fabric tag `0.160.4+26.3` @ `542047ff…`,
+  `fabric-convention-tags-v2/src/generated/resources/data/c/tags/**` (sparse clone `sources/fabric-api-conventions`,
+  now also `/LICENSE`); `carry_fd.py --fapi <checkout>` (pin checked like FD's). Full set: 523 files (item 270,
+  block 132, worldgen 95, fluid 12, enchantment 7, entity_type 6, potion 1).
+- found: FD carries 28 `c` tag files Fabric API also defines; on Fabric both load and merge, here only FD's shipped,
+  so e.g. `c:drinks/milk` lacked `minecraft:milk_bucket`, `c:foods/raw_meat` lacked vanilla raw meats and rabbit,
+  `c:foods/vegetable` lacked carrot/potato/beetroot (a parity gap since M0; no delta had recorded it). Now such a
+  file is written once: FD's entries, then Fabric's missing ones (rule `merge_fapi`, 24 files changed, 4 already
+  equal). The other 495 are byte copies.
+- `tools/gen_conventional_tags.py` and its two tables retired: all 34 files it wrote are in the Fabric set (values
+  equal, except `c:mushrooms`, which Fabric writes as `#minecraft:mushrooms`, a vanilla tag with the same members).
+- licence: `LICENSE-fabric-api` (packaged) + `third_party/fabric-api/LICENSE`, NOTICE section, README; CI clones the
+  sparse Fabric checkout and runs `carry_fd.py --fapi … --check` and `test_carry_lib.py`.
+- new `tools/tag_report.py` (carry_lib tag universe; optional `required: false` references skipped): base alone
+  211 referenced tags, 0 undefined; base + MD + CD sources, `c` only: 158 referenced, undefined only CD's
+  `c:foods/milk` (5 files, pruned by CD-03, CA5) and Expanded Delight integration files (excluded, AD8).
+- in game (fd-port, world FDM6, offscreen, pad at 60000,200,60002 removed afterwards): three pots on lit campfires
+  filled with `data merge`: hot cocoa from a **milk bucket** (`#c:drinks/milk`) cooked, the empty bucket was
+  ejected; dog food from a **raw rabbit** (`#c:foods/raw_meat`) cooked; hot cocoa from FD's milk bottle still cooks.
+  Startup log: no new recipe errors (the 3 crate-recipe "unknown load conditions" lines are the known M0 client-view
+  message). Wheat/bread `c` tags were already shipped by the retired generator (unchanged in effect).
+- carry check ok: 2870 files; cargo test 89; `.hmod` built and checked.
+- evidence: `run/shots/bx-01/` (tag reports, screenshot).
+- next: BX-02 (add-on tag overlay for FD-namespace tags).
