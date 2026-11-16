@@ -1636,3 +1636,15 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   (`CuttingBoardBlockEntity#processStoredItemUsingTool` client branch: swing or not); the port's client takes the
   engine's default prediction, the server result is unchanged. `farmersdelight:serving_containers` (M3) stays.
 - next: M9-07 (lang).
+
+## M9-07 Lang — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- did: `tools/test_lang.py` — all 44 carried locale files parse; 307 keys the port shows are in `en_us.json`:
+  block names of every declared block, item names (`block.` for block items such as the skillet and the debug
+  pie, as FD's BlockItems), both effects, every sound subtitle, the tab title, every `*.farmersdelight.*` key
+  literal in src/, the advancement texts and the custom tooltips. Coverage of other locales is FD's own (e.g.
+  ru_ru 480/509, ja_jp 479/509, de_de 286/509; the rest falls back to en_us as in FD).
+- evidence (FDM6, `run/shots/m9-07/`): language set to ru_ru → "Тушёная говядина / Сытость (03:00)", "Собачий
+  корм / Если скормить прирученному волку: …" (`ru.png`); ja_jp → "リンゴサイダー / 衝撃吸収 (01:00) / 効果: /
+  衝撃吸収レベルの上限 +4", "ビーフシチュー / 栄養 (03:00)" (`ja.png`). Language set back to en_us.
+- next: M9-08 (M9 demo).
