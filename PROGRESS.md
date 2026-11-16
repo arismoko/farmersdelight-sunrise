@@ -1689,3 +1689,26 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - triage: no unexplained differences; every known one is an A-delta in this log (A1–A52) with its E gap where
   the engine is the cause.
 - next: M10-02 (multiplayer).
+
+## M10-02 Multiplayer — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit; code as of 5faed22)
+- VALIDATION_PLAN §3.4 on the dedicated server (re-exported with this build; clients Alice and Bob from the same
+  build, both `--offscreen`):
+  - single-player actual path: integrated server thread (all milestones ran single player through it; the E-36
+    recipe-book gap is the one single-player-only difference).
+  - LAN: covered by M2-10/M3/M5-08 (second client sees renders, sounds, screens). `/publish` now answers "Unable
+    to host local game" in this offline setup, so the guest checks this time ran on the dedicated server, which
+    uses the same hub/guest code.
+  - dedicated server: export runs, same-build clients join; a client without the mod (plain developer build,
+    "Carol") is refused: "Your mods don't match this server's." (D9).
+  - concurrent interaction: beef on one board, Alice and Bob use knives in the same instant → exactly one cut
+    (2 Minced Beef, one knife damaged); the second click found an empty board and placed that player's knife on it
+    (FD's empty-board placement); no duplication, no loss. Pot menu with two players: M3.
+  - multiple players: menu reach and cabinet opener counting with two viewers: M7-09.
+  - disconnect/reconnect: client killed mid held-skillet cooking → after reconnect the skillet still holds its
+    beef (`farmersdelight:skillet_ingredient` 1) and the off hand 2 (not lost); client killed with 5 tomatoes on
+    the cursor in the pot menu → the stack is dropped at the player (vanilla `AbstractContainerMenu#removed` for
+    a disconnected player), not lost; the reconnecting player sees the current world state.
+- world changes: FDServer test world: board, stove and cabinet near −530,81,70; Alice back in creative; dropped
+  tomatoes left at −531,81,68. Server and clients stopped.
+- next: M10-03 (persistence).
