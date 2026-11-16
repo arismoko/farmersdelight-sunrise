@@ -2019,3 +2019,24 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - deltas: CA9 (Corn Delight; recorded in CD-15 when it closes): CD's farmer corn trades are gated by
   `villagersTradeCorn` only; upstream FD's `farmersBuyFDCrops` gate has no counterpart in FD Refabricated 26.3.
 - next: BX-09 (reusable worldgen rewrite).
+
+## BX-09 Reusable worldgen rewrite — PASS (script tests; CD output in CD-08) — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- finding: 26.3 has no `worldgen/configured_feature` folder (vanilla ships `worldgen/feature`, 242 files) and
+  `random_patch` is gone: patches are `minecraft:count` + trapezoid `minecraft:offset` in the placed feature.
+  FD Refabricated 26.3 restates upstream FD's `farmersdelight:wild_crop` (WildCropFeature) the same way:
+  `farmersdelight:in_order` (== `minecraft:overlay`, carry rewrite) of floor (offset y+1, then ±xz/±y),
+  primary (±(xz−2)/±y) and secondary (±xz/±y), the tries as `count` after `in_square`.
+- code: `tools/worldgen_rewrite.py` (pure functions): `wild_crop_to_vanilla(cfg)` → (`minecraft:overlay`
+  feature, tries) in FD 26.3's order/offsets; `upgrade_feature` (1.21.1 `{type, config}` simple_block,
+  `simple_state_provider` + `Name`/`Properties` → 26.3 `minecraft:simple` + `id`/`properties`);
+  `drop_biome_tag`, `placed_with_count`; `biome_filter_to_neoforge` (`farmersdelight:add_features_by_filter` →
+  `neoforge:add_features` with `neoforge:and`/`not` and `horizon:climate`, as FD's own modifiers);
+  `biomes(...)` now also used by `tools/gen_worldgen.py` (FD output unchanged: `--check` ok).
+- tests: `tools/test_worldgen_rewrite.py` (6): upstream-shaped wild carrots (tries 64, xz 6, y 3, floor coarse
+  dirt) → equals FD's carried `worldgen/feature/wild_carrots.json` and `placed_feature/patch_wild_carrots.json`
+  exactly; no-floor and properties case; refuses other types; biome filter with an id-list deny and the
+  default-temperature case. Engine check: `Selector::read` (`horizon-client/src/mod_content_biomes.rs:643-690`)
+  passes a list under `neoforge:not` to the generic holder-set reader. All tools/test_*.py OK, carry --check ok.
+- deltas: none (CD's CA1 is recorded in CD-08).
+- next: CD-01 (corndelight-horizon: native skeleton with base code dependency).

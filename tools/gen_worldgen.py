@@ -14,6 +14,9 @@ import sys
 import tomllib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import worldgen_rewrite  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 TABLES = REPO / "tools" / "worldgen"
 DATA = REPO / "data" / "farmersdelight"
@@ -34,13 +37,7 @@ def dump(body: dict) -> bytes:
 
 
 def biomes(m: dict):
-    terms = [f"#{m['allowed']}"]
-    if "denied" in m:
-        terms.append({"type": "neoforge:not", "value": f"#{m['denied']}"})
-    if "temperature" in m:
-        lo, hi = m["temperature"]
-        terms.append({"type": "horizon:climate", "temperature": {"min": lo, "max": hi}})
-    return terms[0] if len(terms) == 1 else {"type": "neoforge:and", "values": terms}
+    return worldgen_rewrite.biomes(f"#{m['allowed']}", f"#{m['denied']}" if "denied" in m else None, m.get("temperature"))
 
 
 def render() -> dict[str, dict[str, bytes]]:
