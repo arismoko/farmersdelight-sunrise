@@ -24,6 +24,8 @@ pub struct SkilletItem;
 
 pub const INGREDIENT: &str = "farmersdelight:skillet_ingredient";
 pub const COOKING_TIME: &str = "farmersdelight:cooking_time_length";
+static SIZZLE_TICKS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 pub const FLIP_TIMESTAMP: &str = "farmersdelight:skillet_flip_timestamp";
 pub const FLIPPED: &str = "farmersdelight:skillet_flipped";
 /// The four FD data components the skillet carries (registered in `component_types`).
@@ -244,6 +246,28 @@ impl ItemPart for SkilletItem {
             Some(time) => skillet_cooking_time(time, fire_aspect(event.stack)),
             None => USE_PROBE,
         };
+    }
+
+    /// `SkilletItem#onUseTick` (client, no flip in progress): a sizzle 1 tick in 50 while cooking held food.
+    fn on_use_tick(&self, host: HostSide<'_>, event: &mut OnUseTickEvent<'_>) {
+        let HostSide::Client(host) = host else {
+            return;
+        };
+        if !is_cooking(event.stack) {
+            return;
+        }
+        let tick = SIZZLE_TICKS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let mut rng = crate::blocks::stove::ClientRng::new([event.remaining, 0, 0], tick as i64);
+        if rng.next() >= 0.02 {
+            return;
+        }
+        let Some(at) = host
+            .local_player()
+            .and_then(|p| p.entity().position(&*host))
+        else {
+            return;
+        };
+        crate::blocks::skillet::sizzle(&*host, at, SoundSource::Players, rng.next());
     }
 
     /// `SkilletItem#releaseUsing`: an early release gives the ingredient back.

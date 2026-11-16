@@ -17,6 +17,7 @@ pub const SKILLET: &str = "Skillet";
 pub const INVENTORY: &str = "Inventory";
 const TRAY_HEAT_SOURCES: &str = "farmersdelight:tray_heat_sources";
 const SOUND_ADD_FOOD: &str = "farmersdelight:block.skillet.add_food";
+const SIZZLE: &str = "farmersdelight:block.skillet.sizzle";
 
 /// One heated tick (`cookAndOutputItems`): returns the new progress and whether a unit finished.
 pub fn heated_step(progress: i32, total: i32) -> (i32, bool) {
@@ -272,10 +273,55 @@ fn mirror(host: &mut dyn ServerHost, be: BlockEntityRef, stack: Option<&ItemStac
     }
 }
 
+/// Client ticks seen by skillets, for their animation random.
+static CLIENT_TICKS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// `farmersdelight:block.skillet.sizzle` at `at`: volume 0.4, pitch 0.9–1.1 (`random.nextFloat() * 0.2 + 0.9`).
+pub fn sizzle(host: &dyn ClientHost, at: [f64; 3], source: SoundSource, roll: f64) {
+    let mut sound = SoundPlay::ui(SIZZLE);
+    sound.source = source;
+    sound.position = at;
+    sound.relative = false;
+    sound.attenuation = SoundAttenuation::Linear;
+    sound.volume = 0.4;
+    sound.pitch = (roll * 0.2 + 0.9) as f32;
+    let _ = host.play_local_sound(&sound, 0);
+}
+
 #[mod_api::horizon_part]
 impl BlockEntityPart for Skillet {
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
         event.ticks = true;
+    }
+
+    fn block_entity_client_ticks(
+        &self,
+        _: &dyn ClientHost,
+        event: &mut BlockEntityClientTicksEvent<'_>,
+    ) {
+        event.ticks = true;
+    }
+
+    /// `SkilletBlock#animateTick`: while cooking (heated, holding a stack), a sizzle 1 tick in 10.
+    fn block_entity_client_tick(
+        &self,
+        host: &mut dyn ClientHost,
+        event: &mut BlockEntityClientTickEvent<'_>,
+    ) {
+        let tick = CLIENT_TICKS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let mut rng = crate::blocks::stove::ClientRng::new(event.pos, tick as i64);
+        if rng.next() >= 0.1 || stored_on_client(&*host, &event.entity.nbt).is_none() {
+            return;
+        }
+        let Some(level) = host.level(host.dimension()) else {
+            return;
+        };
+        if !crate::heat::is_heated_in_level_ref(&*host, level, event.pos) {
+            return;
+        }
+        let p = event.pos;
+        let at = [p[0] as f64 + 0.5, p[1] as f64, p[2] as f64 + 0.5];
+        sizzle(&*host, at, SoundSource::Blocks, rng.next());
     }
 
     /// `SkilletBlockEntity#cookingTick`.

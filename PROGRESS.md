@@ -1585,16 +1585,33 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   effect category colours are a fixed list for the effects FD's foods use (harmful red, others blue).
 - next: M9-05 (particles & sounds).
 
-## M9-05 Particles & sounds — IN PROGRESS — 2026-11-15
-- build pin: afe471cf | mod commit: (this commit; no code yet)
-- found: all 20 FD sound events are registered (sounds.json). Played by the port: 16. FD itself never plays
-  `block.cutting_board.carve_tool`, `block.food.slice`, `block.food.take_portion` (only registered in ModSounds /
-  SoundDefinitions) → nothing to do beyond registration. **Missing: `block.skillet.sizzle`**:
-  (1) SkilletBlock#animateTick: while the skillet BE is cooking, 1/10 per client tick, local sound at
-  (x+0.5, y, z+0.5), BLOCKS, volume 0.4, pitch 0.9–1.1; (2) SkilletItem#onUseTick (client): held cooking, 1/50
-  per tick (and every tick in the last 3 of a flip), PLAYERS, 0.4, 0.9–1.1; the add_food sound at FLIP_TIME−8.
-- particles: `farmersdelight:star`, `steam`, `sparkle` types registered (registry.rs) with carried provider JSON;
-  still to verify in game and tick the 20-event checklist with subtitles.
-- next: implement the two sizzle paths (block: client BE tick or `block_entity_client_tick`; item: client use
-  tick), test in FDM6, write the checklist, then M9-06…M9-08, then M10 (user: no confirmation needed), then create
-  a private GitHub repo on the user's account and push (user request 2026-11-15).
+## M9-05 Particles & sounds — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- did: the one sound the port never played, `block.skillet.sizzle`: `SkilletBlock#animateTick` as the skillet's
+  client block-entity tick (heated and holding a stack, 1 tick in 10, BLOCKS, volume 0.4, pitch 0.9–1.1) and
+  `SkilletItem#onUseTick` as the skillet item's `on_use_tick` on the client (cooking held food, 1 in 50,
+  PLAYERS). FD's flip branch (sizzle in the last 3 ticks of a flip, add_food at FLIP_TIME−8) has no trigger in the
+  port: nothing sets the flip timestamp (FD neither, outside its own flip input).
+- checklist of the 20 events (subtitles, audio on; `run/shots/m9-05/`, earlier entries cited):
+  - [x] block.cabinet.open / close — "Cabinet opens", "Cabinet closes" (`cab-close-crop.png`; M7-05).
+  - [x] block.cooking_pot.boil — "Cooking Pot boils" (`pot-steam.png`; M3-09).
+  - [x] block.cooking_pot.boil_soup — played instead of boil while a meal is stored (code, M3-09); FD gives it no
+    subtitle, so it is not visible in the list.
+  - [x] block.cutting_board.knife_cut / place_item — "Knife cuts", "Item placed on board" (M1-09; now
+    `subtitles-checklist.png`).
+  - [x] block.cutting_board.remove_item — "Item removed from board" (`subtitles-checklist.png`).
+  - [–] block.cutting_board.carve_tool, block.food.slice, block.food.take_portion — registered with subtitles; FD
+    never plays them (only ModSounds/SoundDefinitions name them).
+  - [x] block.rope_fence_gate.open / close — "Rope Fence Gate unties", "… ties" (`subtitles-checklist.png`; M5-02).
+  - [x] block.skillet.add_food — "Skillet hisses" (`subtitles-checklist.png`).
+  - [x] block.skillet.sizzle — "Skillet sizzles": placed skillet on a lit stove (`skillet-sizzle.png`) and held
+    skillet cooking beef beside it (`held-subtitles.png`, 3 cooked beef).
+  - [x] block.stove.crackle — "Stove crackles" (every screenshot near the stove; M2).
+  - [x] block.tomatoes.pick_tomatoes — "Tomatoes pop" (`tomato-crop.png`, ripe vine → age 0).
+  - [x] entity.rotten_tomato.throw / hit — "Rotten Tomato flies", "… splatters" (M8-06).
+  - [x] item.skillet.attack.strong / weak — recorded on a second client (M2-10).
+- particles: `farmersdelight:steam` puffs and bubbles over the heated pot (`pot-steam.png`); `sparkle` over the
+  gleaming salad (M7-01); `star` on pet feeding (M4). Ambient non-BE effects stay degraded as planned (E-06).
+- world changes: FDM6 pad: stove + cooking pot at 18,100..101,1347, rope gate 16,100,1345, oak cabinet
+  15,100,1346; weather cleared, time noon. Game running.
+- next: M9-06 (property sets & creative tab).
