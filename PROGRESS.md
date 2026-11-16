@@ -1805,3 +1805,16 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   was saved" once (warning only).
 - evidence: `run/shots/bx-07/` (accepted.log, refusal.log, crash report).
 - next: BX-08 (base carry library).
+
+## BX-08 Base carry library — PASS — 2026-11-16
+- build pin: afe471cf | mod commit: (this commit)
+- `tools/carry_lib.py`: the FD carry's reusable parts as functions (canonical JSON writer `dump_json`,
+  `fabric:load_conditions` rewrite, `[[rewrite]]` rules, multi-root `collect` with the overlap check, manifest
+  read/write/stale removal, `git_head`), plus new add-on helpers: `fence_violations` (package namespace fence, owned
+  namespaces + `data/{minecraft,c}/tags/**`) and the tag universe (`tags_in_tree`, `tags_in_zip`, `tag_references`,
+  `undefined_tags`).
+- `carry_fd.py` now uses it; `carry_fd.py --check` → "carry check ok: 2375 files" (manifest byte-identical, so the
+  output is unchanged); `test_carry.py` 7 OK; new `test_carry_lib.py` 4 OK (fence, tag definitions from a tree and a
+  jar, references/report, writer format). Add-on carries will import it with `--base <checkout>` and compare
+  `git_head` with their pinned base commit (MD-02).
+- next: BX-01 (convention tags for MD/CD).

@@ -12,118 +12,27 @@ Files are copied byte for byte; content changes are the fabric:load_conditions r
 from __future__ import annotations
 
 import argparse
-import fnmatch
-import hashlib
 import json
-import shutil
-import subprocess
 import sys
 import tempfile
-import tomllib
 from collections import Counter
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import carry_lib as lib  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 RULES = REPO / "tools" / "carry_rules.toml.in"
 MANIFEST_REL = "tools/carry_manifest.json"
-FABRIC_KEY = "fabric:load_conditions"
-NEOFORGE_KEY = "neoforge:conditions"
-
-
-class CarryError(Exception):
-    pass
-
-
-def sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
 
 
 def load_rules(path: Path) -> dict:
-    with path.open("rb") as f:
-        return tomllib.load(f)
-
-
-def selected(rel: str, rules: dict) -> bool:
-    if not any(rel.startswith(p) for p in rules["source"]["include_prefixes"]):
-        return False
-    return not any(fnmatch.fnmatchcase(rel, pat) for pat in rules["source"]["exclude"])
-
-
-def rewrite_conditions(node, rules: dict, rel: str):
-    """Return (new_node, changed). Replaces every fabric:load_conditions key in place (order kept)."""
-    changed = False
-    if isinstance(node, dict):
-        out = {}
-        for key, value in node.items():
-            if key == FABRIC_KEY:
-                for rule in rules.get("load_condition", []):
-                    if value == rule["fabric"]:
-                        out[NEOFORGE_KEY] = rule["neoforge"]
-                        changed = True
-                        break
-                else:
-                    raise CarryError(f"{rel}: unknown {FABRIC_KEY} value {json.dumps(value)}")
-            else:
-                new, c = rewrite_conditions(value, rules, rel)
-                out[key] = new
-                changed |= c
-        return out, changed
-    if isinstance(node, list):
-        items = [rewrite_conditions(v, rules, rel) for v in node]
-        return [i[0] for i in items], any(i[1] for i in items)
-    return node, False
-
-
-def apply_rewrite(node, rw: dict):
-    """One [[rewrite]] rule over a JSON tree: rename a `type` value, drop entries of a `placement` list, or write a
-    tag's `{"id": x, "required": false}` entries as plain "x" (flatten_tag_entries)."""
-    if isinstance(node, dict):
-        out = {}
-        for key, value in node.items():
-            if key == "values" and rw.get("flatten_tag_entries") and isinstance(value, list):
-                value = [v["id"] if isinstance(v, dict) and set(v) <= {"id", "required"} else v for v in value]
-            if key == "type" and "rename_type" in rw and value == rw["rename_type"]["from"]:
-                value = rw["rename_type"]["to"]
-            elif key == "placement" and "drop_placement" in rw and isinstance(value, list):
-                value = [v for v in value if not (isinstance(v, dict) and v.get("type") == rw["drop_placement"])]
-            out[key] = apply_rewrite(value, rw)
-        return out
-    if isinstance(node, list):
-        return [apply_rewrite(v, rw) for v in node]
-    return node
-
-
-def rewrite_json(rel: str, data: bytes, rules: dict) -> bytes | None:
-    """The [[rewrite]] rules matching `rel` applied in order; None when none matches or nothing changed."""
-    matching = [rw for rw in rules.get("rewrite", []) if fnmatch.fnmatchcase(rel, rw["glob"])]
-    if not matching:
-        return None
-    obj = json.loads(data.decode("utf-8"))
-    new = obj
-    for rw in matching:
-        new = apply_rewrite(new, rw)
-    if new == obj:
-        return None
-    return (json.dumps(new, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    return lib.load_rules(path)
 
 
 def collect(fd: Path, rules: dict) -> dict[str, tuple[str, Path]]:
-    """rel path -> (root, source path). Fails on overlap between roots."""
-    found: dict[str, tuple[str, Path]] = {}
-    for root in rules["source"]["roots"]:
-        base = fd / root
-        if not base.is_dir():
-            raise CarryError(f"missing source root {base}")
-        for p in sorted(base.rglob("*")):
-            if not p.is_file():
-                continue
-            rel = p.relative_to(base).as_posix()
-            if not selected(rel, rules):
-                continue
-            if rel in found:
-                raise CarryError(f"overlapping path in {found[rel][0]} and {root}: {rel}")
-            found[rel] = (root, p)
-    return found
+    src = rules["source"]
+    return lib.collect(fd, src["roots"], src["include_prefixes"], src["exclude"])
 
 
 def carry(fd: Path, out: Path, rules: dict) -> dict:
@@ -134,14 +43,14 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
         data = src.read_bytes()
         rule = "copy"
         result = data
-        if rel.endswith(".json") and FABRIC_KEY.encode() in data:
+        if rel.endswith(".json") and lib.FABRIC_KEY.encode() in data:
             obj = json.loads(data.decode("utf-8"))
-            new, changed = rewrite_conditions(obj, rules, rel)
+            new, changed = lib.rewrite_conditions(obj, rules.get("load_condition", []), rel)
             if changed:
-                result = (json.dumps(new, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+                result = lib.dump_json(new)
                 rule = "load_conditions"
         if rel.endswith(".json"):
-            rewritten = rewrite_json(rel, result, rules)
+            rewritten = lib.rewrite_json(rel, result, rules.get("rewrite", []))
             if rewritten is not None:
                 result = rewritten
                 rule = "rewrite"
@@ -157,30 +66,22 @@ def carry(fd: Path, out: Path, rules: dict) -> dict:
             {
                 "source": f"{root}/{rel}",
                 "dest": rel,
-                "sha256_source": sha256(data),
-                "sha256_dest": sha256(result),
+                "sha256_source": lib.sha256(data),
+                "sha256_dest": lib.sha256(result),
                 "rule": rule,
             }
         )
     manifest = {
         "fd_repo": rules["source"]["repo"],
         "fd_sha": rules["source"]["sha"],
-        "rules_sha256": sha256(RULES.read_bytes()),
+        "rules_sha256": lib.sha256(RULES.read_bytes()),
         "files": entries,
     }
     return manifest
 
 
-def remove_stale(out: Path, old: dict | None, new: dict) -> list[str]:
-    if not old:
-        return []
-    keep = {e["dest"] for e in new["files"]}
-    stale = sorted(e["dest"] for e in old["files"] if e["dest"] not in keep)
-    for rel in stale:
-        p = out / rel
-        if p.exists():
-            p.unlink()
-    return stale
+remove_stale = lib.remove_stale
+CarryError = lib.CarryError
 
 
 def counts(manifest: dict) -> list[tuple[str, int]]:
@@ -235,14 +136,11 @@ def sound_events(out: Path) -> int:
 
 
 def write_manifest(out: Path, manifest: dict) -> None:
-    p = out / MANIFEST_REL
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(manifest, indent=1) + "\n", "utf-8")
+    lib.write_manifest(out / MANIFEST_REL, manifest)
 
 
 def read_manifest(out: Path) -> dict | None:
-    p = out / MANIFEST_REL
-    return json.loads(p.read_text("utf-8")) if p.exists() else None
+    return lib.read_manifest(out / MANIFEST_REL)
 
 
 def check(fd: Path, rules: dict) -> int:
@@ -257,7 +155,7 @@ def check(fd: Path, rules: dict) -> int:
             ours = REPO / e["dest"]
             if not ours.exists():
                 problems.append(f"missing {e['dest']}")
-            elif sha256(ours.read_bytes()) != e["sha256_dest"]:
+            elif lib.sha256(ours.read_bytes()) != e["sha256_dest"]:
                 problems.append(f"drift {e['dest']}")
     for p in problems[:50]:
         print(p, file=sys.stderr)
@@ -276,12 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--rules", type=Path, default=RULES)
     args = ap.parse_args(argv)
     rules = load_rules(args.rules)
-    try:
-        head = subprocess.run(
-            ["git", "-C", str(args.fd), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-        ).stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        head = None
+    head = lib.git_head(args.fd)
     if head != rules["source"]["sha"]:
         print(f"FD checkout is at {head}, rules pin {rules['source']['sha']}", file=sys.stderr)
         return 2
