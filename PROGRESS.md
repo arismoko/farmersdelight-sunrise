@@ -1959,5 +1959,5 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - tool note: this engine's command parser does not know mod item tags (`execute if items … #farmersdelight:…` →
   "Unknown item tag"), so tag membership was checked by behaviour.
 - deltas: none new.
-- next: none in the base for the More Delight scope; Corn Delight BX tasks (BX-04, BX-05, BX-06, BX-09) when the user
-  asks for Corn Delight.
+- next: BX-04 (base PROGRESS; user set the scope to all of Corn Delight on 2026-11-16), then BX-05, BX-06, BX-09,
+  CD-01…CD-18 (`corndelight-horizon/PROGRESS.md`).
