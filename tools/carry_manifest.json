@@ -4,7 +4,7 @@
  "fapi_repo": "https://github.com/FabricMC/fabric",
  "fapi_tag": "0.160.4+26.3",
  "fapi_sha": "542047fffa4f49d96d4863d2c7abf0b508554f70",
- "rules_sha256": "c6b652b6660e594809c657d9f041ab643ca491d4ad87b811385bc387729883a3",
+ "rules_sha256": "c0826edf6d96e4a24cadaae9f5ddd8d660df64e9831cd958372ed0c712c7eff7",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -20095,6 +20095,20 @@
    "sha256_source": "eddc3568ffc236e0616ddaf9ea465fe503596b1db0bb6dcb7de4686233e83d46",
    "sha256_dest": "81036864fcaa1d53d8bea23c47914b0d431e65c0b3376c69f102ba660f8c692a",
    "rule": "rewrite"
+  },
+  {
+   "source": "base_tag:ported_farmersdelight:effect_tooltip",
+   "dest": "data/ported_farmersdelight/tags/item/effect_tooltip.json",
+   "sha256_source": "f74498097708215ee46031db7467ce3abed880ed8188eff156e81993d9787e31",
+   "sha256_dest": "f74498097708215ee46031db7467ce3abed880ed8188eff156e81993d9787e31",
+   "rule": "base_tag"
+  },
+  {
+   "source": "base_tag:ported_farmersdelight:knife_items",
+   "dest": "data/ported_farmersdelight/tags/item/knife_items.json",
+   "sha256_source": "290a86128f607d4263210f7c70931a7e488ab92a264d35a623aae18206405069",
+   "sha256_dest": "290a86128f607d4263210f7c70931a7e488ab92a264d35a623aae18206405069",
+   "rule": "base_tag"
   }
  ]
 }

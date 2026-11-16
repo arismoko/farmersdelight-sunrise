@@ -309,10 +309,10 @@ impl Hooks for FarmersDelight {
 
     fn living_knockback(
         &self,
-        _: &mut dyn LevelRandomHost,
+        level: &mut dyn LevelRandomHost,
         event: &mut LivingKnockbackEvent<'_>,
     ) -> Flow {
-        items::knife::on_knockback(event);
+        items::knife::on_knockback(level, event);
         Flow::Continue
     }
 

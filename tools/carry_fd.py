@@ -15,6 +15,9 @@ ships none. A `c` tag file both define is written once with FD's entries followe
 
 Add-on overlays ([[overlay]], BX-02, `tools/addon_overlays/*.json`, sha256-pinned) append add-on ids to FD-namespace
 tags the base carries, as `required: false` entries (rule `overlay`): add-ons cannot ship files in FD's namespace.
+
+Base-owned tags ([[base_tag]], MD-09/BX-03) are generated from the rules (rule `base_tag`) and take overlay entries too:
+`ported_farmersdelight:knife_items` lists the items that are FD `KnifeItem`s (the Knife part and knockback read it).
 """
 from __future__ import annotations
 
@@ -51,6 +54,11 @@ def entry_key(v) -> str:
     return v["id"] if isinstance(v, dict) else v
 
 
+def base_tag_dest(t: dict) -> str:
+    ns, path = t["tag"].split(":", 1)
+    return f"data/{ns}/tags/{t['kind']}/{path}.json"
+
+
 def merge_fapi(rel: str, fd_bytes: bytes, fapi_bytes: bytes) -> bytes:
     """FD's tag file with Fabric's entries it lacks appended, in Fabric's order."""
     ours = json.loads(fd_bytes.decode("utf-8"))
@@ -70,7 +78,11 @@ def carry(fd: Path, out: Path, rules: dict, fapi: Path | None = None) -> dict:
     files = collect(fd, rules)
     fapi_files = collect_fapi(fapi, rules) if fapi is not None else {}
     overlays = lib.overlay_tags([(REPO / o["file"], o["sha256"]) for o in rules.get("overlay", [])])
-    missing = sorted(set(overlays) - set(files))
+    base_tags = {base_tag_dest(t): t for t in rules.get("base_tag", [])}
+    clash = sorted(set(base_tags) & set(files))
+    if clash:
+        raise lib.CarryError(f"base tags collide with carried files: {', '.join(clash)}")
+    missing = sorted(set(overlays) - set(files) - set(base_tags))
     if missing:
         raise lib.CarryError(f"overlay names tags the base does not carry: {', '.join(missing)}")
     entries = []
@@ -111,6 +123,28 @@ def carry(fd: Path, out: Path, rules: dict, fapi: Path | None = None) -> dict:
         entries.append(
             {
                 "source": f"{root}/{rel}",
+                "dest": rel,
+                "sha256_source": lib.sha256(data),
+                "sha256_dest": lib.sha256(result),
+                "rule": rule,
+            }
+        )
+    for rel, t in sorted(base_tags.items()):
+        data = lib.dump_json({"values": t["values"]})
+        result = data
+        rule = "base_tag"
+        if rel in overlays:
+            appended = lib.append_optional(result, [i for i, _ in overlays[rel]])
+            if appended != result:
+                result = appended
+                rule = "overlay"
+        dest = out / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if not dest.exists() or dest.read_bytes() != result:
+            dest.write_bytes(result)
+        entries.append(
+            {
+                "source": f"base_tag:{t['tag']}",
                 "dest": rel,
                 "sha256_source": lib.sha256(data),
                 "sha256_dest": lib.sha256(result),

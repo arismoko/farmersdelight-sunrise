@@ -1,7 +1,8 @@
 //! Knives (`KnifeItem`). The six items are data declarations (`tools/decl/items.toml.in`); this
-//! module holds their code-side behaviour.
+//! module holds their code-side behaviour. "Is a `KnifeItem`" is the base-owned item tag
+//! `ported_farmersdelight:knife_items` (FD's six + add-on knives from the overlay, MD-09), so add-on
+//! knives built as FD `KnifeItem`s (DelightLib) behave as FD's.
 use mod_api::*;
-use std::sync::OnceLock;
 
 /// FD's six `KnifeItem`s (`ModItems.java`), in registration order.
 pub const KNIVES: [&str; 6] = [
@@ -16,6 +17,8 @@ pub const KNIVES: [&str; 6] = [
 /// `KnifeEvents#onKnifeKnockback`: `strength - 0.1F`.
 pub const KNOCKBACK_CUT: f64 = 0.1f32 as f64;
 
+/// `instanceof KnifeItem`: carry rule `[[base_tag]]` (FD's six + add-on overlay entries).
+pub const KNIFE_ITEMS_TAG: &str = "ported_farmersdelight:knife_items";
 /// `ModTags.Items.KNIVES`.
 const KNIVES_TAG: &str = "farmersdelight:tools/knives";
 /// `ModTags.Blocks.DROPS_CAKE_SLICE` (the 17 candle cakes).
@@ -24,14 +27,10 @@ const CAKE: &str = "minecraft:cake";
 const PUMPKIN: &str = "minecraft:pumpkin";
 const CAKE_SLICE: &str = "farmersdelight:cake_slice";
 
-static KEYS: OnceLock<[ItemKey; 6]> = OnceLock::new();
-
 pub fn register(registrar: &mut dyn Registrar) {
-    let keys = KNIVES.map(|id| registrar.item_key(id));
-    for key in keys {
-        registrar.item_part(key, Knife);
-    }
-    let _ = KEYS.set(keys);
+    // A tag part: an add-on knife that is not installed is simply not in the tag (an item_part on
+    // its key would refuse the world).
+    registrar.item_part_tag(KNIFE_ITEMS_TAG, Knife);
 }
 
 fn block_id(name: &str) -> &str {
@@ -311,7 +310,7 @@ pub fn predict_use(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> F
     let Some(stack) = click.stack else {
         return Flow::Continue;
     };
-    if !is_knife(stack) || !crate::blocks::stove::in_item_tag(host, stack, KNIVES_TAG) {
+    if !is_knife(host, stack) || !crate::blocks::stove::in_item_tag(host, stack, KNIVES_TAG) {
         return Flow::Continue;
     }
     let pumpkin = host
@@ -326,15 +325,26 @@ pub fn predict_use(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> F
     Flow::Cancel
 }
 
-/// `toolStack.getItem() instanceof KnifeItem` (the six items, not the knives tag).
-pub fn is_knife(stack: &ItemStack) -> bool {
-    KEYS.get().is_some_and(|keys| keys.contains(&stack.item()))
+/// `toolStack.getItem() instanceof KnifeItem`: the base-owned `knife_items` tag, not FD's knives tag.
+pub fn is_knife(host: &dyn Host, stack: &ItemStack) -> bool {
+    in_tag(host.tags(), stack, KNIFE_ITEMS_TAG)
+}
+
+fn in_tag(tags: &dyn Tags, stack: &ItemStack, tag: &str) -> bool {
+    Identifier::parse(tag)
+        .ok()
+        .and_then(|id| tags.key(&id))
+        .and_then(|key| tags.is_in_tag(stack.item(), key))
+        == Some(true)
 }
 
 /// `LivingEntityMixin#handleKnifeKnockback`: a knife in the attacker's main hand pushes 0.1 less.
 /// FD reads the victim's kill credit; the engine names the hit's attacker (A39).
-pub fn on_knockback(event: &mut LivingKnockbackEvent<'_>) {
-    if event.attacker_main.is_some_and(is_knife) {
+pub fn on_knockback(level: &dyn LevelHost, event: &mut LivingKnockbackEvent<'_>) {
+    if event
+        .attacker_main
+        .is_some_and(|s| in_tag(level.tags(), s, KNIFE_ITEMS_TAG))
+    {
         event.strength = knocked(event.strength);
     }
 }
@@ -347,6 +357,23 @@ fn knocked(strength: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn knife_items_tag_lists_the_six_knives_first() {
+        let tag = include_str!("../../data/ported_farmersdelight/tags/item/knife_items.json");
+        let plain: Vec<&str> = tag
+            .lines()
+            .map(str::trim)
+            .filter(|l| l.starts_with("\"farmersdelight:"))
+            .map(|l| l.trim_end_matches(',').trim_matches('"'))
+            .collect();
+        assert_eq!(plain, KNIVES);
+        // Add-on knives are optional entries: a missing add-on leaves the tag valid.
+        assert_eq!(
+            tag.matches("\"id\"").count(),
+            tag.matches("\"required\": false").count()
+        );
+    }
 
     #[test]
     fn carving_faces_the_clicked_side_or_the_player() {

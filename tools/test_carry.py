@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import carry_fd  # noqa: E402
 
-RULES = {k: v for k, v in carry_fd.load_rules(carry_fd.RULES).items() if k != "overlay"}
+RULES = {k: v for k, v in carry_fd.load_rules(carry_fd.RULES).items() if k not in ("overlay", "base_tag")}
 
 
 def write(root: Path, rel: str, text: str) -> None:
@@ -163,6 +163,32 @@ class CarryTest(unittest.TestCase):
         (self.fd / "src/generated/resources/data/farmersdelight/tags/item/tools/knives.json").unlink()
         with self.assertRaises(carry_fd.CarryError):  # a tag the base does not carry
             carry_fd.carry(self.fd, self.out, rules)
+
+    def test_base_tag_with_overlay(self):
+        overlay = Path(self.tmp.name) / "md.json"
+        overlay.write_text(
+            json.dumps(
+                {
+                    "addon": "moredelight",
+                    "entries": [
+                        {"tag": "ported_farmersdelight:knife_items", "kind": "item", "ids": ["moredelight:stone_knife"]}
+                    ],
+                }
+            ),
+            "utf-8",
+        )
+        pin = carry_fd.lib.sha256(overlay.read_bytes())
+        base_tag = [{"tag": "ported_farmersdelight:knife_items", "kind": "item", "values": ["farmersdelight:flint_knife"]}]
+        rules = dict(RULES, base_tag=base_tag, overlay=[{"file": str(overlay), "sha256": pin}])
+        m = carry_fd.carry(self.fd, self.out, rules)
+        rel = "data/ported_farmersdelight/tags/item/knife_items.json"
+        tag = json.loads((self.out / rel).read_text("utf-8"))
+        self.assertEqual(
+            tag["values"], ["farmersdelight:flint_knife", {"id": "moredelight:stone_knife", "required": False}]
+        )
+        self.assertEqual({e["dest"]: e["rule"] for e in m["files"]}[rel], "overlay")
+        m = carry_fd.carry(self.fd, self.out, dict(RULES, base_tag=base_tag))
+        self.assertEqual({e["dest"]: e["rule"] for e in m["files"]}[rel], "base_tag")
 
 
 if __name__ == "__main__":
