@@ -2135,3 +2135,36 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   all 9 tools/test_*.py.
 - deltas: A53 new; E-43 new; observations: Sunrise honours the template's `isRandomlyTicking` (see CD RT-03).
 - next: re-validation pass on Sunrise (restart, MP rig, matrix rows), then release 3.6.30-sunrise.1 (+ CD, MD).
+
+## RT-04 Sunrise re-validation and release 3.6.30-sunrise.1 — PASS (LAN: ENVIRONMENT-BLOCKED) — 2026-11-18
+- build pin: sunrise@2d8126336e579777eabf9b2fd8b3d476236a04f2 (signed SDK) | mod commit: (this commit), tag
+  `v3.6.30-sunrise.1` | add-ons: Corn Delight `1.1.8-sunrise.1`, More Delight `26.9.16-sunrise.1` (their RT-04 entries).
+- code: removed a leftover `[fd-debug] pot use …` stderr line from `cooking_pot.rs` `use_on` (since M3; in the
+  Horizon `.2`/`.3` packages too). Log only, no behaviour change.
+- single player (own world `SRTest`, pad 18..38,69,-2..18; `../run/shots/RT-04/`):
+  - pot quick-move, six inputs at 60 carrots: shift-click 64 carrots → 24 in (64 each), 40 stay in the inventory
+    (FD `moveItemStackTo(0, MEAL)`), server-checked; the client's prediction showed the 40 in slot 7 for a moment
+    and was corrected by the server's resend. Bowls ×16 into an empty pot → slot 7 whole (FD routing; the old E-17
+    limitation does not show at this pin: the whole-stack case falls back to the game's routing, whose slot rules
+    keep containers out of 0–5).
+  - Backstabbing III, iron knife, NoAI 200-hp pig: front 3.5, 3.5; behind 6.3, 6.3 (×1.8); side 3.5 (= M8-04).
+  - signal smoke: campfire on straw bale and rice bale → `signal_fire=true`, on a carrot crate → false
+    (`signal-smoke.png`).
+  - restart persistence, twice (`restart-before.txt`, `restart-after.txt`, `restart2-after.txt`): cutting board
+    with a potato (rendered, `board-after-restart.png`; empty hand in survival returns it), feast servings, corn
+    stages (random ticks 0), stove/pot/bales/campfires, inventory with damage values all identical; a pot
+    mid-cook (MD carrot soup 231/400) finished after the reload (soup in slot 8, bowl 3 → 2, `RecipesUsed`).
+    0 ERROR lines.
+- dedicated server (`../run/sr/fd-server`, engine exported with `native-build --server-output`
+  `../run/sr/server-export`, MD `.smod` in its `sunrise-mods/`; clients Alice/Bob `../run/mp/`, now Sunrise —
+  the Horizon rig moved to `../run/horizon/mp/`): handshake accepted the three mods; FD pot driven through Bob's
+  menu (corn soup, shift-click take → XP, milk bucket's bucket ejected beside the pot as FD's
+  `ejectIngredientRemainder`); farmer offers include `farmersdelight:onion` (FD trades). Add-on rows in their
+  entries. LAN: `lan open` → "Offline developer session: single-player only." (ENVIRONMENT-BLOCKED, as at Horizon).
+- observation (engine/desktop, no id): with the client window hidden on KDE Wayland its frames and client ticks
+  stopped; after it came back, chat replies to `ctl command` stopped arriving and a click had no effect until
+  the game was restarted. Not mod-related.
+- checks: cargo fmt/clippy -D warnings/test 98 + 1 ignored; carry 2872, decl 237, tooltips/worldgen --check;
+  9 tools/test_*.py.
+- deltas: none new.
+- next: none in the retarget scope; Let's Do (LD-00/LD-01, `../letsdo/LETSDO_PLAN.md`) at the user's request.

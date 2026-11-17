@@ -384,11 +384,6 @@ impl CookingPot {
         };
         let held = click.stack.cloned();
         let sneaking = player.entity().is_shift_key_down(&*host).unwrap_or(false);
-        eprintln!(
-            "[fd-debug] pot use hand={:?} held={} sneaking={sneaking}",
-            click.hand,
-            held.is_some()
-        );
         if held.is_none() && sneaking {
             let name = host.block_state_string(state).unwrap_or_default();
             let next = if state_value(&name, "support") == Some("handle") {
