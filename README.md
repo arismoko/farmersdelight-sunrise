@@ -1,31 +1,34 @@
-# Farmer's Delight — Horizon port
+# Farmer's Delight — Sunrise port
 
-A native [Horizon](https://github.com/arismoko/horizon) mod porting Farmer's Delight Refabricated 3.6.30
+A native [Sunrise](https://github.com/sunrise-org/sunrise) mod porting Farmer's Delight Refabricated 3.6.30
 (Minecraft 26.3): cooking pot, stove, skillet, cutting board and knives, crops (cabbages, onions, tomatoes, rice),
 rich soil and organic compost, mushroom colonies, wild crops and village additions, feasts and pies, all the meals,
 drinks and pet foods with Nourishment and Comfort, storage blocks, baskets, cabinets, canvas signs, tatami, safety
 net, rotten tomatoes, the Backstabbing enchantment, loot additions, advancements, the cooking pot recipe book, HUD
 overlays, tooltips, config files and FD's 44 translations.
 
-Version `3.6.30-horizon.3` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Horizon `afe471cf15df56439f23cd991d0d4b85563a14fc`.
+Version `3.6.30-sunrise.1` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Sunrise `2d8126336e579777eabf9b2fd8b3d476236a04f2`
+(signed SDK `sdk-2d81263…`). Until `3.6.30-horizon.3` (tag `v3.6.30-horizon.3`) the port targeted Horizon `afe471cf`;
+the target is set in `tools/target.toml.in` (RETARGET_PLAN D13).
 
 ## Install
 
-1. Copy `ported_farmersdelight.hmod` into the instance's `horizon-native-mods/` folder.
-2. Build it for the instance with the launcher: `horizon-launcher native-build --instance <instance>`
-   (native code runs with your rights; the launcher asks for `--trust-native-code` once).
+1. Put this repository's source (or `ported_farmersdelight.smod` unpacked) in a mods folder, or install it with
+   `sunrise-launcher mods add-github <repository URL>`.
+2. Build it for the instance: `sunrise-launcher native-build <mods folder> --instance <instance> --trust-native-code`
+   (native code runs with your rights).
 3. Start the game. Settings are in `config/ported_farmersdelight-common.json` and
    `config/ported_farmersdelight-client.json` (FD's keys and layout; edits apply while the game runs, except the
    item-default keys, see below).
 
-A dedicated server is exported with `horizon-launcher native-build <mod folder> --server-output <dir>`.
+A dedicated server is exported with `sunrise-launcher native-build <mod folder> --server-output <dir> --version <build> --trust-native-code`.
 
-**Multiplayer:** every player needs the Horizon client with this same mod build. Clients without it are refused
+**Multiplayer:** every player needs the Sunrise client with this same mod build. Clients without it are refused
 ("Your mods don't match this server's").
 
 ## Differences from Farmer's Delight
 
-The port keeps FD's behaviour, quirks included. Where Horizon could not express something, the difference is
+The port keeps FD's behaviour, quirks included. Where the engine could not express something, the difference is
 recorded as an accepted delta (A-nn) with its engine gap (E-nn) in `PROGRESS.md`. The ones a player may notice:
 
 - the item-default config keys (stackable soups, rabbit stew buff, vanilla soup Nourishment, straw bed rename) have
@@ -37,6 +40,9 @@ recorded as an accepted delta (A-nn) with its engine gap (E-nn) in `PROGRESS.md`
 - standing canvas signs open the text editor when placed (E-31, A34); a custom name is lost when a cabinet or
   basket is broken by something other than a player (E-30, A33);
 - on page 2 of the creative inventory, the hovered tab's name can be drawn under a page-1 tab name (engine, E-39).
+- `enableVanillaCropCrates = false` no longer removes the carrot, potato and beetroot crate recipes: Sunrise's
+  startup recipe load refuses a recipe whose mod-registered condition it does not know (E-43, A53). The default
+  (`true`) behaves as FD.
 
 ## For add-on authors
 
@@ -44,10 +50,10 @@ Depend on the exact base version, as the API may change in any release:
 
 ```toml
 [dependencies]
-ported_farmersdelight = "=3.6.30-horizon.3"
+ported_farmersdelight = "=3.6.30-sunrise.1"
 ```
 
-What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.toml`, also
+What stays stable while `fd_port_api` (a `[properties]` value in `sunrise-mod.toml`, also
 `ported_farmersdelight::api::API_VERSION`) is unchanged:
 
 - the Rust module `api` for native add-ons (the launcher adds the base as the Cargo dependency
@@ -70,8 +76,8 @@ any namespace.
 
 ## Building from source
 
-`horizon-mod.toml [native] horizon` and the `rev` in `Cargo.toml` name the same Horizon commit. Local checks
-(Rust 1.99.1):
+`sunrise-mod.toml [native] sunrise` names the Sunrise build; `Cargo.toml` takes the API from that build's signed SDK
+(`.sunrise/sdk/api`, fetched by `cargo sunrise-mod check`). Local checks (Rust 1.99.1):
 
 ```sh
 cargo fmt --all --check
@@ -81,7 +87,8 @@ python3 tools/gen_decls.py --check && python3 tools/gen_worldgen.py --check
 python3 tools/gen_food_tooltips.py --check
 python3 tools/carry_fd.py --fd <FD checkout> --fapi <Fabric API checkout> --check
 for t in tools/test_*.py; do python3 "$t"; done
-cargo horizon-mod build      # target/horizon-mod/ported_farmersdelight.hmod
+cargo sunrise-mod check      # fetches and verifies the SDK, then checks the crate
+cargo sunrise-mod build      # target/sunrise-mod/ported_farmersdelight.smod
 ```
 
 Carried Farmer's Delight data under `assets/` and `data/`, and Fabric API's convention tags under `data/c/tags/`, are

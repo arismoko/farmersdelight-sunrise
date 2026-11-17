@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.6.30-sunrise.1 — 2026-11-17
+
+Retarget from Horizon `afe471cf` to Sunrise `2d81263` (signed SDK; RETARGET_PLAN). Same content and behaviour,
+except as listed.
+
+- Manifest `sunrise-mod.toml`; packages are `.smod`; declarations under `data/farmersdelight/sunrise/`; engine data
+  keys `sunrise:add_to` / `sunrise:climate`. The target lives in `tools/target.toml.in` (generators, `src/engine.rs`).
+- Block containers are declared at registration (`block_container`), not by the removed `block_entity_container` hook.
+- FD's recipe serializers are registered (`farmersdelight:cooking`, `farmersdelight:cutting` as read recipe types;
+  `dough` and `food_serving` load as inert raw recipes, as before: E-12 still open).
+- Closer to FD: the cooking pot's empty container slot shows FD's bowl icon; the recipe book's Misc tab shows its
+  second icon (tomato sauce); the book toggle sits at FD's `height / 2 - 49`.
+- New delta A53 (engine E-43): the vanilla crop crate recipes no longer carry the `enableVanillaCropCrates`
+  condition (Sunrise's startup recipe load refuses unknown registered conditions); their advancements keep it.
+- Add-on API unchanged (`fd_port_api = 1`); add-ons rebuild against this version.
+
 ## 3.6.30-horizon.3 — 2026-11-17
 
 - Public add-on API `api::feast` (BX-04): `register` attaches FD's feast behaviour to an add-on's block;

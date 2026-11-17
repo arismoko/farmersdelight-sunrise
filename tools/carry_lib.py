@@ -63,8 +63,8 @@ def selected(rel: str, include_prefixes, exclude) -> bool:
 
 
 def rewrite_conditions(node, condition_rules: list, rel: str):
-    """Return (new_node, changed). Replaces every fabric:load_conditions key in place (order kept); a value no rule
-    names exactly fails."""
+    """Return (new_node, changed). Replaces every fabric:load_conditions key in place (order kept), or drops it in
+    files a rule's `drop_in` globs name; a value no rule names exactly fails."""
     changed = False
     if isinstance(node, dict):
         out = {}
@@ -72,7 +72,9 @@ def rewrite_conditions(node, condition_rules: list, rel: str):
             if key == FABRIC_KEY:
                 for rule in condition_rules:
                     if value == rule["fabric"]:
-                        out[NEOFORGE_KEY] = rule["neoforge"]
+                        # `drop_in`: files (globs) where the condition is dropped instead, so they always load.
+                        if not any(fnmatch.fnmatchcase(rel, pat) for pat in rule.get("drop_in", [])):
+                            out[NEOFORGE_KEY] = rule["neoforge"]
                         changed = True
                         break
                 else:

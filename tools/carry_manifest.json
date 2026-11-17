@@ -4,7 +4,7 @@
  "fapi_repo": "https://github.com/FabricMC/fabric",
  "fapi_tag": "0.160.4+26.3",
  "fapi_sha": "542047fffa4f49d96d4863d2c7abf0b508554f70",
- "rules_sha256": "805e7f0906d53434b0482a0330329260a163d8b59c1a8da622322faf5f9d266b",
+ "rules_sha256": "a04c9a85fdcbc210d33a323a0eb9f36c44f6e60f4a60c3dcffd9813942fa18f5",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",
@@ -16866,7 +16866,7 @@
    "source": "src/generated/resources/data/farmersdelight/recipe/beetroot_crate.json",
    "dest": "data/farmersdelight/recipe/beetroot_crate.json",
    "sha256_source": "458692fdf1637c779d631ce15db6425a821bbf5f548f856be000eb9e409b3514",
-   "sha256_dest": "611ca5a99e58680210eb8cffb29df9f1a73a10a3ad0833ef33f7b7a329cb606a",
+   "sha256_dest": "7bbc7a4f1962ad5bebb421292d326adaef185ca9c842e52dbaed107cc020cc02",
    "rule": "load_conditions"
   },
   {
@@ -17013,7 +17013,7 @@
    "source": "src/generated/resources/data/farmersdelight/recipe/carrot_crate.json",
    "dest": "data/farmersdelight/recipe/carrot_crate.json",
    "sha256_source": "9aa1a5b193e1fd7f80e1003ae1a0254570d0bc91c871e6fcb444dd4c171bd9b5",
-   "sha256_dest": "260b107145cbae3bb4059c908b20ed777124ec5a3cffd7ab4eec98854c6a76c8",
+   "sha256_dest": "a7fb71135b721f7990dfb229865bcc76a996fc9695ebf5a867aaf4163312bf34",
    "rule": "load_conditions"
   },
   {
@@ -18462,7 +18462,7 @@
    "source": "src/generated/resources/data/farmersdelight/recipe/potato_crate.json",
    "dest": "data/farmersdelight/recipe/potato_crate.json",
    "sha256_source": "99cc3d2814a8191557ac9c1cf98882c5f59a7b05154b8903a6c7d4f12d06a5df",
-   "sha256_dest": "cf64951fa4863c99cb474b6672452c4fbc6bce14a269027d0cf3e152ee1514f2",
+   "sha256_dest": "40d972d0d9680af1ff045a0aa6bdb0052565125385036d66cf42b97a1d439d4d",
    "rule": "load_conditions"
   },
   {

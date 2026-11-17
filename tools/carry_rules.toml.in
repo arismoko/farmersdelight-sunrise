@@ -133,6 +133,11 @@ fabric = [{ condition = "farmersdelight:vanilla_crates_enabled" }]
 # The condition is registered under the mod id: Horizon requires a load condition's namespace to equal the
 # registering mod's id (crates/horizon-mod-vocab/src/content/load_conditions.rs, LoadConditionDeclarations).
 neoforge = [{ type = "ported_farmersdelight:vanilla_crates_enabled" }]
+# E-43 / A53: Sunrise's startup recipe load (world_rest.rs, a LoadConditions view without the mods' registered
+# conditions) refuses a recipe file whose condition it doesn't know (recipe_sources.rs check_resource_errors), and
+# the game stops. The crate recipes therefore carry no condition: always loaded, as with the default
+# `enableVanillaCropCrates = true`; setting it false no longer removes them. Their advancements keep it.
+drop_in = ["data/farmersdelight/recipe/*"]
 
 # Whole-file overrides (approved exceptions to D6's single rewrite, each with its reason). The file
 # under tools/carry_overrides/<dest> replaces the carried one; the manifest records rule "override".

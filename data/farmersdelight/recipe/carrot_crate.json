@@ -1,9 +1,4 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "ported_farmersdelight:vanilla_crates_enabled"
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {

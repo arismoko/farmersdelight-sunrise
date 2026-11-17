@@ -33,3 +33,21 @@ impl RecipeTables {
         self.cooking.publish(cooking);
     }
 }
+
+/// FD's two special crafting serializers (`DoughRecipe`, `FoodServingRecipe`). Not yet ported as crafting kinds:
+/// E-12 at Horizon; Sunrise's `register_crafting_recipe_serializer` could carry them (follow-up).
+const SPECIAL_CRAFTING: [&str; 2] = ["farmersdelight:dough", "farmersdelight:food_serving"];
+
+/// Sunrise refuses a recipe whose serializer no mod registered (`crafting/mod_kinds.rs`). The pot's and the
+/// board's recipes are read by this mod through `recipes_of_type`, so each is a recipe type with a raw
+/// (source-preserving) serializer of the same id, as FD registers them. The special crafting files load as
+/// inert raw recipes of their own type, which keeps the Horizon behaviour (they never enter the grid).
+pub fn register_serializers(registrar: &mut dyn mod_api::Registrar) {
+    for id in [cooking::TYPE, cutting::TYPE]
+        .into_iter()
+        .chain(SPECIAL_CRAFTING)
+    {
+        registrar.register_recipe_type(id);
+        registrar.register_raw_recipe_serializer(id, id);
+    }
+}
