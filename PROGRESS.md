@@ -2072,3 +2072,18 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
   bare-hand message, last serving, comparator 2 at 2 servings, breaks without floor) and nachos through `register`
   (corndelight-horizon PROGRESS CD-11).
 - next: CD-12 (corndelight-horizon).
+
+## CD-18 (base side) Release 3.6.30-horizon.3 — PASS — 2026-11-17
+- build pin: afe471cf | mod commit: c2ac486 (release: version, CHANGELOG, README; code as e7215ed) | tag
+  `v3.6.30-horizon.3`
+- content since `.2`: public API `api::feast` (BX-04, + `register_custom` CD-11), `api::wild_crop` (BX-05),
+  `api::config` (BX-06), `tools/worldgen_rewrite.py` (BX-09), `api::crop` (CD-06). FD behaviour unchanged.
+- package: `../dist/ported_farmersdelight-3.6.30-horizon.3.hmod` (2947831 bytes, SHA-256 40a687b8…cab97;
+  `cargo horizon-mod check` clean; every packaged file identical to c2ac486's tree).
+- checks: cargo test 98 + 1 ignored, carry 2872, decl 237, tooltips/worldgen/fixtures --check, 9 tools/test_*.py.
+- in game: validated together with Corn Delight `1.1.8-horizon.1` and More Delight `26.9.16-horizon.2` (their
+  PROGRESS CD-18 entries): single player, restart, dedicated server with two clients, version-mismatch refusals.
+  Base-only open of `CDV8` before the add-ons were added: "content from 1 mod(s)", no new errors.
+- deltas: none. Engine observation E-42 (mod blocks lost in chunks saved while the mod is missing) recorded in
+  corndelight-horizon PROGRESS.
+- next: none in the current scope.
