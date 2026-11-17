@@ -7,7 +7,7 @@ drinks and pet foods with Nourishment and Comfort, storage blocks, baskets, cabi
 net, rotten tomatoes, the Backstabbing enchantment, loot additions, advancements, the cooking pot recipe book, HUD
 overlays, tooltips, config files and FD's 44 translations.
 
-Version `3.6.30-horizon.2` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Horizon `afe471cf15df56439f23cd991d0d4b85563a14fc`.
+Version `3.6.30-horizon.3` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Horizon `afe471cf15df56439f23cd991d0d4b85563a14fc`.
 
 ## Install
 
@@ -44,7 +44,7 @@ Depend on the exact base version, as the API may change in any release:
 
 ```toml
 [dependencies]
-ported_farmersdelight = "=3.6.30-horizon.2"
+ported_farmersdelight = "=3.6.30-horizon.3"
 ```
 
 What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.toml`, also

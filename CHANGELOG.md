@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (3.6.30-horizon.3)
+## 3.6.30-horizon.3 — 2026-11-17
 
 - Public add-on API `api::feast` (BX-04): `register` attaches FD's feast behaviour to an add-on's block;
   `take_serving`, `servings`, `decide` for blocks with their own interaction. FD's six feasts use it.
