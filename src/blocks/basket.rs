@@ -234,7 +234,7 @@ pub fn update_signal(
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Basket {
     /// `getStateForPlacement`: opening toward the placer (opposite the nearest looking
     /// direction), waterlogged in water.
@@ -312,7 +312,7 @@ impl BlockPart for Basket {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for Basket {
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
         event.ticks = true;

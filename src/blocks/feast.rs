@@ -278,7 +278,7 @@ pub struct Feast {
     pub on_use: Option<UseFn>,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Feast {
     fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
         Some(supported(level, [event.pos.x, event.pos.y, event.pos.z]))
@@ -378,7 +378,15 @@ pub fn take_serving(
         creative,
     ) {
         Outcome::BreakLeftovers => {
-            level.play_sound(host, SOUND_LEFTOVERS, at, SoundSource::Players, 0.8, 0.8);
+            level.play_sound(
+                host,
+                SOUND_LEFTOVERS,
+                at,
+                SoundSource::Players,
+                0.8,
+                0.8,
+                None,
+            );
             let _ = level.destroy_block(host, pos, true, None, false);
             InteractionResult::Success
         }
@@ -412,7 +420,7 @@ pub fn take_serving(
             if vanish {
                 let _ = level.destroy_block(host, pos, true, None, false);
             }
-            level.play_sound(host, SOUND_SERVE, at, SoundSource::Blocks, 1.0, 1.0);
+            level.play_sound(host, SOUND_SERVE, at, SoundSource::Blocks, 1.0, 1.0, None);
             if spec.serving_particles {
                 let _ = level.send_particles(
                     host,
@@ -503,10 +511,10 @@ pub struct SaladSparkle {
 /// The chance a given block is picked by one `ClientLevel.animateTick` (radius 16 and 32 rounds).
 pub const ANIMATE_CHANCE: f64 = 667.0 / 32_768.0 + 667.0 / 262_144.0;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for SaladSparkle {}
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for SaladSparkle {
     fn block_entity_client_ticks(
         &self,
@@ -547,7 +555,7 @@ impl BlockEntityPart for SaladSparkle {
 /// `PlaceableItem#appendHoverText`: "Placeable", dark gray italic.
 pub struct Placeable;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for Placeable {
     fn tooltip(&self, _: &dyn ClientHost, event: &mut TooltipEvent<'_>) {
         let mut style = mod_api::text::TextStyle::default();

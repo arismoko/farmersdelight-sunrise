@@ -1,5 +1,5 @@
 {
-  "horizon:add_to": "minecraft:farm_desert",
+  "sunrise:add_to": "minecraft:farm_desert",
   "processors": [
     {
       "processor_type": "minecraft:rule",

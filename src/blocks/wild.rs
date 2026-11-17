@@ -122,9 +122,9 @@ pub fn bonemeal_spread(level: &mut dyn LevelWriteHost, origin: [i32; 3], state: 
     };
     let step = |level: &mut dyn LevelWriteHost, from: [i32; 3]| {
         draw(level, |r| {
-            let x = r.next_int_bound(3).unwrap_or(1) - 1;
-            let y = r.next_int_bound(2).unwrap_or(0) - r.next_int_bound(2).unwrap_or(0);
-            let z = r.next_int_bound(3).unwrap_or(1) - 1;
+            let x = r.next_int_bound(3) - 1;
+            let y = r.next_int_bound(2) - r.next_int_bound(2);
+            let z = r.next_int_bound(3) - 1;
             [from[0] + x, from[1] + y, from[2] + z]
         })
     };
@@ -153,7 +153,7 @@ pub fn bonemeal_success(level: &mut dyn LevelRandomHost) -> bool {
 
 pub struct WildCrop;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for WildCrop {
     /// WildCropBlock#mayPlaceOn: `#farmersdelight:grows_wild_crops`.
     fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
@@ -188,7 +188,7 @@ impl BlockPart for WildCrop {
 
 pub struct SandyShrub;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for SandyShrub {
     /// SandyShrubBlock#mayPlaceOn: `#minecraft:sand`.
     fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
@@ -219,7 +219,7 @@ fn full_water(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
         .is_some_and(|f| f.source && crate::blocks::rope::is_water(level, f))
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for WildRice {
     /// WildRiceBlock#getStateForPlacement: into a full water block with air above; the lower
     /// half holds the water.
@@ -404,10 +404,10 @@ pub fn entity_interact(host: &mut dyn ServerHost, event: &mut EntityInteractEven
                 SoundSource::Neutral,
                 2.0,
                 1.0,
+                None,
             );
         }
     }
-    event.cancelled = true;
     Flow::Cancel
 }
 

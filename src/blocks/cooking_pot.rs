@@ -267,7 +267,7 @@ fn tray_below(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
         .is_some_and(|s| level.block_in_tag(s.block(), TRAY_HEAT_SOURCES) == Some(true))
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for CookingPot {
     /// `getStateForPlacement`: facing opposite the placer, waterlogged in water, a handle when
     /// placed against a ceiling, else a tray over a tray heat source.
@@ -417,6 +417,7 @@ impl CookingPot {
                     SoundSource::Blocks,
                     0.7,
                     1.0,
+                    None,
                 );
             }
             return InteractionResult::Success;
@@ -462,6 +463,7 @@ impl CookingPot {
                     SoundSource::Blocks,
                     1.0,
                     1.0,
+                    None,
                 );
                 self.mirror(host, be);
             }
@@ -541,7 +543,7 @@ pub fn award(
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for CookingPot {
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
         event.ticks = true;
@@ -744,7 +746,9 @@ impl BlockEntityPart for CookingPot {
         if event.slot < event.container_slots {
             return Flow::Continue;
         }
-        let stack = event.stack.clone();
+        let Some(stack) = event.stack.clone() else {
+            return Flow::Continue;
+        };
         let container = stack_tag(&*host, &event.entity.nbt, CONTAINER_KEY).or_else(|| {
             event
                 .entity
@@ -762,10 +766,11 @@ impl BlockEntityPart for CookingPot {
             (0..INPUTS).collect()
         };
         let max = max_stack(&*host, &stack).min(64);
+        let before = stack.count();
         let left = move_into(&mut event.entity.items, &targets, stack, max);
         match left {
-            Some(rest) if rest.count() < event.stack.count() => {
-                *event.stack = rest;
+            Some(rest) if rest.count() < before => {
+                *event.stack = Some(rest);
                 Flow::Cancel
             }
             _ => Flow::Continue,
@@ -1053,13 +1058,29 @@ impl CookingPot {
 }
 
 /// `CookingPotScreen`'s geometry: six inputs, the meal display (drawn, never a slot), container and output.
+/// `CookingPotMenu.EMPTY_CONTAINER_SLOT_BOWL`.
+const EMPTY_CONTAINER_SLOT_BOWL: &str = "farmersdelight:container/slot/bowl";
+
 pub fn screen_layout() -> Screen {
-    let mut slots: Vec<Option<[f32; 2]>> = (0..INPUTS)
-        .map(|i| Some([30.0 + 18.0 * (i % 3) as f32, 17.0 + 18.0 * (i / 3) as f32]))
+    let slot = |x: f32, y: f32, icon: Option<&str>| {
+        Some(ScreenSlot {
+            position: [x, y],
+            no_item_icon: icon.map(Into::into),
+        })
+    };
+    let mut slots: Vec<Option<ScreenSlot>> = (0..INPUTS)
+        .map(|i| {
+            slot(
+                30.0 + 18.0 * (i % 3) as f32,
+                17.0 + 18.0 * (i / 3) as f32,
+                None,
+            )
+        })
         .collect();
     slots.push(None); // meal display: drawn below, never clicked (CookingPotMealSlot)
-    slots.push(Some([92.0, 55.0]));
-    slots.push(Some([124.0, 55.0]));
+    // `CookingPotMenu`'s container slot shows `EMPTY_CONTAINER_SLOT_BOWL` while empty.
+    slots.push(slot(92.0, 55.0, Some(EMPTY_CONTAINER_SLOT_BOWL)));
+    slots.push(slot(124.0, 55.0, None));
     Screen {
         width: 176.0,
         height: 166.0,
@@ -1075,12 +1096,12 @@ pub fn screen_layout() -> Screen {
 /// The pot's menu type: the meal slot takes nothing (`CookingPotMealSlot#mayPlace`).
 pub struct CookingPotMenu;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl MenuPart for CookingPotMenu {
     /// Serving containers stay out of the ingredient slots (accepted delta A13): no recipe uses
     /// one, and the game's routing then sends a whole shift-clicked stack of them to the container
     /// slot, as `quickMoveStack` does (E-17).
-    fn menu_slot_rules(&self, context: &dyn LoopContext, event: &mut MenuSlotRulesEvent<'_>) {
+    fn menu_slot_rules(&self, context: &dyn Host, event: &mut MenuSlotRulesEvent<'_>) {
         if event.slot == MEAL
             || (event.slot < INPUTS
                 && context.mod_recipe_property_contains(SERVING_SET, event.stack.item()))

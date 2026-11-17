@@ -105,7 +105,7 @@ pub struct Skillet {
     pub removed: Removed,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Skillet {
     /// `SkilletBlock#updateShape`: water ticks while waterlogged; a vertical neighbour change
     /// recomputes `support` (a tray heat source below).
@@ -247,7 +247,15 @@ fn interact(
         pos[2] as f64 + 0.5,
     ];
     if crate::heat::is_heated_in_level_ref(&*host, level, pos) {
-        level.play_sound(host, SOUND_ADD_FOOD, at, SoundSource::Blocks, 0.8, 1.0);
+        level.play_sound(
+            host,
+            SOUND_ADD_FOOD,
+            at,
+            SoundSource::Blocks,
+            0.8,
+            1.0,
+            None,
+        );
     }
     if !creative {
         let _ = living.set_hand_item(host, click.hand, None);
@@ -259,6 +267,7 @@ fn interact(
         SoundSource::Blocks,
         0.7,
         1.0,
+        None,
     );
     host.block_entity_sync(pos);
     InteractionResult::Success
@@ -288,7 +297,7 @@ pub fn sizzle(host: &dyn ClientHost, at: [f64; 3], source: SoundSource, roll: f6
     let _ = host.play_local_sound(&sound, 0);
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for Skillet {
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
         event.ticks = true;

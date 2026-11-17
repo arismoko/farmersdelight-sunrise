@@ -22,7 +22,8 @@ exclude = [
   "data/farmersdelight/create/*",
   "data/farmersdelight/potato_cannon_projectile_types/*",
   "data/farmersdelight/weapon_attributes/*",
-  "data/farmersdelight/horizon/*",          # owned by tools/gen_decls.py
+  "data/farmersdelight/sunrise/*",          # owned by tools/gen_decls.py (decl_dir, tools/target.toml.in)
+  "data/farmersdelight/horizon/*",          # the other engine's decl_dir (RETARGET_PLAN D13)
   "assets/farmersdelight/rrv/*",
   "assets/farmersdelight/textures/gui/jei/*",
   "assets/farmersdelight/textures/gui/emi/*",

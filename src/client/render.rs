@@ -38,7 +38,7 @@ pub fn draw_board(
     seed: i32,
 ) {
     let y_rot = board_y_rot(facing);
-    let mut random = LegacyRandom::new(seed as i64);
+    let mut random = LegacyRandomSource::new(seed as i64);
     for i in 0..layers {
         let (dx, dz) = if layers == 1 {
             (0.0, 0.0)
@@ -88,7 +88,7 @@ pub fn draw_skillet(
         "north" => 180.0,
         _ => 270.0,
     };
-    let mut random = LegacyRandom::new(seed as i64);
+    let mut random = LegacyRandomSource::new(seed as i64);
     for i in 0..layers {
         let dx = (random.next_float() * 2.0 - 1.0) * 0.15 * 0.5;
         let dz = (random.next_float() * 2.0 - 1.0) * 0.15 * 0.5;

@@ -21,6 +21,11 @@ Pure functions on JSON values; no I/O.
 from __future__ import annotations
 
 import copy
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import target  # noqa: E402
 
 
 def trapezoid(spread: int) -> dict:
@@ -103,14 +108,14 @@ def placed_with_count(placed: dict, tries: int) -> dict:
 
 def biomes(allowed, denied=None, temperature=None):
     """FD's biome selector (FDBiomeSelector) as one NeoForge biome filter: in `allowed`, not in `denied`,
-    base temperature within [lo, hi] (`horizon:climate`). `allowed`/`denied` are holder sets: a `#tag`, an
+    base temperature within [lo, hi] (`<engine>:climate`, tools/target.toml.in). `allowed`/`denied` are holder sets: a `#tag`, an
     id or a list of ids."""
     terms = [allowed]
     if denied:
         terms.append({"type": "neoforge:not", "value": denied})
     if temperature is not None:
         lo, hi = temperature
-        terms.append({"type": "horizon:climate", "temperature": {"min": lo, "max": hi}})
+        terms.append({"type": target.key("climate"), "temperature": {"min": lo, "max": hi}})
     return terms[0] if len(terms) == 1 else {"type": "neoforge:and", "values": terms}
 
 

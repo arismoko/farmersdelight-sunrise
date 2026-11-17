@@ -135,7 +135,7 @@ pub fn consume_effect(host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<
             let roll = player
                 .level(&*host)
                 .and_then(|l| l.random(&*host))
-                .and_then(|mut r| r.next_int_bound(candidates.len() as i32).ok())
+                .map(|mut r| r.next_int_bound(candidates.len() as i32))
                 .unwrap_or(0);
             let _ = living.remove_effect(host, candidates[roll.max(0) as usize % candidates.len()]);
         }

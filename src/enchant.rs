@@ -66,7 +66,7 @@ pub fn drain(pending: &Pending, host: &mut dyn ServerHost) {
         let Some(level) = host.entity(attacker as u32).and_then(|e| e.level(&*host)) else {
             continue;
         };
-        level.play_sound(host, CRIT, at, SoundSource::Blocks, 1.0, 1.0);
+        level.play_sound(host, CRIT, at, SoundSource::Blocks, 1.0, 1.0, None);
     }
 }
 

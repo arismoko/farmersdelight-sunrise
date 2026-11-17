@@ -1,5 +1,5 @@
 //! Public API for add-on mods (BX-07). An add-on declares
-//! `[dependencies] ported_farmersdelight = "=<exact base version>"` in its `horizon-mod.toml`; a native
+//! `[dependencies] ported_farmersdelight = "=<exact base version>"` in its `sunrise-mod.toml`; a native
 //! add-on then calls this module (the launcher adds the base as a Cargo dependency named
 //! `ported_farmersdelight`).
 //!
@@ -13,14 +13,14 @@ pub mod crop;
 pub mod feast;
 pub mod wild_crop;
 
-/// The add-on API version; equals `[properties] fd_port_api` in `horizon-mod.toml`.
+/// The add-on API version; equals `[properties] fd_port_api` in `sunrise-mod.toml`.
 pub const API_VERSION: u32 = 1;
 
 #[cfg(test)]
 mod tests {
     #[test]
     fn manifest_property_matches_api_version() {
-        let manifest = include_str!("../../horizon-mod.toml");
+        let manifest = include_str!("../../sunrise-mod.toml");
         let line = manifest
             .lines()
             .find(|l| l.starts_with("fd_port_api"))

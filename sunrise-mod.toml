@@ -1,7 +1,7 @@
 id = "ported_farmersdelight"
-name = "Farmer's Delight (Horizon port)"
-version = "3.6.30-horizon.3"
-description = "Native Horizon port of Farmer's Delight Refabricated 3.6.30 (Minecraft 26.3)"
+name = "Farmer's Delight (Sunrise port)"
+version = "3.6.30-sunrise.1"
+description = "Native Sunrise port of Farmer's Delight Refabricated 3.6.30 (Minecraft 26.3)"
 authors = []
 license = "MIT"
 credits = "Farmer's Delight © 2020 vectorwing; Fabric port Refabricated by MehVahdJukaar, cassiancc et al."
@@ -15,5 +15,5 @@ fd_port_api = 1
 
 [native]
 game = "26.3"
-horizon = "afe471cf15df56439f23cd991d0d4b85563a14fc"
+sunrise = "2d8126336e579777eabf9b2fd8b3d476236a04f2"
 mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"

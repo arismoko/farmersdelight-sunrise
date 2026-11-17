@@ -119,7 +119,7 @@ impl CriterionTest for Always {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for CuttingBoard {
     fn state_for_placement(
         &self,
@@ -325,7 +325,15 @@ impl CuttingBoard {
                 .ok()?;
                 clear_carved(host, be, carved);
                 mirror_inventory(host, be, None);
-                level.play_sound(host, SOUND_REMOVE, center, SoundSource::Blocks, 0.25, 0.5);
+                level.play_sound(
+                    host,
+                    SOUND_REMOVE,
+                    center,
+                    SoundSource::Blocks,
+                    0.25,
+                    0.5,
+                    None,
+                );
                 host.block_entity_sync(pos);
                 Some(InteractionResult::Success)
             }
@@ -352,7 +360,15 @@ impl CuttingBoard {
                     let living = host.living(player.entity())?;
                     let _ = living.set_hand_item(host, Hand::Main, held.shrink(n));
                 }
-                level.play_sound(host, SOUND_PLACE, center, SoundSource::Blocks, 1.0, 0.8);
+                level.play_sound(
+                    host,
+                    SOUND_PLACE,
+                    center,
+                    SoundSource::Blocks,
+                    1.0,
+                    0.8,
+                    None,
+                );
                 host.block_entity_sync(pos);
                 Some(InteractionResult::SuccessServer)
             }
@@ -476,6 +492,7 @@ impl CuttingBoard {
             SoundSource::Blocks,
             volume,
             pitch,
+            None,
         );
         let remaining = input.shrink(1);
         let left = remaining.as_ref().map_or(0, ItemStack::count);
@@ -714,6 +731,7 @@ fn carve(host: &mut dyn ServerHost, click: &BlockClick<'_>) -> bool {
         SoundSource::Blocks,
         1.0,
         0.8,
+        None,
     );
     host.block_entity_sync(pos);
     true
@@ -784,7 +802,7 @@ fn clear_carved(host: &mut dyn ServerHost, be: BlockEntityRef, carved: bool) {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for CuttingBoard {
     fn block_entity_update_tag(
         &self,

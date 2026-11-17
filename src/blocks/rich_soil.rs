@@ -87,7 +87,7 @@ pub struct RichSoil {
     pub boosts: Boosts,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for RichSoil {
     /// RichSoilBlock#randomTick: a mushroom above becomes its colony; otherwise, with the boost
     /// chance, the plant above (or, for `#planted_from_below`, the one below) gets bone meal.
@@ -259,7 +259,7 @@ fn near_water(level: &dyn LevelHost, pos: [i32; 3]) -> bool {
     false
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for RichSoilFarmland {
     /// RichSoilFarmlandBlock#randomTick: dries a stage without water or rain (never back to
     /// soil), soaks to 7 with it, and when soaked boosts the plant above with the boost chance.

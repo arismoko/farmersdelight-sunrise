@@ -1,5 +1,5 @@
 {
-  "horizon:add_to": "minecraft:farm_plains",
+  "sunrise:add_to": "minecraft:farm_plains",
   "processors": [
     {
       "processor_type": "minecraft:rule",

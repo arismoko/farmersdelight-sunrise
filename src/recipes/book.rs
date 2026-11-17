@@ -22,9 +22,12 @@ pub fn key() -> Option<&'static RecipeBookTypeKey> {
     KEY.get()
 }
 
-/// `CookingPotScreen#getRecipeBookButtonPosition`: `leftPos + 5`, `height / 2 - 49`, i.e. 34 below the
-/// 166-high menu's top edge.
-const TOGGLE: [f32; 2] = [5.0, 34.0];
+/// `CookingPotScreen#getRecipeBookButtonPosition`: `leftPos + 5`, `height / 2 - 49`.
+const TOGGLE: RecipeBookToggle = RecipeBookToggle {
+    x: 5.0,
+    y: -49.0,
+    from: ToggleOrigin::ScreenCentre,
+};
 
 /// Registration: the book type and the pot menu's placement layout and screen.
 pub fn register(registrar: &mut dyn Registrar) {
@@ -54,17 +57,24 @@ pub fn screen() -> Screen {
     screen
 }
 
-fn tab(tab: Tab) -> (&'static str, &'static str) {
+/// `CookingPotRecipeBookComponent.TABS`: category id, icon and the second icon (Misc shows two).
+fn tab(tab: Tab) -> (&'static str, &'static str, Option<&'static str>) {
     match tab {
         Tab::Meals => (
             "farmersdelight:cooking_meals",
             "farmersdelight:vegetable_noodles",
+            None,
         ),
         Tab::Drinks => (
             "farmersdelight:cooking_drinks",
             "farmersdelight:apple_cider",
+            None,
         ),
-        Tab::Misc => ("farmersdelight:cooking_misc", "farmersdelight:dumplings"),
+        Tab::Misc => (
+            "farmersdelight:cooking_misc",
+            "farmersdelight:dumplings",
+            Some("farmersdelight:tomato_sauce"),
+        ),
     }
 }
 
@@ -115,11 +125,12 @@ pub fn categories(host: &dyn Host, out: &mut Vec<RecipeBookCategory>) {
     };
     let (recipes, _) = cooking::build(host);
     for t in [Tab::Meals, Tab::Drinks, Tab::Misc] {
-        let (id, icon) = tab(t);
+        let (id, icon, secondary) = tab(t);
         out.push(RecipeBookCategory {
             id: id.into(),
             recipe_type: cooking::TYPE.into(),
             icon: icon.into(),
+            secondary_icon: secondary.map(Into::into),
             target_menu: cooking_pot::MENU.into(),
             book: key.clone(),
             search_group: SEARCH.into(),

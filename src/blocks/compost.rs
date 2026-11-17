@@ -32,7 +32,7 @@ pub fn chance(activators: u32, max_sky_light: i32, has_water: bool) -> f32 {
 
 pub struct OrganicCompost;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for OrganicCompost {
     /// OrganicCompostBlock#randomTick.
     fn random_tick(&self, level: &mut dyn LevelWriteHost, event: &mut RandomTickEvent) -> Flow {

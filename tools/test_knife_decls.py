@@ -20,7 +20,7 @@ MATERIALS = {
 def main():
     bad = []
     for name, (dur, speed, bonus, ench, inc, rep, fire) in MATERIALS.items():
-        d = json.loads((ROOT / f"data/farmersdelight/horizon/item/{name}_knife.json").read_text())
+        d = json.loads((ROOT / f"data/farmersdelight/sunrise/item/{name}_knife.json").read_text())
         c = d["components"]
         mods = {m["type"]: m["amount"] for m in c["minecraft:attribute_modifiers"]}
         rules = c["minecraft:tool"]["rules"]

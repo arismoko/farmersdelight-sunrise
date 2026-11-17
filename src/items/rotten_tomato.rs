@@ -46,7 +46,7 @@ fn step_of(facing: Direction) -> [f64; 3] {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for RottenTomato {
     /// `RottenTomatoItem#use`: the throw sound, a projectile at 1.5 with 1.0 spread, the use
     /// counted, one used up outside creative. SUCCESS on the client, CONSUME on the server.
@@ -63,7 +63,15 @@ impl ItemPart for RottenTomato {
         let living = host.living(player.entity())?;
         let at = player.entity().position(&*host)?;
         let r = level.random(&*host).map_or(0.5, |mut r| r.next_float());
-        level.play_sound(host, THROW, at, SoundSource::Neutral, 0.5, throw_pitch(r));
+        level.play_sound(
+            host,
+            THROW,
+            at,
+            SoundSource::Neutral,
+            0.5,
+            throw_pitch(r),
+            None,
+        );
         if let Ok(kind) = Identifier::parse(ENTITY) {
             let _ = host.spawn_projectile_from_rotation(living, &kind, event.stack, 0.0, 1.5, 1.0);
         }
@@ -132,6 +140,7 @@ pub fn on_impact(host: &mut dyn ServerHost, event: &mut ProjectileImpactEvent<'_
             SoundSource::Neutral,
             1.0,
             hit_pitch(a, b),
+            None,
         );
     }
 }

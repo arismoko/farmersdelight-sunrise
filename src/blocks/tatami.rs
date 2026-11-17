@@ -105,7 +105,7 @@ fn at(pos: BlockPos) -> [i32; 3] {
 
 pub struct Tatami;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Tatami {
     /// `getStateForPlacement`: facing into the clicked block; paired when it is an unpaired
     /// tatami and the placer is not sneaking.
@@ -152,7 +152,7 @@ impl BlockPart for Tatami {
 
 pub struct FullMat;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for FullMat {
     /// `getStateForPlacement`: facing the look direction, refused unless the cell ahead can take
     /// the head (replaceable, with a block under it).
@@ -279,7 +279,7 @@ pub fn on_placed(host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) {
 
 pub struct HalfMat;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for HalfMat {
     /// `getStateForPlacement`: facing the placer.
     fn state_for_placement(

@@ -47,7 +47,7 @@ fn full_water(level: &dyn LevelHost, fluid: FluidState) -> bool {
 
 pub struct Rice;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Rice {
     /// RiceBlock#getStateForPlacement: only into a full water source, at age 0.
     fn state_for_placement(
@@ -68,7 +68,7 @@ impl BlockPart for Rice {
         if bright_enough(level, up(pos, 1), 6) {
             let age = age(level, event.state);
             // (int)(25.0F / 10) + 1
-            if age <= MAX_AGE && draw(level, |r| r.next_int_bound(3).unwrap_or(0)) == Some(0) {
+            if age <= MAX_AGE && draw(level, |r| r.next_int_bound(3)) == Some(0) {
                 if age == MAX_AGE {
                     let above = up(pos, 1);
                     let empty = level.block_state(above).is_some_and(|s| is_air(level, s));
@@ -146,7 +146,7 @@ impl BlockPart for Rice {
     /// above take the meal, or new panicles start with the rest.
     fn perform_bonemeal(&self, level: &mut dyn LevelWriteHost, event: &mut PerformBonemealEvent) {
         let pos = at(event.pos);
-        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(4).unwrap_or(0)) else {
+        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(4)) else {
             return;
         };
         let growth = (age(level, event.state) + inc).min(7);
@@ -183,7 +183,7 @@ pub struct Panicles;
 impl Panicles {
     /// CropBlock#growCrops with RicePaniclesBlock#getBonemealAgeIncrease (nextInt(2, 5) / 3).
     fn grow(level: &mut dyn LevelWriteHost, pos: [i32; 3], state: BlockState) {
-        let Some(inc) = draw(level, |r| (2 + r.next_int_bound(4).unwrap_or(0)) / 3) else {
+        let Some(inc) = draw(level, |r| (2 + r.next_int_bound(4)) / 3) else {
             return;
         };
         let next_age = (age(level, state) + inc).min(MAX_AGE);
@@ -193,7 +193,7 @@ impl Panicles {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Panicles {
     /// CropBlock#randomTick (not beetroots' one-in-three): raw light ≥ 9, one in `25/speed + 1`.
     fn random_tick(&self, level: &mut dyn LevelWriteHost, event: &mut RandomTickEvent) -> Flow {
@@ -203,7 +203,7 @@ impl BlockPart for Panicles {
             if age < MAX_AGE {
                 let speed = growth_speed(level, event.state, pos, true);
                 let bound = (25.0 / speed) as i32 + 1;
-                if draw(level, |r| r.next_int_bound(bound).unwrap_or(0)) == Some(0)
+                if draw(level, |r| r.next_int_bound(bound)) == Some(0)
                     && let Some(next) =
                         level.state_with_property(event.state, "age", &(age + 1).to_string())
                 {
@@ -244,35 +244,41 @@ impl BlockPart for Panicles {
 /// RiceItem#useOn: a failed placement on top of soil says the seed needs shallow water.
 pub struct RiceItem;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for RiceItem {
-    fn use_on(&self, host: &mut dyn ServerHost, event: &mut UseOnEvent<'_>) -> Flow {
-        if event.face != [0, 1, 0] {
-            return Flow::Continue;
-        }
-        let Some(player) = host.players().acting_player() else {
-            return Flow::Continue;
+    fn use_on(&self, host: HostSide<'_>, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
+        // Server only, as at Horizon; the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
         };
-        let Some(level) = player.level(&*host) else {
-            return Flow::Continue;
-        };
-        let Some(clicked) = level.block_state(&*host, event.pos) else {
-            return Flow::Continue;
-        };
-        let target = up(event.pos, 1);
-        let water = level
-            .fluid_state(&*host, target)
-            .is_some_and(|f| f.source && crate::blocks::rope::is_water(&LevelOf(&*host), f));
-        let soil = ["minecraft:substrate_overworld", "minecraft:supports_crops"]
-            .iter()
-            .any(|t| host.block_in_tag(clicked.block(), t) == Some(true));
-        if !water && soil {
-            let _ = player.action_bar(
-                host,
-                Text::translate("block.farmersdelight.rice.invalid_placement", vec![]),
-            );
-        }
-        Flow::Continue
+        crate::compat::claimed((|| -> Flow {
+            if event.face != [0, 1, 0] {
+                return Flow::Continue;
+            }
+            let Some(player) = host.players().acting_player() else {
+                return Flow::Continue;
+            };
+            let Some(level) = player.level(&*host) else {
+                return Flow::Continue;
+            };
+            let Some(clicked) = level.block_state(&*host, event.pos) else {
+                return Flow::Continue;
+            };
+            let target = up(event.pos, 1);
+            let water = level
+                .fluid_state(&*host, target)
+                .is_some_and(|f| f.source && crate::blocks::rope::is_water(&LevelOf(&*host), f));
+            let soil = ["minecraft:substrate_overworld", "minecraft:supports_crops"]
+                .iter()
+                .any(|t| host.block_in_tag(clicked.block(), t) == Some(true));
+            if !water && soil {
+                let _ = player.action_bar(
+                    host,
+                    Text::translate("block.farmersdelight.rice.invalid_placement", vec![]),
+                );
+            }
+            Flow::Continue
+        })())
     }
 }
 

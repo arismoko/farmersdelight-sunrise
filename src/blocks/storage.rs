@@ -32,7 +32,7 @@ pub fn face_name(face: Direction) -> &'static str {
 
 pub struct RiceBale;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for RiceBale {
     /// `getStateForPlacement`: `FACING` = the clicked face.
     fn state_for_placement(
@@ -48,9 +48,9 @@ impl BlockPart for RiceBale {
 /// `CampfireBaleMixin#isFDSmokeSource`.
 pub struct SignalSmoke;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for SignalSmoke {
-    fn smoke_source(&self, _: &dyn LevelHost, _: &mut SmokeSourceEvent) -> Option<bool> {
+    fn smoke_source(&self, _: LevelSide<'_>, _: &mut SmokeSourceEvent) -> Option<bool> {
         Some(true)
     }
 }

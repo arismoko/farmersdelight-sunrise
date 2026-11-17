@@ -164,7 +164,7 @@ pub fn entity_interact(host: &mut dyn ServerHost, event: &mut EntityInteractEven
             at[1].floor() + 0.5,
             at[2].floor() + 0.5,
         ];
-        level.play_sound(host, sound, block, SoundSource::Players, 0.8, 0.8);
+        level.play_sound(host, sound, block, SoundSource::Players, 0.8, 0.8, None);
         if let Some(star) = STAR.get() {
             let [w, h] = target.dimensions(&*host).unwrap_or([0.6, 0.85]);
             let center = [at[0], at[1] + h * 0.5 + 0.5, at[2]];
@@ -196,7 +196,6 @@ pub fn entity_interact(host: &mut dyn ServerHost, event: &mut EntityInteractEven
             });
         }
     }
-    event.cancelled = true;
     Flow::Cancel
 }
 

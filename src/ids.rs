@@ -3,7 +3,7 @@
 /// The manifest's package id. Load conditions must live in this namespace (Horizon refuses a
 /// condition whose namespace differs from the registering mod's id).
 pub const MOD_ID: &str = "ported_farmersdelight";
-/// The content namespace the package owns (`namespaces` in horizon-mod.toml).
+/// The content namespace the package owns (`namespaces` in sunrise-mod.toml).
 pub const NAMESPACE: &str = "farmersdelight";
 
 /// Load condition gating the vanilla crop crate recipes (`enableVanillaCropCrates`).

@@ -115,7 +115,7 @@ pub struct Pie {
     pub block_particle: ParticleKey,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Pie {
     fn state_for_placement(
         &self,
@@ -252,6 +252,7 @@ impl Pie {
             SoundSource::Neutral,
             1.0,
             eat_pitch,
+            None,
         );
         let _ = player.feed(host, SLICE_NUTRITION, SLICE_SATURATION);
         level.play_sound(
@@ -261,6 +262,7 @@ impl Pie {
             SoundSource::Players,
             0.5,
             burp_pitch,
+            None,
         );
         if let Some(slice) = slice_of(self.block).and_then(|id| stack_of(&*host, id))
             && let Some(living) = host.living(player.entity())
@@ -279,6 +281,7 @@ impl Pie {
             SoundSource::Players,
             0.8,
             0.8,
+            None,
         );
         self.particles(host, level, pos, state);
         InteractionResult::Success
@@ -329,6 +332,7 @@ impl Pie {
             SoundSource::Players,
             0.8,
             0.8,
+            None,
         );
         self.particles(host, level, pos, state);
         if let Some(knife) = click.stack {
@@ -380,57 +384,64 @@ fn sneak_ok(host: &dyn Host, player: PlayerRef) -> bool {
         || player.entity().is_shift_key_down(host) == Some(true)
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for VanillaPumpkinPie {
-    fn use_on(&self, host: &mut dyn ServerHost, event: &mut UseOnEvent<'_>) -> Flow {
-        let Some(player) = host.players().acting_player() else {
-            return Flow::Continue;
+    fn use_on(&self, host: HostSide<'_>, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
+        // Server only, as at Horizon; the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
         };
-        if !sneak_ok(&*host, player) || player.may_build(&*host) == Some(false) {
-            return Flow::Continue;
-        }
-        let Some(level) = player.level(&*host) else {
-            return Flow::Continue;
-        };
-        let Some(pos) = pie_target(&*host, level, event.pos, event.face) else {
-            return Flow::Continue;
-        };
-        let facing = player.entity().direction(&*host).unwrap_or("north");
-        let Some(state) = host
-            .block_state_id(PUMPKIN_PIE)
-            .and_then(|s| host.block_state_string(s))
-            .and_then(|n| host.block_state_id(&set_prop(&n, "facing", facing)))
-        else {
-            return Flow::Continue;
-        };
-        if level.set_block(
-            host,
-            pos,
-            state,
-            BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS,
-        ) != Ok(true)
-        {
-            return Flow::Continue;
-        }
-        // BlockItem#place: the wool place sound at (1 + 1) / 2, pitch 0.8 × 1.0.
-        level.play_sound(
-            host,
-            "minecraft:block.wool.place",
-            [
-                pos[0] as f64 + 0.5,
-                pos[1] as f64 + 0.5,
-                pos[2] as f64 + 0.5,
-            ],
-            SoundSource::Blocks,
-            1.0,
-            0.8,
-        );
-        if player.is_creative(&*host) != Some(true)
-            && let Some(living) = host.living(player.entity())
-        {
-            let _ = living.set_hand_item(host, event.hand, event.stack.clone().shrink(1));
-        }
-        Flow::Cancel
+        crate::compat::claimed((|| -> Flow {
+            let Some(player) = host.players().acting_player() else {
+                return Flow::Continue;
+            };
+            if !sneak_ok(&*host, player) || player.may_build(&*host) == Some(false) {
+                return Flow::Continue;
+            }
+            let Some(level) = player.level(&*host) else {
+                return Flow::Continue;
+            };
+            let Some(pos) = pie_target(&*host, level, event.pos, event.face) else {
+                return Flow::Continue;
+            };
+            let facing = player.entity().direction(&*host).unwrap_or("north");
+            let Some(state) = host
+                .block_state_id(PUMPKIN_PIE)
+                .and_then(|s| host.block_state_string(s))
+                .and_then(|n| host.block_state_id(&set_prop(&n, "facing", facing)))
+            else {
+                return Flow::Continue;
+            };
+            if level.set_block(
+                host,
+                pos,
+                state,
+                BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS,
+            ) != Ok(true)
+            {
+                return Flow::Continue;
+            }
+            // BlockItem#place: the wool place sound at (1 + 1) / 2, pitch 0.8 × 1.0.
+            level.play_sound(
+                host,
+                "minecraft:block.wool.place",
+                [
+                    pos[0] as f64 + 0.5,
+                    pos[1] as f64 + 0.5,
+                    pos[2] as f64 + 0.5,
+                ],
+                SoundSource::Blocks,
+                1.0,
+                0.8,
+                None,
+            );
+            if player.is_creative(&*host) != Some(true)
+                && let Some(living) = host.living(player.entity())
+            {
+                let _ = living.set_hand_item(host, event.hand, event.stack.clone().shrink(1));
+            }
+            Flow::Cancel
+        })())
     }
 }
 

@@ -4,7 +4,7 @@
 - tools/worldgen/biome_modifiers.toml.in → data/farmersdelight/neoforge/biome_modifier/<NN>_<feature>.json
   (NeoForge-format biome modifiers; NN = FD's registration order).
 - tools/worldgen/villages.toml.in → data/farmersdelight/worldgen/template_pool/village/<pool>.json and
-  worldgen/processor_list/<list>.json (`horizon:add_to` additions to vanilla's village pools and farm lists).
+  worldgen/processor_list/<list>.json (`<engine>:add_to` additions to vanilla's village pools and farm lists).
 
 Each output folder holds only generated files: others there are removed. `--check` verifies them.
 """
@@ -15,6 +15,7 @@ import tomllib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import target  # noqa: E402
 import worldgen_rewrite  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -56,7 +57,7 @@ def render() -> dict[str, dict[str, bytes]]:
         name = h["pool"].removeprefix("minecraft:village/").replace("/", "_")
         out["pool"][f"{name}.json"] = dump(
             {
-                "horizon:add_to": h["pool"],
+                target.key("add_to"): h["pool"],
                 "elements": [
                     {
                         "weight": h["weight"],
@@ -80,7 +81,7 @@ def render() -> dict[str, dict[str, bytes]]:
             for block, p, crop in villages["crops"][farm["crops"]]
         ]
         out["processor_list"][f"{farm['list'].removeprefix('minecraft:')}.json"] = dump(
-            {"horizon:add_to": farm["list"], "processors": [{"processor_type": "minecraft:rule", "rules": rules}]}
+            {target.key("add_to"): farm["list"], "processors": [{"processor_type": "minecraft:rule", "rules": rules}]}
         )
     return out
 

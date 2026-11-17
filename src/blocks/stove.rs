@@ -104,7 +104,7 @@ fn lit_of(name: &str) -> bool {
     state_value(name, "lit") == Some("true")
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Stove {
     fn state_for_placement(
         &self,
@@ -204,6 +204,7 @@ impl Stove {
                     SoundSource::Blocks,
                     1.0,
                     pitch_rand * 0.4 + 0.8,
+                    None,
                 );
                 self.set_lit(host, level, pos, true, player.map(PlayerRef::entity));
                 if let Some(living) = player.and_then(|p| host.living(p.entity())) {
@@ -219,6 +220,7 @@ impl Stove {
                     SoundSource::Blocks,
                     1.0,
                     (pitch_rand - 0.5) * 0.2 + 1.0,
+                    None,
                 );
                 self.set_lit(host, level, pos, true, player.map(PlayerRef::entity));
                 shrink_hand(host, player, click.hand, stack);
@@ -255,6 +257,7 @@ impl Stove {
                 SoundSource::Blocks,
                 1.0,
                 1.0,
+                None,
             );
             self.set_lit(host, level, pos, false, player.map(PlayerRef::entity));
             let creative = player.and_then(|p| p.is_creative(&*host)).unwrap_or(false);
@@ -332,6 +335,7 @@ impl Stove {
             SoundSource::Blocks,
             0.5,
             1.0,
+            None,
         );
         let _ = level.game_event(
             host,
@@ -347,7 +351,7 @@ impl Stove {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for Stove {
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
         event.ticks = true;

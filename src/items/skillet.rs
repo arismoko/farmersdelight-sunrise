@@ -236,7 +236,7 @@ pub fn on_use_start(host: HostSide<'_>, event: &mut LivingEntityUseItemStartEven
     Flow::Continue
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for SkilletItem {
     /// `SkilletItem#getUseDuration`. Always above 0 so a right click starts a use on both sides
     /// (the engine then treats the skillet as used over time); `on_use_start` sets the real
@@ -321,15 +321,21 @@ impl ItemPart for SkilletItem {
 
     /// `SkilletItem#place`: the skillet goes down as a block only while sneaking. Otherwise the
     /// click is left alone so the item's own `use` (held cooking) runs.
-    fn use_on(&self, host: &mut dyn ServerHost, event: &mut UseOnEvent<'_>) -> Flow {
-        let Some(player) = host.players().acting_player() else {
-            return Flow::Continue;
+    fn use_on(&self, host: HostSide<'_>, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
+        // Server only, as at Horizon; the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
         };
-        if player.entity().is_shift_key_down(&*host) != Some(true) {
-            return Flow::Continue;
-        }
-        place(host, player, event);
-        Flow::Cancel
+        crate::compat::claimed((|| -> Flow {
+            let Some(player) = host.players().acting_player() else {
+                return Flow::Continue;
+            };
+            if player.entity().is_shift_key_down(&*host) != Some(true) {
+                return Flow::Continue;
+            }
+            place(host, player, event);
+            Flow::Cancel
+        })())
     }
 }
 
@@ -391,6 +397,7 @@ fn place(host: &mut dyn ServerHost, player: PlayerRef, event: &UseOnEvent<'_>) {
         SoundSource::Blocks,
         1.0,
         0.8,
+        None,
     );
     // BlockItem#place fires `minecraft:placed_block`; a mod cannot fire a `minecraft:` trigger
     // (E-33), so FD's own criterion for it is granted directly (A44).
@@ -487,7 +494,7 @@ pub fn on_attack(host: &mut dyn ServerHost, event: &AttackEntityEvent<'_>) {
     let pitch = pitch
         .unwrap_or_else(|| 0.9 + level.random(&*host).map_or(0.5, |mut r| r.next_float()) * 0.2);
     let at = attacker.entity().position(&*host).unwrap_or(event.pos);
-    level.play_sound(host, sound, at, SoundSource::Players, volume, pitch);
+    level.play_sound(host, sound, at, SoundSource::Players, volume, pitch, None);
 }
 
 /// `SkilletItem#finishUsingItem`: the cooked result to the inventory (or dropped), one more of the

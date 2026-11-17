@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Generate Horizon content declarations from tools/decl/*.toml.in (PORT_PLAN M0-06).
+"""Generate engine content declarations from tools/decl/*.toml.in (PORT_PLAN M0-06).
 
 Each tools/decl/<kind>.toml.in holds one table per id (the path under `farmersdelight:`). Every row
 carries `source = "<FD file:SYMBOL>"` (dropped from the output); the other keys are the
-declaration exactly as Horizon reads it. Keys are checked against the build pin's
-`deny_unknown_fields` structs (crates/horizon-mod-package/src/content.rs @ afe471cf) so a typo fails
-here rather than at game load.
+declaration exactly as the engine reads it. Keys are checked against the build pin's
+`deny_unknown_fields` structs (crates/sunrise-mod-package/src/content.rs @ 2d81263) so a typo fails
+here rather than at game load. The output dir comes from tools/target.toml.in (`decl_dir`), and the
+generator also writes src/engine.rs (the engine's macro names); `--check` covers both and fails on
+declarations left under the other engine's dir.
 
 Usage: gen_decls.py [--check]
 """
@@ -17,9 +19,13 @@ import sys
 import tomllib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import target  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 DECL = REPO / "tools" / "decl"
-OUT = REPO / "data" / "farmersdelight" / "horizon"
+OUT = REPO / "data" / "farmersdelight" / target.DECL_DIR
+ENGINE_RS = REPO / "src" / "engine.rs"
 NAMESPACE = "farmersdelight"
 
 BLOCK_PROPERTIES = {
@@ -75,7 +81,7 @@ def validate(kind: str, name: str, row: dict) -> dict:
 
 
 def render(decl: Path = DECL) -> dict[str, bytes]:
-    """Relative output path (under data/farmersdelight/horizon) -> file bytes."""
+    """Relative output path (under data/farmersdelight/<decl_dir>) -> file bytes."""
     out: dict[str, bytes] = {}
     for kind in sorted(KINDS):
         path = decl / f"{kind}.toml.in"
@@ -96,6 +102,17 @@ def existing(root: Path = OUT) -> set[str]:
     return {p.relative_to(root).as_posix() for p in root.rglob("*.json")} if root.exists() else set()
 
 
+def foreign_decls() -> list[str]:
+    """Committed files under data/*/<engine>/ for an engine other than the target's."""
+    out = []
+    for other in target.ENGINES:
+        if other == target.DECL_DIR:
+            continue
+        for p in (REPO / "data").glob(f"*/{other}"):
+            out += [q.relative_to(REPO).as_posix() for q in p.rglob("*") if q.is_file()]
+    return sorted(out)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="fail if generated files are out of date")
@@ -109,8 +126,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         bad = [r for r, b in files.items() if not (OUT / r).exists() or (OUT / r).read_bytes() != b]
         for r in bad + stale:
-            print(f"out of date: data/{NAMESPACE}/horizon/{r}", file=sys.stderr)
-        if bad or stale:
+            print(f"out of date: data/{NAMESPACE}/{target.DECL_DIR}/{r}", file=sys.stderr)
+        foreign = foreign_decls()
+        for r in foreign:
+            print(f"declaration under another engine's dir: {r}", file=sys.stderr)
+        engine_bad = not ENGINE_RS.exists() or ENGINE_RS.read_bytes() != target.engine_rs()
+        if engine_bad:
+            print("out of date: src/engine.rs", file=sys.stderr)
+        if bad or stale or foreign or engine_bad:
             return 1
         print(f"decl check ok: {len(files)} files")
         return 0
@@ -121,6 +144,8 @@ def main(argv: list[str] | None = None) -> int:
             p.write_bytes(body)
     for rel in stale:
         (OUT / rel).unlink()
+    if not ENGINE_RS.exists() or ENGINE_RS.read_bytes() != target.engine_rs():
+        ENGINE_RS.write_bytes(target.engine_rs())
     print(f"wrote {len(files)} declaration(s), removed {len(stale)} stale")
     return 0
 

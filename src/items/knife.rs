@@ -87,73 +87,80 @@ pub fn cake_after_cut(bites: u32) -> Option<u32> {
 
 pub struct Knife;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for Knife {
-    fn use_on(&self, host: &mut dyn ServerHost, event: &mut UseOnEvent<'_>) -> Flow {
-        let Some(player) = host.players().acting_player() else {
-            return Flow::Continue;
+    fn use_on(&self, host: HostSide<'_>, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
+        // Server only, as at Horizon; the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
         };
-        let Some(level) = player.level(&*host) else {
-            return Flow::Continue;
-        };
-        let pos = event.pos;
-        let Some(state) = level.block_state(&*host, pos) else {
-            return Flow::Continue;
-        };
-        let name = host.block_state_string(state).unwrap_or_default();
-        if block_id(&name) != PUMPKIN
-            || !crate::blocks::stove::in_item_tag(&*host, event.stack, KNIVES_TAG)
-        {
-            return Flow::Continue;
-        }
-        let looking = player.entity().direction(&*host).unwrap_or("north");
-        let facing = carve_facing(event.face, looking);
-        let centre = [
-            pos[0] as f64 + 0.5,
-            pos[1] as f64 + 0.5,
-            pos[2] as f64 + 0.5,
-        ];
-        level.play_sound(
-            host,
-            "minecraft:block.pumpkin.carve",
-            centre,
-            SoundSource::Blocks,
-            1.0,
-            1.0,
-        );
-        if let Some(carved) =
-            host.block_state_id(&format!("minecraft:carved_pumpkin[facing={facing}]"))
-        {
-            let _ = level.set_block(
+        crate::compat::claimed((|| -> Flow {
+            let Some(player) = host.players().acting_player() else {
+                return Flow::Continue;
+            };
+            let Some(level) = player.level(&*host) else {
+                return Flow::Continue;
+            };
+            let pos = event.pos;
+            let Some(state) = level.block_state(&*host, pos) else {
+                return Flow::Continue;
+            };
+            let name = host.block_state_string(state).unwrap_or_default();
+            if block_id(&name) != PUMPKIN
+                || !crate::blocks::stove::in_item_tag(&*host, event.stack, KNIVES_TAG)
+            {
+                return Flow::Continue;
+            }
+            let looking = player.entity().direction(&*host).unwrap_or("north");
+            let facing = carve_facing(event.face, looking);
+            let centre = [
+                pos[0] as f64 + 0.5,
+                pos[1] as f64 + 0.5,
+                pos[2] as f64 + 0.5,
+            ];
+            level.play_sound(
                 host,
-                pos,
-                carved,
-                BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS,
+                "minecraft:block.pumpkin.carve",
+                centre,
+                SoundSource::Blocks,
+                1.0,
+                1.0,
+                None,
             );
-        }
-        let [sx, sz] = step(facing);
-        let (r1, r2) = level
-            .random(&*host)
-            .map_or((0.5, 0.5), |mut r| (r.next_double(), r.next_double()));
-        if let Some(seeds) = stack_of(&*host, "minecraft:pumpkin_seeds", 4) {
-            let _ = level.spawn_item_with_motion(
-                host,
-                pos[0] as f64 + 0.5 + sx as f64 * 0.65,
-                pos[1] as f64 + 0.1,
-                pos[2] as f64 + 0.5 + sz as f64 * 0.65,
-                seeds,
-                [
-                    0.05 * sx as f64 + r1 * 0.02,
-                    0.05,
-                    0.05 * sz as f64 + r2 * 0.02,
-                ],
-                0,
-            );
-        }
-        if let Some(living) = host.living(player.entity()) {
-            let _ = living.hurt_and_break(host, slot_of(event.hand), 1);
-        }
-        Flow::Cancel
+            if let Some(carved) =
+                host.block_state_id(&format!("minecraft:carved_pumpkin[facing={facing}]"))
+            {
+                let _ = level.set_block(
+                    host,
+                    pos,
+                    carved,
+                    BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS,
+                );
+            }
+            let [sx, sz] = step(facing);
+            let (r1, r2) = level
+                .random(&*host)
+                .map_or((0.5, 0.5), |mut r| (r.next_double(), r.next_double()));
+            if let Some(seeds) = stack_of(&*host, "minecraft:pumpkin_seeds", 4) {
+                let _ = level.spawn_item_with_motion(
+                    host,
+                    pos[0] as f64 + 0.5 + sx as f64 * 0.65,
+                    pos[1] as f64 + 0.1,
+                    pos[2] as f64 + 0.5 + sz as f64 * 0.65,
+                    seeds,
+                    [
+                        0.05 * sx as f64 + r1 * 0.02,
+                        0.05,
+                        0.05 * sz as f64 + r2 * 0.02,
+                    ],
+                    0,
+                );
+            }
+            if let Some(living) = host.living(player.entity()) {
+                let _ = living.hurt_and_break(host, slot_of(event.hand), 1);
+            }
+            Flow::Cancel
+        })())
     }
 }
 
@@ -293,6 +300,7 @@ fn cut_cake(host: &mut dyn ServerHost, level: LevelRef, pos: [i32; 3], cut: &Cak
         SoundSource::Players,
         0.8,
         0.8,
+        None,
     );
 }
 

@@ -137,7 +137,7 @@ pub struct FoodTooltip {
     item: &'static str,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for FoodTooltip {
     fn tooltip(&self, _: &dyn ClientHost, event: &mut TooltipEvent<'_>) {
         if !crate::config::food_effect_tooltip() {

@@ -9,7 +9,7 @@
         "value": "#farmersdelight:wild_potatoes_blacklist"
       },
       {
-        "type": "horizon:climate",
+        "type": "sunrise:climate",
         "temperature": {
           "min": 0.1,
           "max": 0.3

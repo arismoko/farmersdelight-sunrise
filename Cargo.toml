@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
-description = "Native Horizon port of Farmer's Delight"
+description = "Native Sunrise port of Farmer's Delight"
 
 [dependencies]
-horizon-mod-api = { git = "https://github.com/arismoko/horizon", rev = "afe471cf15df56439f23cd991d0d4b85563a14fc" }
+sunrise-mod-api = { path = ".sunrise/sdk/api/crates/sunrise-mod-api" }
 
 [dev-dependencies]
-horizon-mod-api = { git = "https://github.com/arismoko/horizon", rev = "afe471cf15df56439f23cd991d0d4b85563a14fc", features = ["testing"] }
+sunrise-mod-api = { path = ".sunrise/sdk/api/crates/sunrise-mod-api", features = ["testing"] }

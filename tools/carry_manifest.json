@@ -4,7 +4,7 @@
  "fapi_repo": "https://github.com/FabricMC/fabric",
  "fapi_tag": "0.160.4+26.3",
  "fapi_sha": "542047fffa4f49d96d4863d2c7abf0b508554f70",
- "rules_sha256": "488177d374f664946b69de013db02eba9e7a40dc5a28221216aec00faa40b30d",
+ "rules_sha256": "805e7f0906d53434b0482a0330329260a163d8b59c1a8da622322faf5f9d266b",
  "files": [
   {
    "source": "src/main/resources/assets/farmersdelight/blockstates/acacia_cabinet.json",

@@ -38,7 +38,7 @@ pub struct Colony {
     block_particle: ParticleKey,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Colony {
     /// MushroomColonyBlock#randomTick: on `#grows_mushroom_colonies`, one in 4 grows a stage; no
     /// light check (Q9) and none of the template's spreading.
@@ -47,7 +47,7 @@ impl BlockPart for Colony {
         let age = age(level, event.state);
         if age < MAX_AGE
             && on_colony_ground(level, pos)
-            && draw(level, |r| r.next_int_bound(4).unwrap_or(1)) == Some(0)
+            && draw(level, |r| r.next_int_bound(4)) == Some(0)
             && let Some(next) = with_age(level, event.state, age + 1)
         {
             level.set_block(pos, next, BlockUpdateFlags::CLIENTS);
@@ -85,7 +85,7 @@ impl BlockPart for Colony {
 
     /// MushroomColonyBlock#performBonemeal: + Mth.nextInt(1, 2) stages.
     fn perform_bonemeal(&self, level: &mut dyn LevelWriteHost, event: &mut PerformBonemealEvent) {
-        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(2).unwrap_or(0)) else {
+        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(2)) else {
             return;
         };
         let next = (age(level, event.state) + inc).min(MAX_AGE);
@@ -139,7 +139,7 @@ impl BlockPart for Colony {
             pos[2] as f64 + 0.5,
         ];
         let _ = level.set_block(host, pos, next, BlockUpdateFlags::CLIENTS);
-        level.play_sound(host, sound, centre, SoundSource::Blocks, 1.0, 1.0);
+        level.play_sound(host, sound, centre, SoundSource::Blocks, 1.0, 1.0, None);
         if let Some(stack) = item_stack(&*host, self.mushroom, taken as u32) {
             let _ = level.pop_resource(host, pos, stack);
         }

@@ -62,7 +62,7 @@ pub struct Cabinet {
     pub names: crate::blocks::basket::Names,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Cabinet {
     /// `getStateForPlacement`: facing the placer.
     fn state_for_placement(
@@ -104,7 +104,7 @@ impl BlockPart for Cabinet {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockEntityPart for Cabinet {
     /// Ticks only to keep the comparator signal (FD reads it from the container on demand).
     fn block_entity_ticks(&self, _: &dyn Host, event: &mut BlockEntityTicksEvent<'_>) {
@@ -168,6 +168,7 @@ pub fn on_viewers(host: &mut dyn ServerHost, event: &mut ModContainerViewersEven
         SoundSource::Blocks,
         0.5,
         pitch,
+        None,
     );
     let open_value = if open { "true" } else { "false" };
     if let Some(next) =

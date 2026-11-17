@@ -98,6 +98,27 @@ pub fn register(
 }
 
 /// Item storage of the mod's block entities (`ModContainer`).
+/// Every block `container` answers for, declared at registration (Sunrise's
+/// `DefaultCapabilitiesRegistrar::block_container`; at Horizon this was the `block_entity_container` hook).
+pub fn register_containers(registrar: &mut dyn Registrar) {
+    use crate::blocks::{basket, cabinet, cooking_pot, cutting_board, skillet, stove};
+    let ids = [
+        cutting_board::ID,
+        stove::ID,
+        skillet::ID,
+        cooking_pot::ID,
+        basket::WOODEN,
+        basket::BAMBOO,
+    ]
+    .into_iter()
+    .chain(cabinet::IDS.iter().copied());
+    for id in ids {
+        let container = container(id).expect("every listed block has a container");
+        let key = registrar.block_key(id);
+        registrar.block_container(&key, container);
+    }
+}
+
 pub fn container(block: &str) -> Option<ModContainer> {
     match block {
         // One slot, open to automation on every face (Fabric Transfer, all sides).

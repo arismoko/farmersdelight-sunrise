@@ -1,5 +1,5 @@
 {
-  "horizon:add_to": "minecraft:farm_savanna",
+  "sunrise:add_to": "minecraft:farm_savanna",
   "processors": [
     {
       "processor_type": "minecraft:rule",

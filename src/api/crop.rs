@@ -12,7 +12,7 @@ pub fn growth_speed(level: &dyn LevelHost, state: BlockState, pos: [i32; 3]) -> 
 /// `random.nextInt(bound)` from the level's own random stream (the draw advances it). `None` when the level
 /// has no random to draw from.
 pub fn next_int(level: &mut dyn LevelRandomHost, bound: i32) -> Option<i32> {
-    crate::blocks::tomato::draw(level, |r| r.next_int_bound(bound).unwrap_or(0))
+    crate::blocks::tomato::draw(level, |r| r.next_int_bound(bound))
 }
 
 /// `random.nextFloat()` from the level's own random stream.

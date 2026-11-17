@@ -51,7 +51,7 @@ fn is_vine(name: &str) -> bool {
 /// Draws from the level's random and stores the stream back, so draws move the level's own.
 pub(crate) fn draw<T>(
     level: &mut dyn LevelRandomHost,
-    f: impl FnOnce(&mut LegacyRandom) -> T,
+    f: impl FnOnce(&mut LegacyRandomSource) -> T,
 ) -> Option<T> {
     let mut random = level.random()?;
     let out = f(&mut random);
@@ -124,7 +124,7 @@ pub(crate) fn bright_enough(level: &dyn LevelHost, pos: [i32; 3], min: i32) -> b
 
 pub struct BuddingTomato;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for BuddingTomato {
     /// BuddingBushBlock#randomTick: at raw light ≥ 9, one in `25/speed + 1` grows a stage; at
     /// max age it grows past into `tomatoes` (BuddingTomatoBlock#growPastMaxAge).
@@ -135,7 +135,7 @@ impl BlockPart for BuddingTomato {
             if age <= BUDDING_MAX {
                 let speed = growth_speed(level, event.state, pos, false);
                 let bound = (25.0 / speed) as i32 + 1;
-                if draw(level, |r| r.next_int_bound(bound).unwrap_or(0)) == Some(0) {
+                if draw(level, |r| r.next_int_bound(bound)) == Some(0) {
                     let next = if age >= BUDDING_MAX {
                         with_age(level, TOMATOES, 0)
                     } else {
@@ -187,7 +187,7 @@ impl BlockPart for BuddingTomato {
     /// rest carries into the vine's age (`ageGrowth - maxAge - 1`).
     fn perform_bonemeal(&self, level: &mut dyn LevelWriteHost, event: &mut PerformBonemealEvent) {
         let pos = at(event.pos);
-        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(4).unwrap_or(0)) else {
+        let Some(inc) = draw(level, |r| 1 + r.next_int_bound(4)) else {
             return;
         };
         let growth = (age(level, event.state) + inc).min(7);
@@ -286,7 +286,7 @@ impl Tomato {
             return;
         }
         // CropBlock#getBonemealAgeIncrease (Mth.nextInt(random, 2, 5)) / 2.
-        let Some(inc) = draw(level, |r| (2 + r.next_int_bound(4).unwrap_or(0)) / 2) else {
+        let Some(inc) = draw(level, |r| (2 + r.next_int_bound(4)) / 2) else {
             return;
         };
         let new_age = age(level, state) + inc;
@@ -341,7 +341,7 @@ impl Tomato {
     }
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Tomato {
     /// TomatoBlock#randomTick: grows at raw light ≥ 9 (one in `25/speed + 1`, flag 2) and then
     /// tries to climb the rope above, every tick while bright enough.
@@ -355,7 +355,7 @@ impl BlockPart for Tomato {
             if age < VINE_MAX {
                 let speed = growth_speed(level, event.state, pos, true);
                 let bound = (25.0 / speed) as i32 + 1;
-                if draw(level, |r| r.next_int_bound(bound).unwrap_or(0)) == Some(0)
+                if draw(level, |r| r.next_int_bound(bound)) == Some(0)
                     && let Some(next) =
                         level.state_with_property(event.state, "age", &(age + 1).to_string())
                 {
@@ -445,7 +445,7 @@ impl BlockPart for Tomato {
         let pos = click.pos;
         let mut tomato = item_stack(&*host, TOMATO, 1)?;
         let quantity = level
-            .with_random(host, |r| 1 + r.next_int_bound(2).unwrap_or(0))
+            .with_random(host, |r| 1 + r.next_int_bound(2))
             .unwrap_or(1);
         let _ = tomato.set_count(quantity as u32);
         let _ = level.pop_resource(host, pos, tomato);
@@ -462,7 +462,15 @@ impl BlockPart for Tomato {
             pos[1] as f64 + 0.5,
             pos[2] as f64 + 0.5,
         ];
-        level.play_sound(host, PICK_SOUND, centre, SoundSource::Blocks, 1.0, pitch);
+        level.play_sound(
+            host,
+            PICK_SOUND,
+            centre,
+            SoundSource::Blocks,
+            1.0,
+            pitch,
+            None,
+        );
         let name = host.block_state_string(event.state)?;
         let reset = host.block_state_id(&crate::items::skillet::set_prop(&name, "age", "0"))?;
         let _ = level.set_block(host, pos, reset, BlockUpdateFlags::CLIENTS);

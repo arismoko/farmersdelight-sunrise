@@ -84,7 +84,7 @@ class Biomes(unittest.TestCase):
         self.assertEqual(m, {"type": "neoforge:add_features", "biomes": {"type": "neoforge:and", "values": [
             "#minecraft:is_overworld",
             {"type": "neoforge:not", "value": ["minecraft:lush_caves", "minecraft:mushroom_fields"]},
-            {"type": "horizon:climate", "temperature": {"min": 0.4, "max": 0.9}}]},
+            {"type": w.target.key("climate"), "temperature": {"min": 0.4, "max": 0.9}}]},
             "features": "testaddon:patch_wild_x", "step": "vegetal_decoration"})
 
     def test_default_temperature_writes_no_climate(self):

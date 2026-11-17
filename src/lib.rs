@@ -1,12 +1,14 @@
-//! Farmer's Delight — native Horizon port. `Hooks` only dispatches; logic lives in modules.
+//! Farmer's Delight — native Sunrise port. `Hooks` only dispatches; logic lives in modules.
 #![allow(dead_code)] // skeleton: modules are filled in by later milestones
 
 pub mod api;
 mod blocks;
 mod client;
+mod compat;
 mod config;
 mod effects;
 mod enchant;
+mod engine;
 mod heat;
 mod ids;
 mod inventory;
@@ -33,7 +35,7 @@ struct FarmersDelight {
     backstabs: enchant::Pending,
 }
 
-#[mod_api::horizon_mod]
+#[crate::engine::entry]
 impl Hooks for FarmersDelight {
     fn register_load_conditions(
         &self,
@@ -74,6 +76,7 @@ impl Hooks for FarmersDelight {
 
     fn register(&self, registrar: &mut dyn Registrar, _: &RegistrationContext) {
         registry::register(registrar, &self.recipes, &self.removed_skillets, &self.pots);
+        registry::register_containers(registrar);
         effects::register(registrar);
         recipes::book::register(registrar);
         blocks::rope::register(registrar);
@@ -93,14 +96,6 @@ impl Hooks for FarmersDelight {
         blocks::tatami::register(registrar);
         blocks::safety_net::register(registrar, &self.sneaking);
         blocks::cabinet::register(registrar, &self.baskets, &self.container_names);
-    }
-
-    fn block_entity_container(
-        &self,
-        _: &dyn Host,
-        event: &mut BlockEntityContainerEvent<'_>,
-    ) -> Option<ModContainer> {
-        registry::container(event.block)
     }
 
     fn recipe_property_sets(
@@ -153,13 +148,20 @@ impl Hooks for FarmersDelight {
 
     fn entity_interact(
         &self,
-        host: &mut dyn ServerHost,
+        host: HostSide<'_>,
         event: &mut EntityInteractEvent<'_>,
-    ) -> Flow {
-        if blocks::wild::entity_interact(host, event) == Flow::Cancel {
-            return Flow::Cancel;
+    ) -> Option<InteractionResult> {
+        // Server only, as at Horizon (where the hook was server-side): a claim swings the hand from
+        // the server (`SUCCESS_SERVER`, the old `claimed`); the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
+        };
+        if blocks::wild::entity_interact(host, event) == Flow::Cancel
+            || items::foods::entity_interact(host, event) == Flow::Cancel
+        {
+            return Some(InteractionResult::SuccessServer);
         }
-        items::foods::entity_interact(host, event)
+        None
     }
 
     fn tags_updated(&self, host: HostSide<'_>, event: &mut TagsUpdatedEvent) {
@@ -208,7 +210,7 @@ impl Hooks for FarmersDelight {
     /// Draws the cooking skillet's model; FD's flip animation is omitted (delta A12).
     fn item_model_update(&self, _: &dyn ClientHost, event: &mut ItemModelUpdateEvent<'_>) {
         if event.kind == items::skillet::FLIP_MODEL {
-            event.models.push("cooking".into());
+            event.layers.push(ItemModelLayer::new("cooking"));
         }
     }
 
@@ -288,7 +290,7 @@ impl Hooks for FarmersDelight {
 
     fn living_incoming_damage(
         &self,
-        _: &mut dyn LevelRandomHost,
+        _: &mut dyn HitHost,
         event: &mut LivingIncomingDamageEvent<'_>,
     ) -> Flow {
         enchant::on_incoming(&self.backstabs, event);

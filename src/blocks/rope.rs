@@ -129,7 +129,7 @@ pub struct Rope {
     pub bell: BlockKey,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for Rope {
     /// RopeBlock#getStateForPlacement. A click on a side face uses the template's own placement
     /// (vanilla's attachsTo, identical to FD's horizontal rule, and the sturdy-face check only the
@@ -318,6 +318,7 @@ fn ring_bell(
         SoundSource::Blocks,
         2.0,
         1.0,
+        None,
     );
     let affected_state = level.block_state(&*host, pos);
     let _ = level.game_event(
@@ -335,53 +336,59 @@ fn ring_bell(
 /// column (or, sneaking, one block out of the clicked face). Other clicks place as a block item.
 pub struct RopeItem;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl ItemPart for RopeItem {
-    fn use_on(&self, host: &mut dyn ServerHost, event: &mut UseOnEvent<'_>) -> Flow {
-        let Some(player) = host.players().acting_player() else {
-            return Flow::Continue;
+    fn use_on(&self, host: HostSide<'_>, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
+        // Server only, as at Horizon; the client predicts vanilla.
+        let HostSide::Server(host) = host else {
+            return None;
         };
-        let Some(level) = player.level(&*host) else {
-            return Flow::Continue;
-        };
-        let is_rope_at = |host: &dyn Host, pos: [i32; 3]| {
-            level
-                .block_state(host, pos)
-                .and_then(|s| host.block_state_string(s))
-                .is_some_and(|n| n.starts_with("farmersdelight:rope[") || n == ROPE)
-        };
-        // BlockItem#place: the clicked block if the rope may replace it (rope only), else the
-        // block beside the clicked face.
-        let start = if is_rope_at(&*host, event.pos) {
-            event.pos
-        } else {
-            offset(event.pos, event.face)
-        };
-        if !is_rope_at(&*host, start) {
-            return Flow::Continue;
-        }
-        let sneaking = player.is_secondary_use_active(&*host) == Some(true);
-        let step = if sneaking { event.face } else { [0, -1, 0] };
-        let min_y = min_y(&*host, level);
-        let mut pos = offset(start, step);
-        while pos[1] >= min_y {
-            if is_rope_at(&*host, pos) {
-                if step != [0, -1, 0] {
+        crate::compat::claimed((|| -> Flow {
+            let Some(player) = host.players().acting_player() else {
+                return Flow::Continue;
+            };
+            let Some(level) = player.level(&*host) else {
+                return Flow::Continue;
+            };
+            let is_rope_at = |host: &dyn Host, pos: [i32; 3]| {
+                level
+                    .block_state(host, pos)
+                    .and_then(|s| host.block_state_string(s))
+                    .is_some_and(|n| n.starts_with("farmersdelight:rope[") || n == ROPE)
+            };
+            // BlockItem#place: the clicked block if the rope may replace it (rope only), else the
+            // block beside the clicked face.
+            let start = if is_rope_at(&*host, event.pos) {
+                event.pos
+            } else {
+                offset(event.pos, event.face)
+            };
+            if !is_rope_at(&*host, start) {
+                return Flow::Continue;
+            }
+            let sneaking = player.is_secondary_use_active(&*host) == Some(true);
+            let step = if sneaking { event.face } else { [0, -1, 0] };
+            let min_y = min_y(&*host, level);
+            let mut pos = offset(start, step);
+            while pos[1] >= min_y {
+                if is_rope_at(&*host, pos) {
+                    if step != [0, -1, 0] {
+                        return Flow::Cancel;
+                    }
+                    pos = offset(pos, step);
+                    continue;
+                }
+                if let Some(fluid) = level.fluid_state(&*host, pos)
+                    && !fluid.is_empty()
+                    && !is_water_host(&*host, fluid)
+                {
                     return Flow::Cancel;
                 }
-                pos = offset(pos, step);
-                continue;
-            }
-            if let Some(fluid) = level.fluid_state(&*host, pos)
-                && !fluid.is_empty()
-                && !is_water_host(&*host, fluid)
-            {
+                place_rope(host, level, player, event, pos);
                 return Flow::Cancel;
             }
-            place_rope(host, level, player, event, pos);
-            return Flow::Cancel;
-        }
-        Flow::Cancel
+            Flow::Cancel
+        })())
     }
 }
 
@@ -429,6 +436,7 @@ fn place_rope(
         SoundSource::Blocks,
         1.0,
         0.8,
+        None,
     );
     if player.is_creative(&*host) != Some(true)
         && let Some(living) = host.living(player.entity())
@@ -479,7 +487,7 @@ fn rope_state_at(host: &dyn Host, level: LevelRef, pos: [i32; 3]) -> Option<Bloc
 /// fence or a rope fence gate.
 pub struct FenceRule;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for FenceRule {
     fn connects_to(&self, level: &dyn LevelHost, event: &mut ConnectsToEvent) {
         let own = name_of(level, event.state) == Some(ROPE_FENCE);
@@ -502,7 +510,7 @@ impl BlockPart for FenceRule {
 /// axis (vanilla: either side).
 pub struct RopeFenceGate;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for RopeFenceGate {
     fn update_shape(
         &self,
@@ -537,7 +545,7 @@ impl BlockPart for RopeFenceGate {
 /// FD registers no flammability for the rope fence (the oak-fence template's is not kept).
 pub struct NotFlammable;
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for NotFlammable {
     fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))

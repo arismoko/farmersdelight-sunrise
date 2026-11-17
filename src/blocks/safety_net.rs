@@ -42,7 +42,7 @@ pub struct SafetyNet {
     pub sneaking: Sneaking,
 }
 
-#[mod_api::horizon_part]
+#[crate::engine::part]
 impl BlockPart for SafetyNet {
     /// `getStateForPlacement`: waterlogged in water.
     fn state_for_placement(
@@ -89,7 +89,7 @@ impl BlockPart for SafetyNet {
     /// `fallOn`: no fall damage unless the entity suppresses bounce.
     fn fall_on(&self, _: &mut dyn LevelRandomHost, event: &mut FallOnEvent<'_>) {
         if !self.sneaking.suppresses_bounce(event.entity) {
-            event.damage = 0.0;
+            event.damage_multiplier = 0.0;
         }
     }
 

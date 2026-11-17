@@ -1,5 +1,5 @@
 {
-  "horizon:add_to": "minecraft:farm_taiga",
+  "sunrise:add_to": "minecraft:farm_taiga",
   "processors": [
     {
       "processor_type": "minecraft:rule",
