@@ -2087,3 +2087,51 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - deltas: none. Engine observation E-42 (mod blocks lost in chunks saved while the mod is missing) recorded in
   corndelight-horizon PROGRESS.
 - next: none in the current scope.
+
+## RT-03 Retarget to Sunrise 2d81263 — PASS (smoke; full re-validation NOT RUN) — 2026-11-17
+- build pin: sunrise@2d8126336e579777eabf9b2fd8b3d476236a04f2 (signed SDK `sdk-2d81263…`, newest of 3 `sdk-*` tags;
+  `sdk.json` sha256 306600dc… matches; Horizon main still has no `sdk-*`: no flip, RETARGET_PLAN §2) | mod commits:
+  e2063cb, 1763062 | version 3.6.30-sunrise.1 (not tagged/released yet). The port was finished on Horizon, so this
+  converts the finished mod in place (user's choice: `main` converted; Horizon releases stay at their tags).
+- did (RETARGET_PLAN M0-03/M0-06 applied to the existing repo):
+  - `sunrise-mod.toml` (`[native] sunrise`), API from the SDK path `.sunrise/sdk/api/crates/sunrise-mod-api`;
+    `tools/target.toml.in` + `tools/target.py` (D13): declaration dir `data/farmersdelight/sunrise/`, engine data keys
+    (`sunrise:add_to`, `sunrise:climate`), generated `src/engine.rs` (entry/part attribute aliases); `gen_decls.py
+    --check` also fails on declarations under the other engine's dir. Declaration schema at the pin: additive only.
+  - API at the pin: `use_on`/`entity_interact` are both-sided and return `InteractionResult` (old server `claimed` →
+    `SUCCESS_SERVER` via `compat::claimed`, client passes, as at Horizon); C30 containers declared at registration
+    (`registry::register_containers`, `block_container`); `play_sound` takes `except` (None: everyone, as before);
+    `LegacyRandomSource`/`RandomSource` (bounded draws infallible, same values); quick-move stack is
+    `Option<ItemStack>`; `smoke_source` gets `LevelSide`, `menu_slot_rules` `&dyn Host`, `living_incoming_damage`
+    `HitHost`; fall damage via `damage_multiplier`; item model `layers`.
+  - closer to FD (new API): pot container slot shows `farmersdelight:container/slot/bowl` when empty; recipe book
+    Misc tab gets its second icon (tomato sauce); book toggle at FD's `leftPos+5, height/2-49` (`ScreenCentre`).
+  - Sunrise refuses unregistered recipe serializers: `farmersdelight:cooking`/`cutting` registered as recipe types
+    with raw serializers (read by `recipes_of_type` as before); `dough`/`food_serving` load as inert raw recipes
+    (E-12 behaviour kept; Sunrise's `register_crafting_recipe_serializer` could now port them: follow-up).
+  - **E-43 (new)**: Sunrise's startup recipe load (`world_rest.rs`: `LoadConditions::new` without the mods'
+    registered conditions) escalates unknown conditions in `recipe/` to a fatal error (`recipe_sources.rs`
+    `check_resource_errors`); at Horizon the same three files were only logged. Workaround: carry rule `drop_in`
+    keeps the crate recipes unconditional. **A53 (new)**: `enableVanillaCropCrates = false` no longer removes them
+    (default true unchanged); their advancements keep the condition.
+- environment: Sunrise built from source at the pin (`sources/sunrise`, dev profile, launcher release), resources
+  prepared from the Prism "Vanilla 26.3" instance + the user's server jar (Prism Java 25), exporters copied,
+  wasm-std built, `sunrise-launcher developer-install` → `developer-96eff419…`; native builds use the published
+  signed SDK (no `SUNRISE_LAUNCHER_DEVELOPER_SDK`). Separate homes `../run/sr/`; scripts `../run/{env.sh,rebuild.sh,
+  launch.sh,play.sh,ctl}` now Sunrise, Horizon ones kept in `../run/horizon/`. `cargo-sunrise-mod` from the SDK's
+  `tool-x86_64-unknown-linux-gnu.tar.xz` (sha256 checked).
+- in game (own world `SRTest`, creative/peaceful; `../run/shots/RT-03/`): "content from 3 mod(s)", 0 ERROR lines
+  (WARNs = the vanilla damage-tag and rice lines seen at Horizon); mushroom stew cooked on a lit stove (inputs and
+  bowls consumed, meal to output, `RecipesUsed`); pot screen with bowl icon, heat, toggle (`pot-screen.png`), book
+  tabs incl. Misc's two icons (`pot-book.png`; order Drinks/Meals/Misc = existing A49); cutting board beef → minced
+  beef with a knife; knife carves a pumpkin (`use_on`); wild cabbage fed to a brown mooshroom stores strength
+  (`entity_interact`); safety net fall 16 blocks: 20 hp kept vs stone control damaged; cabbage/tomato/wheat-on-rich-
+  soil growth at speed 200; tomato harvest; recipes present (`recipe give`: carrot_crate, cooking, cutting, CD
+  corn_crate, MD stone_knife); skillet in hand (`skillet-hand.png`).
+- not run: shift-click partial quick-move into the pot, Backstabbing, signal smoke, restart persistence on Sunrise,
+  dedicated server + two clients (the `../run/mp/` rig is still Horizon), full VALIDATION_PLAN / ADDONS_VALIDATION
+  replay, M10-06-style release packaging.
+- checks: cargo test 98 passed + 1 ignored, clippy -D warnings, fmt; carry 2872, decl 237, worldgen --check;
+  all 9 tools/test_*.py.
+- deltas: A53 new; E-43 new; observations: Sunrise honours the template's `isRandomlyTicking` (see CD RT-03).
+- next: re-validation pass on Sunrise (restart, MP rig, matrix rows), then release 3.6.30-sunrise.1 (+ CD, MD).
