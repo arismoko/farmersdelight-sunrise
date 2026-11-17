@@ -53,7 +53,7 @@ What stays stable while `fd_port_api` (a `[properties]` value in `horizon-mod.to
 - the Rust module `api` for native add-ons (the launcher adds the base as the Cargo dependency
   `ported_farmersdelight`);
   - `api::feast`: FD's `FeastBlock` behaviour for an add-on's feast block (`register`, `take_serving`,
-    `servings`, `decide`);
+    `servings`, `decide`; `register_custom` for a feast with its own use);
   - `api::wild_crop`: FD's `WildCropBlock` behaviour (`register`, `may_place_on`, `bonemeal_spread`,
     `suspicious_stew_effect`, …);
   - `api::config`: FD's boolean config keys by name (`common_bool`, `client_bool`), and

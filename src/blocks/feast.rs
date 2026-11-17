@@ -76,6 +76,33 @@ impl FeastSpec {
     }
 }
 
+/// An add-on feast's own `useItemOn` (server side), in place of [`take_serving`]: the clicked
+/// block, its state, the spec it was registered with and `minecraft:block`.
+pub type UseFn = fn(
+    &mut dyn ServerHost,
+    &BlockClick<'_>,
+    BlockState,
+    &FeastSpec,
+    ParticleKey,
+) -> InteractionResult;
+
+/// That feast's client prediction (E-28): the servings left and the clicked hand's stack → the
+/// client's answer (`Pass` lets the client go on to the item and the other hand).
+pub type PredictFn = fn(servings: u32, held: Option<&ItemStack>) -> InteractionResult;
+
+/// Client predictions of feasts registered with their own use (`api::feast::register_custom`).
+static PREDICTORS: std::sync::RwLock<Vec<(&'static str, PredictFn)>> =
+    std::sync::RwLock::new(Vec::new());
+
+fn predictor(block: &str) -> Option<PredictFn> {
+    PREDICTORS
+        .read()
+        .ok()?
+        .iter()
+        .find(|(b, _)| *b == block)
+        .map(|(_, f)| *f)
+}
+
 /// Feasts registered through `api::feast::register` (FD's six and add-ons'), for the client
 /// prediction and the rigid-floor check, which see only a state.
 static REGISTERED: std::sync::RwLock<Vec<(&'static str, FeastSpec)>> =
@@ -247,6 +274,8 @@ pub struct Feast {
     pub spec: FeastSpec,
     /// `minecraft:block`, for `BlockParticleOption(ParticleTypes.BLOCK, state)`.
     pub block_particle: ParticleKey,
+    /// An add-on's own use in place of `takeServing` (`api::feast::register_custom`).
+    pub on_use: Option<UseFn>,
 }
 
 #[mod_api::horizon_part]
@@ -274,7 +303,8 @@ impl BlockPart for Feast {
         host: &mut dyn ServerHost,
         event: &mut UseItemOnEvent<'_>,
     ) -> Option<InteractionResult> {
-        Some(take_serving(
+        let take = self.on_use.unwrap_or(take_serving);
+        Some(take(
             host,
             event.click,
             event.state,
@@ -436,7 +466,14 @@ pub fn predict(host: HostSide<'_>, event: &mut UseItemOnBlockEvent<'_>) -> Flow 
     else {
         return Flow::Continue;
     };
-    let servings = servings_in(name, spec.servings_property);
+    let servings = servings_in(name.clone(), spec.servings_property);
+    if let Some(predict) = name
+        .as_deref()
+        .and_then(|n| predictor(n.split('[').next().unwrap_or(n)))
+    {
+        *event.cancellation_result = predict(servings, event.click.stack);
+        return Flow::Cancel;
+    }
     let container = (servings > 0)
         .then(|| (spec.serving_item)(servings))
         .flatten()
@@ -525,6 +562,16 @@ impl ItemPart for Placeable {
 
 /// `api::feast::register`: the feast Part on `block` and its client prediction.
 pub fn register_feast(registrar: &mut dyn Registrar, block: &'static str, spec: FeastSpec) {
+    register_feast_with(registrar, block, spec, None);
+}
+
+/// [`register_feast`], with an add-on's own use and client prediction when `custom` is set.
+pub fn register_feast_with(
+    registrar: &mut dyn Registrar,
+    block: &'static str,
+    spec: FeastSpec,
+    custom: Option<(UseFn, PredictFn)>,
+) {
     let block_particle = registrar.particle_key("minecraft:block");
     let key = registrar.block_key(block);
     registrar.block_part(
@@ -532,11 +579,18 @@ pub fn register_feast(registrar: &mut dyn Registrar, block: &'static str, spec: 
         Feast {
             spec,
             block_particle,
+            on_use: custom.map(|(u, _)| u),
         },
     );
     if let Ok(mut all) = REGISTERED.write() {
         all.retain(|(b, _)| *b != block);
         all.push((block, spec));
+    }
+    if let Ok(mut all) = PREDICTORS.write() {
+        all.retain(|(b, _)| *b != block);
+        if let Some((_, predict)) = custom {
+            all.push((block, predict));
+        }
     }
 }
 

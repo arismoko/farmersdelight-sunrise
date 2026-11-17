@@ -19,16 +19,30 @@
 //! the next use, "needs container" on the action bar, `item.armor.equip_generic` /
 //! `block.wood.break` sounds, three block particles), survives only on a rigid floor (the A28
 //! approximation), gives a comparator signal of the servings left, is not pathfindable, and
-//! predicts the use on the client (E-28). A block with its own interaction can skip `register`
-//! and call [`take_serving`], [`servings`] and [`decide`] itself.
+//! predicts the use on the client (E-28). A feast block with its own interaction (a `FeastBlock`
+//! subclass overriding `useItemOn`) keeps the rest through [`register_custom`], whose use can call
+//! [`take_serving`], [`servings`] and [`decide`].
 
-pub use crate::blocks::feast::{FeastSpec, Kind, Outcome, decide, take_serving};
+pub use crate::blocks::feast::{FeastSpec, Kind, Outcome, PredictFn, UseFn, decide, take_serving};
 use mod_api::{BlockState, Host, Registrar};
 
 /// Attaches FD's feast behaviour to `block` (an id in the caller's namespace). Call once from the
 /// add-on's `register` hook; registering the same block again replaces its spec.
 pub fn register(registrar: &mut dyn Registrar, block: &'static str, spec: FeastSpec) {
     crate::blocks::feast::register_feast(registrar, block, spec);
+}
+
+/// [`register`] with the block's own use in place of `takeServing` (server side) and its client
+/// prediction (what the client answers before the server, E-28); survival on a rigid floor, the
+/// comparator signal, pathfinding and `useWithoutItem` stay FD's. Added in API 1 (additive).
+pub fn register_custom(
+    registrar: &mut dyn Registrar,
+    block: &'static str,
+    spec: FeastSpec,
+    on_use: UseFn,
+    predict: PredictFn,
+) {
+    crate::blocks::feast::register_feast_with(registrar, block, spec, Some((on_use, predict)));
 }
 
 /// The servings left in `state` (0 when the property is missing).

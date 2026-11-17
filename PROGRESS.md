@@ -2057,3 +2057,18 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Докум�
 - checks: cargo test 98 passed + 1 ignored, clippy clean. In game: corn growth and bone meal through it
   (corndelight-horizon PROGRESS CD-06).
 - next: CD-07 (corndelight-horizon).
+
+## CD-11 (base side) api::feast::register_custom — PASS (used by Corn Delight's popcorn box in game) — 2026-11-17
+- build pin: afe471cf | mod commit: (this commit)
+- why: CD's `PopcornBoxBlock` is a `FeastBlock` that overrides `useItemOn` with its own `takeServing`; the rest of
+  `FeastBlock` (rigid-floor survival, comparator signal, not pathfindable, `useWithoutItem` PASS) stays. The API
+  had either all of it (`register`, FD's use) or none; the engine documents no order between two Parts answering
+  the same block's use, so a second Part was not an option.
+- `api::feast::register_custom(registrar, block, spec, on_use: UseFn, predict: PredictFn)`: the `Feast` Part
+  calls `on_use` in place of `take_serving`; the client prediction (E-28) asks `predict(servings, held)` for that
+  block. Additive (API 1 unchanged); FD's feasts unchanged (`register` = `register_feast_with(…, None)`).
+  CHANGELOG/README updated.
+- checks: cargo test 98 passed + 1 ignored, clippy -D warnings clean, fmt. In game: CD's popcorn box (serving,
+  bare-hand message, last serving, comparator 2 at 2 servings, breaks without floor) and nachos through `register`
+  (corndelight-horizon PROGRESS CD-11).
+- next: CD-12 (corndelight-horizon).

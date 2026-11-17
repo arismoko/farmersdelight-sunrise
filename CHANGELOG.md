@@ -9,6 +9,8 @@
 - Public add-on API `api::config` (BX-06): FD's boolean config keys by name; `farmers_buy_fd_crops()` is always
   true (FD Refabricated has no such key; its farmer trades are unconditional).
 - Public add-on API `api::crop` (CD-06): vanilla crop growth speed and draws from the level's random, as FD's crops use.
+- `api::feast::register_custom` (CD-11): a feast block with its own `useItemOn` (a `FeastBlock` subclass) keeps
+  FD's survival, comparator and pathfinding and gets its own use and client prediction (`UseFn`, `PredictFn`).
 
 ## 3.6.30-horizon.2 — 2026-11-16
 
