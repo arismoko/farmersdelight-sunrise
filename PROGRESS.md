@@ -1894,7 +1894,8 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
   (`creative.rs:1000`), which does not filter by page. On page 2 (Farmer's Delight, More Delight) the cursor over a
   mod tab also hits the page-1 vanilla tab at the same position, so two different names are drawn over each other.
 - no mod-side workaround: tab placement and the tooltip are engine code; a mod cannot keep its tab off page 2.
-  The fix is one engine line (filter `hovered_tab` by `on_page`, or drop the duplicate pass). Not filed upstream yet.
+  The fix is one engine line (filter `hovered_tab` by `on_page`, or drop the duplicate pass). Filed upstream
+  2026-11-18: sunrise-org/sunrise#2646 (still in Sunrise `2d81263` and `main`: `creative_screen.rs:278` and `:325`); port issue #1.
 - not reproducible with agent screenshots (agent mode draws no hover tooltips); identified by reading.
 - **reproduced in game (2026-11-16, user request; FDM6, creative screen page 2/2, `../run/shots/e-39/`):** with the
   cursor on the Farmer's Delight tab, page 1's "Building Blocks" is drawn over "Farmer's Delight" (only its last "t"
