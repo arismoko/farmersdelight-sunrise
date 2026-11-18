@@ -19,7 +19,7 @@ the target is set in `tools/target.toml.in`.
 
 ![Cutting boards, stove with cooking pot and skillet, roast chicken and stuffed pumpkin feasts](docs/screenshots/kitchen.png)
 
-![Cabbages, onions, tomatoes, rice and the wild crops](docs/screenshots/crops.png)
+![Wild crops, with mushroom colonies in the background](docs/screenshots/crops.png)
 
 ![The cooking pot screen with its recipe book](docs/screenshots/cooking-pot.png)
 
