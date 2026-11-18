@@ -15,6 +15,14 @@ the target is set in `tools/target.toml.in`.
 
 **Add-ons ported alongside it:** [Corn Delight](https://github.com/play-go/corndelight-sunrise) and [More Delight](https://github.com/play-go/moredelight-sunrise). Each needs this exact base version.
 
+## Screenshots
+
+![Cutting boards, stove with cooking pot and skillet, roast chicken and stuffed pumpkin feasts](docs/screenshots/kitchen.png)
+
+![Cabbages, onions, tomatoes, rice and the wild crops](docs/screenshots/crops.png)
+
+![The cooking pot screen with its recipe book](docs/screenshots/cooking-pot.png)
+
 ## Install
 
 1. Unpack `ported_farmersdelight-<version>.smod` from the release (or put this repository's source) in a mods
