@@ -1,7 +1,7 @@
 # PROGRESS — farmersdelight-horizon
 
-Append-only task log (CODEX_HANDOFF §6). Plan files: `/home/isubuki/Документы/claude` (substitutes
-`/home/user/fd-port`); checkouts under its `sources/` (substitute `/home/user/arismoko/*` and
+Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directory (not in this repository;
+`/home/user/fd-port` in older entries); checkouts under its `sources/` (substitute `/home/user/arismoko/*` and
 `/home/user/fd-port/sources/*`). Build pin `afe471cf15df56439f23cd991d0d4b85563a14fc` unless stated.
 
 ## M0-01 Verify workspace, pins and environment — PASS — 2026-11-13

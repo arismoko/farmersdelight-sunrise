@@ -9,12 +9,16 @@ overlays, tooltips, config files and FD's 44 translations.
 
 Version `3.6.30-sunrise.1` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Sunrise `2d8126336e579777eabf9b2fd8b3d476236a04f2`
 (signed SDK `sdk-2d81263…`). Until `3.6.30-horizon.3` (tag `v3.6.30-horizon.3`) the port targeted Horizon `afe471cf`;
-the target is set in `tools/target.toml.in` (RETARGET_PLAN D13).
+the target is set in `tools/target.toml.in`.
+
+**Download:** [Releases](https://github.com/play-go/farmersdelight-horizon/releases) (`ported_farmersdelight-<version>.smod` with its SHA-256).
+
+**Add-ons ported alongside it:** [Corn Delight](https://github.com/play-go/corndelight-horizon) and [More Delight](https://github.com/play-go/moredelight-horizon). Each needs this exact base version.
 
 ## Install
 
-1. Put this repository's source (or `ported_farmersdelight.smod` unpacked) in a mods folder, or install it with
-   `sunrise-launcher mods add-github <repository URL>`.
+1. Unpack `ported_farmersdelight-<version>.smod` from the release (or put this repository's source) in a mods
+   folder, or install it with `sunrise-launcher mods add-github https://github.com/play-go/farmersdelight-horizon`.
 2. Build it for the instance: `sunrise-launcher native-build <mods folder> --instance <instance> --trust-native-code`
    (native code runs with your rights).
 3. Start the game. Settings are in `config/ported_farmersdelight-common.json` and
@@ -77,7 +81,7 @@ any namespace.
 ## Building from source
 
 `sunrise-mod.toml [native] sunrise` names the Sunrise build; `Cargo.toml` takes the API from that build's signed SDK
-(`.sunrise/sdk/api`, fetched by `cargo sunrise-mod check`). Local checks (Rust 1.99.1):
+(`.sunrise/sdk/api`, fetched by `cargo sunrise-mod check`). Local checks (Rust 1.99.1; `<FD checkout>` is Farmer's Delight Refabricated at the commit in `NOTICE`):
 
 ```sh
 cargo fmt --all --check
