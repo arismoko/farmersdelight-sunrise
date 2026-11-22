@@ -132,6 +132,10 @@ impl Hooks for FarmersDelight {
         items::foods::modify_default_components(event.item, event.components);
     }
 
+    fn can_eat(&self, host: &dyn Host, event: &mut CanEatEvent<'_>) -> Option<bool> {
+        effects::can_eat(host, event)
+    }
+
     fn consume_effect(&self, host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<'_>) {
         effects::consume_effect(host, event);
     }

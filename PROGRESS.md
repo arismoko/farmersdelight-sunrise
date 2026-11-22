@@ -2290,3 +2290,31 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
 - rig notes: launcher 1.1.4's `play` ignores the native build (RT-07); right after `gamemode survival` a `ctl tp` is
   dropped (teleport first, then switch).
 - next: RT-09 (CD carry re-pin and rows on the Nightly, MD dependency), then RT-10 E-gap audit.
+
+## RT-10 Engine-gap audit on Nightly 9425651 — PASS — 2026-11-22
+- build pin: sunrise@94256510f74e6843754e0a93fd9e4da7e45b1056 | branch `nightly` | mod commit: (this commit).
+- method: every E-id in the three logs against the `2d81263 → 9425651` SDK diff (`../repin/94256510…/`), the
+  Nightly's hook docs and, where cheap, an in-game probe (`../run/shots/RT-10/`). "Open" means no API change
+  found and not re-probed; the workaround stays.
+- closed, workaround removed (this commit unless noted):
+  | E | Now | Change | Delta |
+  |---|---|---|---|
+  | E-01 | `LevelRef::game_rule(host, "minecraft:natural_health_regeneration")` readable from the effect tick | Nourishment reads the rule (default `true` only if unreadable). Not observable in game: `foodExhaustionLevel` reads 0 on this build | A15 retired |
+  | E-18 | `can_eat` v3 names the eater | `can_eat` hook: a player with Nourishment can always eat (NourishmentAlwaysEatMixin). In game: full player can't eat an apple, nourished player eats it | A16 retired |
+  | E-21 | kelp-template water drawn on the client | rice declares FD's states (RT-07) | A22 retired |
+  | E-34 | `PlayerRef::trigger_consume_item` | the skillet's finished use fires `minecraft:consume_item` with the skillet (data-pack advancements see it too). In game: beef cooked, `main/use_skillet` granted | A44 use half retired |
+  | E-43 | startup recipe load knows the mods' registered conditions | carry keeps FD's `vanilla_crates_enabled` condition on the three crate recipes (`drop_in` gone, `test_carry.py` updated). In game: default → `carrot_crate` recipe present; `enableVanillaCropCrates = false` → "Unknown recipe", `cabbage_crate` unaffected | A53 retired |
+- fixed upstream, no mod change needed: **E-36** (single player: a click in the pot's recipe book now places the
+  ingredients: two mushrooms into the inputs for mushroom stew; README/registry "known differences" to update at
+  release), **E-38** (`#c:tools/knife`, `#farmersdelight:straw_harvesters` work in `execute if items` / `clear`),
+  **E-39** (RT-08). Already closed earlier: E-04, E-10 (no engine change needed), E-08 (not a gap).
+- new API used for an old pattern: `BlockPart::set_placed_by` (RT-08 tatami fix).
+- still open: E-06 (animate_tick part, A5), E-12 (special crafting kinds: the serializer API exists, port not done,
+  optional), E-13, E-14, E-15 (mod damage types), E-16 (animated item renderer, A12), E-17 (did not show at RT-04),
+  E-19, E-20, E-22 (farmland trample), E-23, E-24, E-25, E-26, E-27, E-28, E-29 (`open_menu` still takes no title:
+  A30/A31), E-30 (`block_drops` without block entity), E-31 (`player_open_sign` still listen-only: A34), E-32,
+  E-33 (`placed_block` from mod code: A44 place half stays), E-35, E-37, E-42 (observation); add-ons: E-40, E-41,
+  E-44, E-45 (sunrise-org/sunrise#4323).
+- checks: fmt; clippy `-D warnings`; test 100 + 1 ignored; carry 2872, decl 237; 9 tools/test_*.py.
+- next: RT-11 release (versions `.2`, add-on carry re-pins to the final base commit, READMEs: drop A15/A16/A22/A53,
+  E-36, E-39 from the known differences).

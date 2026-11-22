@@ -2,10 +2,10 @@
 //!
 //! - Nourishment (J/common/effect/NourishmentEffect.java): every tick on a player, unless they are
 //!   healing from food (natural regeneration on, hurt, food ≥ 18), exhaustion drops by
-//!   `min(exhaustion, 4.0)`. NourishmentAlwaysEatMixin (always edible while nourished) is not
-//!   ported: `can_eat` gives no player at the pin (E-18, delta A16).
-//!   The `naturalHealthRegeneration` game rule cannot be read at the build pin, so it is taken as
-//!   its default `true` (accepted delta A15; E-01).
+//!   `min(exhaustion, 4.0)`. NourishmentAlwaysEatMixin (always edible while nourished) is the
+//!   `can_eat` hook (its player arrived in Sunrise 9425651: E-18 closed, A16 retired).
+//!   `naturalHealthRegeneration` is read from the holder's level (E-01 closed, A15 retired); it
+//!   counts as its default `true` only when the level cannot be read.
 //! - Comfort (J/common/effect/ComfortEffect.java): every 80 ticks of remaining duration, heal 1.0
 //!   unless the holder has Regeneration or (a player) saturation above 0.
 //! - Consume effect types `farmersdelight:remove_random_effects`, `heal`, `extinguish`.
@@ -95,13 +95,22 @@ impl MobEffectPart for Nourishment {
         event.apply = true;
     }
 
-    fn apply_effect_tick(&self, _: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
+    fn apply_effect_tick(&self, host: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
         event.keep = true;
         let Some(food) = event.food else {
             return;
         };
         let hurt = event.health < event.max_health;
-        let cut = nourishment_reduction(food.exhaustion, hurt, food.level, true);
+        let natural_regen = host
+            .level(event.dimension)
+            .and_then(|level| {
+                level
+                    .game_rule(host, "minecraft:natural_health_regeneration")
+                    .ok()
+                    .flatten()
+            })
+            .is_none_or(|value| value == GameRuleValue::Bool(true));
+        let cut = nourishment_reduction(food.exhaustion, hurt, food.level, natural_regen);
         if cut > 0.0 {
             event.add_exhaustion(-cut);
         }
@@ -131,6 +140,13 @@ impl MobEffectPart for Comfort {
             event.heal(1.0);
         }
     }
+}
+
+/// `NourishmentAlwaysEatMixin`: a player under Nourishment can always eat (`Player#canEat` → true).
+pub fn can_eat(host: &dyn Host, event: &CanEatEvent<'_>) -> Option<bool> {
+    let nourishment = key(NOURISHMENT)?;
+    let living = host.living(event.player.entity())?;
+    living.effect(host, nourishment).map(|_| true)
 }
 
 /// The consume effect types FD registers (ModConsumeEffectTypes), for the acting player.

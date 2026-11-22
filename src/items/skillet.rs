@@ -409,7 +409,7 @@ fn place(host: &mut dyn ServerHost, player: PlayerRef, event: &UseOnEvent<'_>) {
 }
 
 /// Grants one criterion of one of FD's advancements to `player` (the console's
-/// `advancement grant … only`), for vanilla triggers a mod cannot fire (E-33, E-34; A44).
+/// `advancement grant … only`), for the vanilla trigger a mod cannot fire (E-33; A44).
 pub fn grant_criterion(
     host: &mut dyn ServerHost,
     player: PlayerRef,
@@ -507,9 +507,9 @@ pub fn on_finish(host: HostSide<'_>, event: &mut LivingEntityUseItemFinishEvent<
         return;
     };
     // ServerPlayer#completeUsingItem fires `minecraft:consume_item` for any finished use; the
-    // engine fires it for consumables only and a mod cannot fire a `minecraft:` trigger (E-34),
-    // so FD's own criterion for the skillet is granted directly (A44).
-    grant_criterion(host, player, "farmersdelight:main/use_skillet", "skillet");
+    // engine fires it for consumables only, so the skillet fires it itself (Sunrise 9425651's
+    // `trigger_consume_item`: E-34 closed, A44's use half retired).
+    let _ = player.trigger_consume_item(host, event.stack);
     let Some(ingredient) = ingredient_of(&*host, event.stack) else {
         return;
     };

@@ -54,8 +54,10 @@ class CarryTest(unittest.TestCase):
         # untouched files are byte copies (no reformatting)
         self.assertEqual((self.out / dests[0]).read_text("utf-8"), '{ "k" : "v" }')
         crate = json.loads((self.out / dests[2]).read_text("utf-8"))
-        # A recipe drops the crate condition (rule `drop_in`, E-43/A53); the rewrite still counts.
-        self.assertEqual(list(crate), ["type"])
+        # The crate recipe keeps FD's condition, rewritten for the mod-registered one (E-43 fixed, A53 retired).
+        self.assertEqual(
+            crate["neoforge:conditions"], [{"type": "ported_farmersdelight:vanilla_crates_enabled"}]
+        )
         self.assertEqual([e["rule"] for e in m["files"]].count("load_conditions"), 1)
 
     def test_deterministic(self):
