@@ -130,20 +130,17 @@ pub fn container(block: &str) -> Option<ModContainer> {
             menu: None,
             ..Default::default()
         }),
-        // Six one-item slots; the reference exposes them to automation on every side.
+        // Six one-item slots used as the block entity's storage only. Refabricated registers no
+        // `ItemStorage.SIDED` for the stove (only the cutting board, cabinet, pot and basket), so no
+        // face reaches them: a hopper could otherwise stack items past FD's one-item slot limit.
         crate::blocks::stove::ID => Some(ModContainer {
             slots: crate::blocks::stove::SLOTS,
-            faces: std::array::from_fn(|_| (0..crate::blocks::stove::SLOTS).collect()),
-            inputs: (0..crate::blocks::stove::SLOTS).collect(),
-            outputs: (0..crate::blocks::stove::SLOTS).collect(),
             menu: None,
             ..Default::default()
         }),
+        // The skillet's one slot is storage only too (no `ItemStorage.SIDED` in Refabricated).
         crate::blocks::skillet::ID => Some(ModContainer {
             slots: 1,
-            faces: std::array::from_fn(|_| vec![0]),
-            inputs: vec![0],
-            outputs: vec![0],
             menu: None,
             ..Default::default()
         }),
