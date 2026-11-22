@@ -2169,3 +2169,21 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
   9 tools/test_*.py.
 - deltas: none new.
 - next: none in the retarget scope; Let's Do (LD-00/LD-01, `../letsdo/LETSDO_PLAN.md`) at the user's request.
+
+## REG-01 Registry repack of 3.6.30-sunrise.1 for sunrise-mods#4 — PASS — 2026-11-22
+- build pin: sunrise@2d8126336e579777eabf9b2fd8b3d476236a04f2 (unchanged) | mod commit: b2f523c (tag `v3.6.30-sunrise.1`
+  is 8911db2; the commits since change only README/NOTICE/docs) | tool: `cargo-sunrise-mod` 94256510 (Nightly 2026-11-19,
+  signed install block, `~/.local/bin`; the older `~/.cargo/bin` tool still shadows it on PATH).
+- why: the registry maintainers asked every author to repack once with the current tool, so the package carries the
+  new `uses.json` (schema 2) and newer Nightlies can judge whether it fits.
+- package: `../dist/ported_farmersdelight-3.6.30-sunrise.1.smod`, 2995434 bytes, SHA-256 `1c5c0d01…5c36e`; the old file
+  (`b4a8e2b6…`) is in `../dist/superseded/`. Every file except `uses.json`, NOTICE (heading now "Sunrise port") and
+  README.md is byte-identical to the old package. The GitHub release asset and `.sha256` were replaced and the download
+  re-hashed.
+- `cargo sunrise-mod fits`: does not fit Nightly 9425651 (72 used items changed: loot condition/function hooks removed,
+  `ModContainer.insert_rules`, `BlockPart` placement methods, screen events…). It stays a `2d81263` mod. A port to the
+  current Nightly would be a new release.
+- registry (`../sunrise-mods`, branch `add-ported-farmersdelight`, 3099046): new SHA-256, `screenshots` line, #2646 noted as
+  fixed upstream, merged upstream `main`. Local `registry review/check` with the new tool reports no problem for this
+  entry (the 76 errors are other mods' files not downloaded locally). PR comment asks a maintainer to stage the file.
+- next: after #4 lists, repack CD the same way (and MD if the maintainers want it) and update #5 and #6 from `main`.
