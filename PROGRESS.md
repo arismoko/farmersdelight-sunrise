@@ -2215,3 +2215,30 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
   (RT-11).
 - deltas: none new (the Comfort/mob and tooltip-colour changes move toward FD).
 - next: RT-07, a Nightly instance `fd-nightly` (launcher Nightly client, else developer base), then RT-08.
+
+## RT-07 Nightly rig `fd-nightly` — PASS — 2026-11-22
+- build pin: sunrise@94256510f74e6843754e0a93fd9e4da7e45b1056 | branch `nightly` | mod commit: (this commit).
+- engine: developer base from `../sources/sunrise-9425651` (blobless clone, read only, clean): `cargo build -p
+  sunrise-game -p sunrise-client-lib --bins -p sunrise-prepare -p sunrise-server -p sunrise-perf -p sunrise-port-pack`
+  (debug, 7 min), wasm-std, `sunrise-prepare --prepare --prism-dir "Vanilla 26.3"` + the user's server jar, exporters
+  with Prism's Java 25 → `developer-e24ae271…`.
+- launcher: the old 2d81263 launcher installs the base, but its `native-build` writes a 4-part library identity that
+  the Nightly game refuses ("incompatible build identity", the game wants 5 parts). Launcher moved to
+  `sunrise-org/sunrise-launcher` on 2026-11-18: signed **1.1.4** (SHA256SUMS signature verified with Sunrise's release
+  key) in `../run/srn/launcher-1.1.4/`, with its **own homes** `../run/srn/` (`env-nightly.sh`) so it can't migrate
+  the 2d81263 rig in `../run/sr/`. Profile `fd-nightly` (copy of `SRTest` + MD `.smod`).
+- launcher 1.1.4 `play` starts the profile's committed build (`mod-browser/active-build.json`, the plain base), not
+  the build `native-build FOLDER` installs ("selected for its profile" notwithstanding): the game then runs without
+  FD/CD (MD refused "requires missing mod", the world screen lists FD/CD as missing). Workaround:
+  `../run/launch-nightly.sh` starts the selected native build's `sunrise-client` directly with the base's prepared
+  resources, the profile folder and the control socket. Scripts: `rebuild-nightly.sh`, `launch-nightly.sh`,
+  `nightly.sh` (sets `ENVF`, `INSTANCE`, `SR_CTL` for `launch.sh`/`ctl`). No engine id: launcher-side, local use only.
+- fix: the Nightly refuses rice's declared `waterlogged` ("every state of template minecraft:kelp already holds
+  water", a fatal resource error). It was A22, the workaround for E-21 (client drew no water for a kelp-template mod
+  block). E-21 is fixed upstream, so `rice` declares FD's states again (`age`, `supporting`); **A22 retired**. Water
+  drawing to check in RT-08.
+- smoke (`SRTest` copy, `../run/shots/RT-07/`): "content from 3 mod(s)", 0 ERROR lines (WARNs: the known vanilla
+  damage-tag lines and rice's survival-rule line); `setblock` cooking pot / stove / CD corn crate → states as
+  declared; MD stone knife given; rice placed → `rice[age=0,supporting=false]`.
+- checks: test 100 + 1 ignored, decl check 237.
+- next: RT-08 FD in-game replay on `fd-nightly`.
