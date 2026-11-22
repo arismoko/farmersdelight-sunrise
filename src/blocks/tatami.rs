@@ -107,6 +107,10 @@ pub struct Tatami;
 
 #[crate::engine::part]
 impl BlockPart for Tatami {
+    fn set_placed_by(&self, host: &mut dyn ServerHost, event: &mut SetPlacedByEvent<'_>) {
+        write_partner(host, event);
+    }
+
     /// `getStateForPlacement`: facing into the clicked block; paired when it is an unpaired
     /// tatami and the placer is not sneaking.
     fn state_for_placement(
@@ -119,8 +123,9 @@ impl BlockPart for Tatami {
         let face = face_name(context.face);
         let target = offset(at(context.pos), opposite(face));
         let target_name = level.block_state(target).map(|s| name_of(level, s));
-        // The engine asks this twice: for the `entity_place` preview, then for the placement
-        // itself, after `on_placed` already paired the clicked tatami toward this cell.
+        // At 2d81263 the engine asked this again after the partner write (then in `entity_place`);
+        // the partner is now written in `set_placed_by`, after placement, and the second test is
+        // only a tolerance.
         let pairing = !context.sneaking
             && target_name.as_deref().is_some_and(|n| {
                 block_of(n) == TATAMI
@@ -155,6 +160,10 @@ pub struct FullMat;
 
 #[crate::engine::part]
 impl BlockPart for FullMat {
+    fn set_placed_by(&self, host: &mut dyn ServerHost, event: &mut SetPlacedByEvent<'_>) {
+        write_partner(host, event);
+    }
+
     /// `getStateForPlacement`: facing the look direction, refused unless the cell ahead can take
     /// the head (replaceable, with a block under it).
     fn state_for_placement(
@@ -165,8 +174,8 @@ impl BlockPart for FullMat {
         let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = looking(event.context.yaw);
         let pair = offset(at(event.context.pos), facing);
-        // Asked again after `on_placed` wrote the head (see `Tatami`): the head this placement
-        // just wrote counts as free.
+        // A head this placement wrote counts as free (needed when the engine asked again after
+        // the partner write; see `Tatami`).
         let own_head = level.block_state(pair).is_some_and(|s| {
             let n = name_of(level, s);
             block_of(&n) == FULL_MAT
@@ -240,23 +249,16 @@ impl BlockPart for FullMat {
     }
 }
 
-/// `setPlacedBy` of the tatami and the full mat, from `entity_place` (before the placed block is
-/// written).
-pub fn on_placed(host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) {
-    if event.placer.is_none() {
-        return;
-    }
+/// `setPlacedBy` of the tatami and the full mat: write the partner half. Since Sunrise 9425651 this
+/// runs from `BlockPart::set_placed_by`, after the placed block is written: an `entity_place` listener
+/// that writes a block makes the engine abandon the placement (`place_item_block` re-checks the level
+/// revision after the event), which dropped the mat's foot.
+fn write_partner(host: &mut dyn ServerHost, event: &SetPlacedByEvent<'_>) {
     let Some(name) = host.block_state_string(event.state) else {
         return;
     };
     let block = block_of(&name);
-    if block != TATAMI && block != FULL_MAT {
-        return;
-    }
-    let Some(level) = host.level(host.dimension()) else {
-        return;
-    };
-    let pos = at(event.pos);
+    let pos = event.pos;
     let facing = state_value(&name, "facing").unwrap_or("north").to_string();
     let target = offset(pos, &facing);
     let partner = if block == TATAMI {
@@ -267,11 +269,13 @@ pub fn on_placed(host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) {
         }
         let set = crate::items::skillet::set_prop(&name, "facing", opposite(&facing));
         crate::items::skillet::set_prop(&set, "paired", "true")
-    } else {
+    } else if block == FULL_MAT {
         crate::items::skillet::set_prop(&name, "part", "head")
+    } else {
+        return;
     };
     if let Some(state) = host.block_state_id(&partner) {
-        let _ = level.set_block(
+        let _ = event.level.set_block(
             host,
             target,
             state,

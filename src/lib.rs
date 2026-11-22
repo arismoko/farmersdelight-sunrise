@@ -244,7 +244,6 @@ impl Hooks for FarmersDelight {
     }
 
     fn entity_place(&self, host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) -> Flow {
-        blocks::tatami::on_placed(host, event);
         blocks::canvas_sign::on_placed(host, event);
         Flow::Continue
     }
