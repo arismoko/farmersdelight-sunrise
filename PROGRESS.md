@@ -2318,3 +2318,19 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
 - checks: fmt; clippy `-D warnings`; test 100 + 1 ignored; carry 2872, decl 237; 9 tools/test_*.py.
 - next: RT-11 release (versions `.2`, add-on carry re-pins to the final base commit, READMEs: drop A15/A16/A22/A53,
   E-36, E-39 from the known differences).
+
+## RT-11 Release 3.6.30-sunrise.2 (Sunrise Nightly 9425651) — PASS — 2026-11-22
+- build pin: sunrise@94256510f74e6843754e0a93fd9e4da7e45b1056 | mod commit: c1a1e58, tag `v3.6.30-sunrise.2` (`nightly`
+  fast-forwarded into `main`) | add-ons: More Delight `26.9.16-sunrise.2` (its RT-11 entry); Corn Delight not
+  released (package blocked by E-45, sunrise-org/sunrise#4323; its `nightly` branch is ready).
+- changes since `.1`: RT-05…RT-10 (CHANGELOG `3.6.30-sunrise.2`); README "known differences" without the fixed items
+  (single-player recipe book, page-2 tab names, crate config); `../retarget/RETARGET_SOURCE_LOCK.json` build pin →
+  9425651 (old pin kept as `previous_build_pin`).
+- package: `../dist/ported_farmersdelight-3.6.30-sunrise.2.smod`, 3000063 bytes, SHA-256 `49637af5…64d2092`
+  (`cargo-sunrise-mod` 9425651); every packaged file byte-identical to c1a1e58, plus `uses.json` (schema 2);
+  `fits` → "9425651 made for".
+- release-package check: the unpacked `.smod` built by launcher 1.1.4 `native-build` into `fd-nightly`, MD `.2`
+  package in its mods: "content from 2 mod(s)", 0 ERROR; fresh world `RelTest2`: MD stone knife cuts a potato on an FD
+  board → diced potatoes.
+- deltas: retired A15, A16, A22, A53, A44 (use half); none new.
+- next: registry (new PR for `3.6.30-sunrise.2`, MD `.2` on #6); CD `.2` when E-45 is fixed.
