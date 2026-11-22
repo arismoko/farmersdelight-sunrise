@@ -52,9 +52,10 @@ impl BlockPart for Rice {
     /// RiceBlock#getStateForPlacement: only into a full water source, at age 0.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         if !full_water(level, event.fluid) {
             return Some(None);
         }
@@ -89,12 +90,14 @@ impl BlockPart for Rice {
     }
 
     /// RiceBlock#canSurvive: its ground (the water is its own, always a full source).
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let below = level.block_state(up(at(event.pos), -1))?;
         Some(rice_ground(level, below))
     }
 
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(rice_ground(level, event.ground))
     }
 
@@ -214,12 +217,14 @@ impl BlockPart for Panicles {
         Flow::Cancel
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(panicles_survive(level, at(event.pos)))
     }
 
     /// RicePaniclesBlock#mayPlaceOn: rice.
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(block_name(level, event.ground) == RICE)
     }
 

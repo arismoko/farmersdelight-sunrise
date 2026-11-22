@@ -240,9 +240,10 @@ impl BlockPart for Basket {
     /// direction), waterlogged in water.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = opposite(nearest_looking(event.context.yaw, event.context.pitch));
         let water = crate::blocks::rope::is_water(level, event.fluid);
         let state = level.state_with_property(event.state, "facing", facing)?;
@@ -297,7 +298,7 @@ impl BlockPart for Basket {
         event.output = true;
     }
 
-    fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, _: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
         let pos = [event.pos.x, event.pos.y, event.pos.z];
         event.output = signal(&self.signals, pos);
     }
@@ -307,7 +308,7 @@ impl BlockPart for Basket {
     }
 
     /// FD registers no fire odds for baskets (the oak-planks template's are dropped).
-    fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
+    fn fire_odds(&self, _: LevelSide<'_>, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))
     }
 }
@@ -497,6 +498,7 @@ pub fn container() -> ModContainer {
         inputs: (0..SLOTS).collect(),
         outputs: (0..SLOTS).collect(),
         menu: Some(MENU.into()),
+        ..Default::default()
     }
 }
 

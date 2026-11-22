@@ -156,11 +156,13 @@ pub struct WildCrop;
 #[crate::engine::part]
 impl BlockPart for WildCrop {
     /// WildCropBlock#mayPlaceOn: `#farmersdelight:grows_wild_crops`.
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(may_place_on(level, event.ground))
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(can_survive_at(level, at(event.pos)))
     }
 
@@ -191,11 +193,13 @@ pub struct SandyShrub;
 #[crate::engine::part]
 impl BlockPart for SandyShrub {
     /// SandyShrubBlock#mayPlaceOn: `#minecraft:sand`.
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(level.block_in_tag(event.ground.block(), SAND) == Some(true))
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(ground_in(level, at(event.pos), SAND))
     }
 
@@ -225,9 +229,10 @@ impl BlockPart for WildRice {
     /// half holds the water.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let p = event.context.pos;
         let pos = [p.x, p.y, p.z];
         let top = level.min_y() + level.height() - 1;
@@ -240,13 +245,15 @@ impl BlockPart for WildRice {
         Some(level.state_with_property(event.state, "waterlogged", "true"))
     }
 
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(level.block_in_tag(event.ground.block(), GROWS_WILD_CROPS) == Some(true))
     }
 
     /// WildRiceBlock#canSurvive: the lower half on its ground in a full water block, the upper
     /// half on the lower.
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let pos = at(event.pos);
         let lower = level
             .state_string(event.state)

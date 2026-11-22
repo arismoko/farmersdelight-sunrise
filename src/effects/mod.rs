@@ -39,6 +39,22 @@ pub fn register(registrar: &mut dyn Registrar) {
             .map(|id| (*id, registrar.effect_key(id)))
             .collect(),
     );
+    // FD's two MobEffect subclasses become parts on their own effects (Sunrise 9425651 moved the
+    // effect-tick hooks from `Hooks` to `MobEffectPart`).
+    for (id, result) in [
+        (
+            NOURISHMENT,
+            key(NOURISHMENT).map(|k| registrar.mob_effect_part(&k, Nourishment)),
+        ),
+        (
+            COMFORT,
+            key(COMFORT).map(|k| registrar.mob_effect_part(&k, Comfort)),
+        ),
+    ] {
+        if let Some(Err(e)) = result {
+            eprintln!("[farmersdelight] effect part for {id} refused: {e:?}");
+        }
+    }
 }
 
 /// The key of an effect in [`USED`].
@@ -66,16 +82,21 @@ pub fn comfort_heals(
     !has_regeneration && saturation.is_none_or(|s| s <= 0.0) && health < max
 }
 
-pub fn should_apply(_: &dyn Host, event: &mut ShouldApplyEffectTickThisTickEvent) {
-    if Some(event.effect) == key(NOURISHMENT) {
-        event.apply = true;
-    } else if Some(event.effect) == key(COMFORT) {
-        event.apply = event.tick_count % 80 == 0;
-    }
-}
+/// `NourishmentEffect`: ticks every tick (`shouldApplyEffectTickThisTick` → true).
+pub struct Nourishment;
 
-pub fn apply_tick(host: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
-    if Some(event.effect) == key(NOURISHMENT) {
+#[crate::engine::part]
+impl MobEffectPart for Nourishment {
+    fn should_apply_effect_tick_this_tick(
+        &self,
+        _: &dyn Host,
+        event: &mut ShouldApplyEffectTickThisTickEvent,
+    ) {
+        event.apply = true;
+    }
+
+    fn apply_effect_tick(&self, _: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
+        event.keep = true;
         let Some(food) = event.food else {
             return;
         };
@@ -84,15 +105,31 @@ pub fn apply_tick(host: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
         if cut > 0.0 {
             event.add_exhaustion(-cut);
         }
+    }
+}
+
+/// `ComfortEffect`: ticks when the remaining duration is a multiple of 80.
+pub struct Comfort;
+
+#[crate::engine::part]
+impl MobEffectPart for Comfort {
+    fn should_apply_effect_tick_this_tick(
+        &self,
+        _: &dyn Host,
+        event: &mut ShouldApplyEffectTickThisTickEvent,
+    ) {
+        event.apply = event.tick_count % 80 == 0;
+    }
+
+    fn apply_effect_tick(&self, _: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
         event.keep = true;
-    } else if Some(event.effect) == key(COMFORT) {
+        // `hasEffect(REGENERATION)`: the holder's live effects, readable for mobs too.
         let regen =
-            key("minecraft:regeneration").is_some_and(|r| event.holder.effect(host, r).is_some());
+            key("minecraft:regeneration").is_some_and(|r| event.active_effects.contains(&r));
         let saturation = event.food.map(|f| f.saturation);
         if comfort_heals(regen, saturation, event.health, event.max_health) {
             event.heal(1.0);
         }
-        event.keep = true;
     }
 }
 

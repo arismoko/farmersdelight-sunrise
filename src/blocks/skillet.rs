@@ -8,7 +8,6 @@
 use super::cutting_board::state_value;
 use crate::items::skillet::{set_prop, skillet_cooking_time};
 use mod_api::*;
-use std::collections::BTreeMap;
 
 pub const ID: &str = "farmersdelight:skillet";
 pub const COOK_TIME: &str = "CookTime";
@@ -236,7 +235,7 @@ fn interact(
     {
         return InteractionResult::Consume;
     }
-    let mut merge = BTreeMap::new();
+    let mut merge = Compound::new();
     merge.insert(COOK_TIME_TOTAL.into(), Tag::Int(total));
     merge.insert(COOK_TIME.into(), Tag::Int(0));
     merge.insert(INVENTORY.into(), inventory_tag(&*host, Some(&held)));
@@ -274,7 +273,7 @@ fn interact(
 }
 
 fn mirror(host: &mut dyn ServerHost, be: BlockEntityRef, stack: Option<&ItemStack>) {
-    let mut merge = BTreeMap::new();
+    let mut merge = Compound::new();
     merge.insert(INVENTORY.into(), inventory_tag(&*host, stack));
     let _ = be.merge_data(host, merge);
     if let Some(pos) = be.position(&*host) {

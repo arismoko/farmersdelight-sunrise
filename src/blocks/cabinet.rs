@@ -67,9 +67,10 @@ impl BlockPart for Cabinet {
     /// `getStateForPlacement`: facing the placer.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(level.state_with_property(event.state, "facing", facing_for_yaw(event.context.yaw)))
     }
 
@@ -93,13 +94,13 @@ impl BlockPart for Cabinet {
         event.output = true;
     }
 
-    fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, _: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
         let pos = [event.pos.x, event.pos.y, event.pos.z];
         event.output = crate::blocks::basket::signal(&self.signals, pos);
     }
 
     /// Barrels (and so cabinets) are not flammable: the oak-planks template's odds are dropped.
-    fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
+    fn fire_odds(&self, _: LevelSide<'_>, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))
     }
 }

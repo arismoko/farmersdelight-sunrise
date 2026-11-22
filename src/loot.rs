@@ -1,8 +1,8 @@
 //! Loot (J/refabricated/LootModificationEvents.java, J/common/loot/**). Fabric's
 //! `LootTableEvents.MODIFY` builders become JSON pools added in `loot_table_load`; FD's
 //! `MODIFY_DROPS` additions (leather from knife kills, cake slices from candle cakes) become
-//! tag-gated pools on every entity / block table. `smoker_cook` and
-//! `can_item_perform_ability` are evaluated here.
+//! tag-gated pools on every entity / block table. `smoker_cook`, `copy_skillet` and
+//! `can_item_perform_ability` are registered loot types here.
 use mod_api::serde_json::{Value, json};
 use mod_api::*;
 use std::collections::HashMap;
@@ -336,24 +336,36 @@ pub fn on_table_load(id: &str, table: &mut Value) {
 // ---------------------------------------------------------------- custom kinds
 
 /// `CanItemPerformAbility`: the context's tool can perform `ability` (each ability is a tag).
-pub fn on_condition(event: &mut LootConditionEvent<'_>) {
-    if event.kind != "farmersdelight:can_item_perform_ability" {
-        return;
+pub struct CanItemPerformAbility;
+
+impl ModLootCondition for CanItemPerformAbility {
+    fn validate(&self, data: &LootEntryData) -> Result<(), String> {
+        match data.value().get("ability") {
+            Some(Value::String(_)) => Ok(()),
+            _ => Err("`ability` must be a string".into()),
+        }
     }
-    let Some(tool) = &event.ctx.tool else {
-        event.holds = false;
-        return;
-    };
-    let tag = event
-        .data
-        .get("ability")
-        .and_then(Value::as_str)
-        .and_then(crate::recipes::ingredient::ability_tag);
-    event.holds = tag
-        .and_then(|t| Identifier::parse(t.trim_start_matches('#')).ok())
-        .and_then(|id| event.tags.key(&id))
-        .and_then(|key| event.tags.is_in_tag(tool.item, key))
-        == Some(true);
+
+    fn test(
+        &self,
+        data: &LootEntryData,
+        context: &mut dyn LootTypeContext,
+    ) -> Result<bool, String> {
+        let Some(tool) = context.snapshot().tool else {
+            return Ok(false);
+        };
+        let tags = context.tags();
+        let tag = data
+            .value()
+            .get("ability")
+            .and_then(Value::as_str)
+            .and_then(crate::recipes::ingredient::ability_tag);
+        Ok(tag
+            .and_then(|t| Identifier::parse(t.trim_start_matches('#')).ok())
+            .and_then(|id| tags.key(&id))
+            .and_then(|key| tags.is_in_tag(tool.item, key))
+            == Some(true))
+    }
 }
 
 /// Smoking recipes by input item (`RecipeType.SMOKING`), refreshed when the server's data loads.
@@ -377,23 +389,89 @@ pub fn refresh_smoking(host: &dyn Host) {
 }
 
 /// `SmokerCookFunction`: the stack's smoking result, count × the stack's count.
-pub fn on_function(event: &mut LootFunctionEvent<'_>) {
-    if event.kind != "farmersdelight:smoker_cook" || event.stack.count <= 0 {
-        return;
+pub struct SmokerCook;
+
+impl ModLootFunction for SmokerCook {
+    fn validate(&self, _: &LootEntryData) -> Result<(), String> {
+        Ok(())
     }
-    let map = SMOKING.read().unwrap_or_else(|e| e.into_inner());
-    if let Some(result) = map.get(&event.stack.item) {
-        event.stack.item = result.item();
-        event.stack.count *= result.count() as i32;
-        event.stack.damage = 0;
-        event.stack.enchantments.clear();
-        event.stack.potion = None;
+
+    fn apply(
+        &self,
+        _: &LootEntryData,
+        mut stack: LootStack,
+        _: &mut dyn LootTypeContext,
+    ) -> Result<LootStack, String> {
+        if stack.count <= 0 {
+            return Ok(stack);
+        }
+        let map = SMOKING.read().unwrap_or_else(|e| e.into_inner());
+        if let Some(result) = map.get(&stack.item) {
+            stack.item = result.item();
+            stack.count *= result.count() as i32;
+            stack.damage = 0;
+            stack.enchantments.clear();
+            stack.potion = None;
+        }
+        Ok(stack)
     }
+}
+
+/// `CopySkilletFunction` keeps the rolled stack here: the copy of the placed skillet is made in
+/// `loot_drops` (blocks::skillet), where the block entity is still readable.
+pub struct CopySkillet;
+
+impl ModLootFunction for CopySkillet {
+    fn validate(&self, _: &LootEntryData) -> Result<(), String> {
+        Ok(())
+    }
+
+    fn apply(
+        &self,
+        _: &LootEntryData,
+        stack: LootStack,
+        _: &mut dyn LootTypeContext,
+    ) -> Result<LootStack, String> {
+        Ok(stack)
+    }
+}
+
+/// FD's loot types (`ModLootFunctions`, `CanItemPerformAbility.register`). Unknown types refuse
+/// the whole data load, so `copy_skillet` is registered even though it keeps the stack.
+pub fn register(registrar: &mut dyn Registrar) {
+    let id = |path: &str| Identifier::parse(&format!("farmersdelight:{path}")).expect("valid id");
+    registrar.register_loot_function_type(&id("copy_skillet"), CopySkillet);
+    registrar.register_loot_function_type(&id("smoker_cook"), SmokerCook);
+    registrar.register_loot_condition_type(&id("can_item_perform_ability"), CanItemPerformAbility);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn can_item_perform_ability_needs_a_string_ability() {
+        let ok = LootEntryData::new(
+            json!({"type": "farmersdelight:can_item_perform_ability", "ability": "shears_dig"}),
+        )
+        .unwrap();
+        let missing =
+            LootEntryData::new(json!({"type": "farmersdelight:can_item_perform_ability"})).unwrap();
+        let number = LootEntryData::new(
+            json!({"type": "farmersdelight:can_item_perform_ability", "ability": 3}),
+        )
+        .unwrap();
+        assert!(CanItemPerformAbility.validate(&ok).is_ok());
+        assert!(CanItemPerformAbility.validate(&missing).is_err());
+        assert!(CanItemPerformAbility.validate(&number).is_err());
+    }
+
+    #[test]
+    fn fd_loot_functions_take_any_fields() {
+        let data = LootEntryData::new(json!({"type": "farmersdelight:smoker_cook"})).unwrap();
+        assert!(SmokerCook.validate(&data).is_ok());
+        assert!(CopySkillet.validate(&data).is_ok());
+    }
 
     #[test]
     fn chest_tables_get_one_nested_pool() {

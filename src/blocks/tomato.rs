@@ -167,7 +167,8 @@ impl BlockPart for BuddingTomato {
     }
 
     /// BuddingBushBlock#mayPlaceOn: `#minecraft:supports_crops`.
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(on_supports_crops(level, event.ground))
     }
 
@@ -369,7 +370,8 @@ impl BlockPart for Tomato {
 
     /// TomatoBlock#canSurvive: above another tomato vine only the light matters; otherwise the
     /// crop's own rule (light and `#minecraft:supports_crops` below).
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let pos = at(event.pos);
         let below = level.block_state(up(pos, -1))?;
         if is_vine(block_name(level, below)) {
@@ -382,7 +384,8 @@ impl BlockPart for Tomato {
         None
     }
 
-    fn may_place_on(&self, level: &dyn LevelHost, event: &mut MayPlaceOnEvent) -> Option<bool> {
+    fn may_place_on(&self, level: LevelSide<'_>, event: &mut MayPlaceOnEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(on_supports_crops(level, event.ground))
     }
 

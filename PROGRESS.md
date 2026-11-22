@@ -2187,3 +2187,31 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
   fixed upstream, merged upstream `main`. Local `registry review/check` with the new tool reports no problem for this
   entry (the 76 errors are other mods' files not downloaded locally). PR comment asks a maintainer to stage the file.
 - next: after #4 lists, repack CD the same way (and MD if the maintainers want it) and update #5 and #6 from `main`.
+
+## RT-05 Re-pin to Sunrise Nightly 9425651 (compile; includes RT-06's code) — IN PROGRESS — 2026-11-22
+- build pin: sunrise@94256510f74e6843754e0a93fd9e4da7e45b1056 (signed SDK, Nightly 2026-11-19; `mixins` e59da909 and
+  `game` 26.3 unchanged) | branch `nightly` | mod commit: (this commit) | plan: `../retarget/NIGHTLY_PLAN.md`; evidence
+  `../repin/94256510…/` (SDK diff, fits, the pre-fix compile log).
+- code (81 compile errors at the new pin → 0):
+  - C1: `state_for_placement`, `can_survive`, `may_place_on`, `fire_odds` take `LevelSide` (47 methods, the crate's
+    `let (LevelSide::Server(level) | LevelSide::Client(level)) = level;` idiom); `analog_output` takes
+    `&mut dyn LevelRandomHost`. `state_for_placement`/`may_place_on` now also run on the client: **untested in game**.
+  - C5: `Compound` is no longer a `BTreeMap` (NBT merges build `Compound::new()`); `ModContainer` literals end in
+    `..Default::default()` (new `insert_rules`, default = every slot `Any`, the old behaviour).
+  - C2 (RT-06): the `loot_condition`/`loot_function` hooks are gone; FD's three loot types are registered codecs
+    (`loot::register`): `smoker_cook` and `copy_skillet` (functions), `can_item_perform_ability` (condition). An
+    unregistered type now refuses the whole data load, so `copy_skillet` (pass-through; the copy is made in
+    `loot_drops` as before) has to be registered. Validation: `ability` must be a string.
+  - C3 (RT-06): Nourishment and Comfort are `MobEffectPart`s on their own effects (the tick hooks left `Hooks`).
+    Comfort's Regeneration check reads `event.active_effects` (FD `hasEffect`), which also works for a ticking mob,
+    where the old host read of the holder could not.
+  - C4 (RT-06): the pot screen (`screen`, `screen_draw`, `screen_tooltip`) moved to `CookingPotMenu`. Tooltip
+    lines are `(Text, colour)`; the meal-slot tooltip now replaces the slot's lines with the name and a gray
+    "Served on" line, as `CookingPotScreen#renderMealDisplayTooltip` does (the old port pushed plain lines).
+- checks: cargo fmt; clippy `-D warnings`; test 100 + 1 ignored (2 new loot-codec tests); carry 2872, decl 237,
+  tooltips/worldgen `--check`; 9 `tools/test_*.py`; `cargo sunrise-mod check` (only the known warnings: wall-sign loot
+  tables, debug pie, skillet name); `cargo sunrise-mod build` + `fits` → "9425651 made for".
+- untested: everything in game (RT-07 rig, RT-08 replay). Not yet done: CD/MD (RT-09), source lock and README pins
+  (RT-11).
+- deltas: none new (the Comfort/mob and tooltip-colour changes move toward FD).
+- next: RT-07, a Nightly instance `fd-nightly` (launcher Nightly client, else developer base), then RT-08.

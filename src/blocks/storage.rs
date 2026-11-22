@@ -37,9 +37,10 @@ impl BlockPart for RiceBale {
     /// `getStateForPlacement`: `FACING` = the clicked face.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = face_name(event.context.face);
         Some(level.state_with_property(event.state, "facing", facing))
     }

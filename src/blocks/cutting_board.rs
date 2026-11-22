@@ -6,7 +6,6 @@
 use crate::client::render::{Pose, draw_board, model_count};
 use crate::recipes::{RecipeTables, cutting};
 use mod_api::*;
-use std::collections::BTreeMap;
 use std::sync::Arc;
 
 pub const ID: &str = "farmersdelight:cutting_board";
@@ -123,9 +122,10 @@ impl CriterionTest for Always {
 impl BlockPart for CuttingBoard {
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = facing_for_yaw(event.context.yaw);
         // `fluid.getType() == Fluids.WATER`: water's source fluid, read from the water block.
         let water = level
@@ -141,7 +141,8 @@ impl BlockPart for CuttingBoard {
         Some(Some(state))
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(supported(level, [event.pos.x, event.pos.y, event.pos.z]))
     }
 
@@ -179,7 +180,7 @@ impl BlockPart for CuttingBoard {
         event.output = true;
     }
 
-    fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, _: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
         event.output = signal([event.pos.x, event.pos.y, event.pos.z]);
     }
 
@@ -711,7 +712,7 @@ fn carve(host: &mut dyn ServerHost, click: &BlockClick<'_>) -> bool {
     {
         return false;
     }
-    let mut data = BTreeMap::new();
+    let mut data = Compound::new();
     data.insert(CARVED.into(), Tag::Byte(1));
     let _ = be.merge_data(host, data);
     mirror_inventory(host, be, Some(&held));
@@ -789,14 +790,14 @@ fn mirror_inventory(host: &mut dyn ServerHost, be: BlockEntityRef, stack: Option
         .and_then(|s| s.to_nbt(&*host))
         .map(|c| vec![Tag::Compound(c)])
         .unwrap_or_default();
-    let mut data = BTreeMap::new();
+    let mut data = Compound::new();
     data.insert(INVENTORY.into(), Tag::List(list));
     let _ = be.merge_data(host, data);
 }
 
 fn clear_carved(host: &mut dyn ServerHost, be: BlockEntityRef, carved: bool) {
     if carved {
-        let mut data = BTreeMap::new();
+        let mut data = Compound::new();
         data.insert(CARVED.into(), Tag::Byte(0));
         let _ = be.merge_data(host, data);
     }
@@ -810,7 +811,7 @@ impl BlockEntityPart for CuttingBoard {
     ) -> Option<Compound> {
         // The client copy never receives `items` (seen in game, U-6): the update tag carries the
         // reference's `Inventory` list, mirrored into the NBT on each server-side change.
-        let mut tag = BTreeMap::new();
+        let mut tag = Compound::new();
         tag.insert(CARVED.into(), Tag::Byte(is_carved(&event.entity.nbt) as i8));
         if let Some(inv) = event.entity.nbt.get(&INVENTORY.into()) {
             tag.insert(INVENTORY.into(), inv.clone());

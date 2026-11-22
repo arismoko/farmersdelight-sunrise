@@ -1,6 +1,5 @@
 //! Skillet item (J/common/item/SkilletItem.java) — M2-06: combat wear, attack sounds, sneak placement.
 use mod_api::*;
-use std::collections::BTreeMap;
 
 pub const ITEM: &str = "farmersdelight:skillet";
 pub const BLOCK: &str = "farmersdelight:skillet";
@@ -380,7 +379,7 @@ fn place(host: &mut dyn ServerHost, player: PlayerRef, event: &UseOnEvent<'_>) {
     if let Some(be) = host.block_entity(level, pos)
         && let Some(nbt) = event.stack.to_nbt(&*host)
     {
-        let mut data = BTreeMap::new();
+        let mut data = Compound::new();
         data.insert("Skillet".into(), Tag::Compound(nbt));
         let _ = be.merge_data(host, data);
     }

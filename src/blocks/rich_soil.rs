@@ -308,7 +308,8 @@ impl BlockPart for RichSoilFarmland {
     }
 
     /// RichSoilFarmlandBlock#canSurvive: FarmlandBlock's, or under a melon or pumpkin.
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let above = level.block_state(up(at(event.pos), 1))?;
         matches!(
             block_name(level, above),

@@ -119,14 +119,16 @@ pub struct Pie {
 impl BlockPart for Pie {
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = facing_looking(event.context.yaw);
         Some(level.state_with_property(event.state, "facing", facing))
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(crate::blocks::feast::supported(
             level,
             [event.pos.x, event.pos.y, event.pos.z],
@@ -169,7 +171,8 @@ impl BlockPart for Pie {
         event.output = true;
     }
 
-    fn analog_output(&self, level: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, level: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
+        let level: &dyn LevelHost = level;
         event.output = comparator(bites_of(level.state_string(event.state).as_deref()));
     }
 

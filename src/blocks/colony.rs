@@ -57,16 +57,18 @@ impl BlockPart for Colony {
 
     /// MushroomColonyBlock#canSurvive: MushroomBlock's own rule (the template's), and any light
     /// on `#grows_mushroom_colonies`.
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         on_colony_ground(level, at(event.pos)).then_some(true)
     }
 
     /// MushroomColonyItem#getPlacementState: placed fully grown.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(with_age(level, event.state, MAX_AGE))
     }
 

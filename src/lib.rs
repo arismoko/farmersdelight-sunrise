@@ -79,6 +79,7 @@ impl Hooks for FarmersDelight {
         registry::register_containers(registrar);
         recipes::register_serializers(registrar);
         effects::register(registrar);
+        loot::register(registrar);
         recipes::book::register(registrar);
         blocks::rope::register(registrar);
         blocks::tomato::register(registrar);
@@ -133,18 +134,6 @@ impl Hooks for FarmersDelight {
 
     fn consume_effect(&self, host: &mut dyn ServerHost, event: &mut ConsumeEffectEvent<'_>) {
         effects::consume_effect(host, event);
-    }
-
-    fn should_apply_effect_tick_this_tick(
-        &self,
-        host: &dyn Host,
-        event: &mut ShouldApplyEffectTickThisTickEvent,
-    ) {
-        effects::should_apply(host, event);
-    }
-
-    fn apply_effect_tick(&self, host: &dyn Host, event: &mut ApplyEffectTickEvent<'_>) {
-        effects::apply_tick(host, event);
     }
 
     fn entity_interact(
@@ -219,16 +208,6 @@ impl Hooks for FarmersDelight {
         if event.property == items::skillet::IS_COOKING {
             event.value = items::skillet::is_cooking(event.stack);
         }
-    }
-
-    /// Known kinds keep the rolled stack: `farmersdelight:copy_skillet`'s copy is made in
-    /// `loot_drops` (blocks::skillet), where the block entity is still readable.
-    fn loot_function(&self, event: &mut LootFunctionEvent<'_>) {
-        loot::on_function(event);
-    }
-
-    fn loot_condition(&self, event: &mut LootConditionEvent<'_>) {
-        loot::on_condition(event);
     }
 
     fn loot_table_load(&self, _: &dyn DataLoadContext, event: &mut LootTableLoadEvent<'_>) {

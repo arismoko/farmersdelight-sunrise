@@ -128,6 +128,7 @@ pub fn container(block: &str) -> Option<ModContainer> {
             inputs: vec![0],
             outputs: vec![0],
             menu: None,
+            ..Default::default()
         }),
         // Six one-item slots; the reference exposes them to automation on every side.
         crate::blocks::stove::ID => Some(ModContainer {
@@ -136,6 +137,7 @@ pub fn container(block: &str) -> Option<ModContainer> {
             inputs: (0..crate::blocks::stove::SLOTS).collect(),
             outputs: (0..crate::blocks::stove::SLOTS).collect(),
             menu: None,
+            ..Default::default()
         }),
         crate::blocks::skillet::ID => Some(ModContainer {
             slots: 1,
@@ -143,6 +145,7 @@ pub fn container(block: &str) -> Option<ModContainer> {
             inputs: vec![0],
             outputs: vec![0],
             menu: None,
+            ..Default::default()
         }),
         // CookingPotItemHandler: the top reaches the ingredients (in and out), every other side
         // puts into the container slot and takes from the output.
@@ -162,6 +165,7 @@ pub fn container(block: &str) -> Option<ModContainer> {
                 inputs: (0..INPUTS).chain([CONTAINER]).collect(),
                 outputs: (0..INPUTS).chain([OUTPUT]).collect(),
                 menu: Some(MENU.into()),
+                ..Default::default()
             })
         }
         crate::blocks::basket::WOODEN | crate::blocks::basket::BAMBOO => {

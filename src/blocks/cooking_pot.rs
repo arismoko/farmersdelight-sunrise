@@ -273,9 +273,10 @@ impl BlockPart for CookingPot {
     /// placed against a ceiling, else a tray over a tray heat source.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let pos = [
             event.context.pos.x,
             event.context.pos.y,
@@ -360,7 +361,7 @@ impl BlockPart for CookingPot {
     }
 
     /// Read from the signal the tick keeps (the hook's level host has no block-entity read).
-    fn analog_output(&self, _: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, _: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
         let pos = [event.pos.x, event.pos.y, event.pos.z];
         event.output = lock(&self.shared).signal.get(&pos).copied().unwrap_or(0);
     }
@@ -433,7 +434,7 @@ impl CookingPot {
             let split = meal.clone().split(1);
             let serving = split.taken.expect("meal is not empty");
             let creative = player.is_creative(&*host).unwrap_or(false);
-            let mut merge = BTreeMap::new();
+            let mut merge = Compound::new();
             merge.insert(MEAL_KEY.into(), meal_tag(&*host, split.remainder.as_ref()));
             let ok = be.merge_data(host, merge).unwrap_or(false)
                 && host
@@ -485,7 +486,7 @@ impl CookingPot {
             .map(|i| be.item_slot(&*host, i as u32).ok().flatten())
             .collect();
         items[MEAL] = be.data(&*host).and_then(|d| meal_of(&*host, &d));
-        let mut merge = BTreeMap::new();
+        let mut merge = Compound::new();
         merge.insert(INVENTORY.into(), inventory_tag(&*host, &items));
         let _ = be.merge_data(host, merge);
         if let Some(pos) = be.position(&*host) {
@@ -772,86 +773,6 @@ impl BlockEntityPart for CookingPot {
         }
     }
 
-    fn screen(&self, _: &dyn Host, _: &mut ScreenEvent<'_>) -> Option<Screen> {
-        Some(crate::recipes::book::screen())
-    }
-
-    /// `CookingPotScreen#renderBg`: the background, the heat icon while heated, the arrow, and
-    /// the meal display drawn from the pot's synced slots.
-    fn screen_draw(&self, host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
-        let [x, y] = event.origin;
-        event
-            .draw
-            .sprite(GUI, [0.0, 0.0, 176.0, 166.0], [x, y, 176.0, 166.0], None);
-        let Some(pos) = host.screen_pos() else {
-            return;
-        };
-        let level = host.level(host.dimension());
-        if level.is_some_and(|l| crate::heat::is_heated_in_level_ref(host, l, pos)) {
-            event.draw.sprite(
-                GUI,
-                [176.0, 0.0, 17.0, 15.0],
-                [x + 47.0, y + 55.0, 17.0, 15.0],
-                None,
-            );
-        }
-        let cook = event.data.first().copied().unwrap_or(0);
-        let total = event.data.get(1).copied().unwrap_or(0);
-        let w = (arrow_width(cook, total) + 1) as f32;
-        event.draw.sprite(
-            GUI,
-            [176.0, 15.0, w, 17.0],
-            [x + 89.0, y + 25.0, w, 17.0],
-            None,
-        );
-        if let Some(meal) = client_meal(host, pos) {
-            event.draw.item_stack(&meal, [x + 124.0, y + 26.0], 16.0);
-            if meal.count() > 1 {
-                let n = meal.count().to_string();
-                let tw = event.draw.text_width(&n);
-                event
-                    .draw
-                    .text(&n, [x + 141.0 - tw, y + 35.0], 0xFFFF_FFFF, true);
-            }
-        }
-    }
-
-    /// Heat icon (heated / needs heat) and meal ("Served on: …") tooltips.
-    fn screen_tooltip(&self, host: &dyn ClientHost, event: &mut ScreenTooltipEvent<'_>) {
-        let [mx, my] = event.at;
-        let inside =
-            |rx: f32, ry: f32, w: f32, h: f32| mx >= rx && mx < rx + w && my >= ry && my < ry + h;
-        let Some(pos) = host.screen_pos() else {
-            return;
-        };
-        let tr = |k: &str| host.translate(k).unwrap_or_else(|| k.to_owned());
-        if inside(47.0, 55.0, 17.0, 15.0) {
-            let heated = host
-                .level(host.dimension())
-                .is_some_and(|l| crate::heat::is_heated_in_level_ref(host, l, pos));
-            event.lines.push(tr(if heated {
-                "container.farmersdelight.cooking_pot.heated"
-            } else {
-                "container.farmersdelight.cooking_pot.not_heated"
-            }));
-        } else if inside(124.0, 26.0, 16.0, 16.0)
-            && let Some(meal) = client_meal(host, pos)
-        {
-            let key = |s: &ItemStack| {
-                let id = s.item().id(host);
-                let (ns, path) = id.split_once(':').unwrap_or(("minecraft", &id));
-                format!("item.{ns}.{path}")
-            };
-            event.lines.push(tr(&key(&meal)));
-            let container =
-                client_container(host, pos).or_else(|| host.item_crafting_remainder(&meal));
-            if let Some(c) = container {
-                let served = tr("container.farmersdelight.cooking_pot.served_on");
-                event.lines.push(served.replace("%s", &tr(&key(&c))));
-            }
-        }
-    }
-
     fn block_entity_client_ticks(
         &self,
         _: &dyn ClientHost,
@@ -1093,6 +1014,93 @@ pub struct CookingPotMenu;
 
 #[crate::engine::part]
 impl MenuPart for CookingPotMenu {
+    fn screen(&self, _: &dyn Host, _: &mut ScreenEvent<'_>) -> Option<Screen> {
+        Some(crate::recipes::book::screen())
+    }
+
+    /// `CookingPotScreen#renderBg`: the background, the heat icon while heated, the arrow, and
+    /// the meal display drawn from the pot's synced slots.
+    fn screen_draw(&self, host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
+        let [x, y] = event.origin;
+        event
+            .draw
+            .sprite(GUI, [0.0, 0.0, 176.0, 166.0], [x, y, 176.0, 166.0], None);
+        let Some(pos) = host.screen_pos() else {
+            return;
+        };
+        let level = host.level(host.dimension());
+        if level.is_some_and(|l| crate::heat::is_heated_in_level_ref(host, l, pos)) {
+            event.draw.sprite(
+                GUI,
+                [176.0, 0.0, 17.0, 15.0],
+                [x + 47.0, y + 55.0, 17.0, 15.0],
+                None,
+            );
+        }
+        let cook = event.data.first().copied().unwrap_or(0);
+        let total = event.data.get(1).copied().unwrap_or(0);
+        let w = (arrow_width(cook, total) + 1) as f32;
+        event.draw.sprite(
+            GUI,
+            [176.0, 15.0, w, 17.0],
+            [x + 89.0, y + 25.0, w, 17.0],
+            None,
+        );
+        if let Some(meal) = client_meal(host, pos) {
+            event.draw.item_stack(&meal, [x + 124.0, y + 26.0], 16.0);
+            if meal.count() > 1 {
+                let n = meal.count().to_string();
+                let tw = event.draw.text_width(&n);
+                event
+                    .draw
+                    .text(&n, [x + 141.0 - tw, y + 35.0], 0xFFFF_FFFF, true);
+            }
+        }
+    }
+
+    /// Heat icon (heated / needs heat) and meal tooltips (`CookingPotScreen#extractTooltip`). The
+    /// meal slot's tooltip is replaced by its name and "Served on: …" in gray, as FD does.
+    fn screen_tooltip(&self, host: &dyn ClientHost, event: &mut ScreenTooltipEvent<'_>) {
+        const WHITE: u32 = 0xFFFF_FFFF;
+        const GRAY: u32 = 0xFFAA_AAAA;
+        let [mx, my] = event.at;
+        let inside =
+            |rx: f32, ry: f32, w: f32, h: f32| mx >= rx && mx < rx + w && my >= ry && my < ry + h;
+        let Some(pos) = host.screen_pos() else {
+            return;
+        };
+        let tr = |k: &str| host.translate(k).unwrap_or_else(|| k.to_owned());
+        if inside(47.0, 55.0, 17.0, 15.0) {
+            let heated = host
+                .level(host.dimension())
+                .is_some_and(|l| crate::heat::is_heated_in_level_ref(host, l, pos));
+            let line = tr(if heated {
+                "container.farmersdelight.cooking_pot.heated"
+            } else {
+                "container.farmersdelight.cooking_pot.not_heated"
+            });
+            event.lines.push((Text::literal(line), WHITE));
+        } else if inside(124.0, 26.0, 16.0, 16.0)
+            && let Some(meal) = client_meal(host, pos)
+        {
+            let key = |s: &ItemStack| {
+                let id = s.item().id(host);
+                let (ns, path) = id.split_once(':').unwrap_or(("minecraft", &id));
+                format!("item.{ns}.{path}")
+            };
+            event.lines.clear();
+            event.lines.push((Text::literal(tr(&key(&meal))), WHITE));
+            let container =
+                client_container(host, pos).or_else(|| host.item_crafting_remainder(&meal));
+            if let Some(c) = container {
+                let served = tr("container.farmersdelight.cooking_pot.served_on");
+                event
+                    .lines
+                    .push((Text::literal(served.replace("%s", &tr(&key(&c)))), GRAY));
+            }
+        }
+    }
+
     /// Serving containers stay out of the ingredient slots (accepted delta A13): no recipe uses
     /// one, and the game's routing then sends a whole shift-clicked stack of them to the container
     /// slot, as `quickMoveStack` does (E-17).

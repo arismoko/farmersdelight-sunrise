@@ -82,7 +82,8 @@ impl BlockPart for OrganicCompost {
     }
 
     /// OrganicCompostBlock#getAnalogOutputSignal: 8 at the first stage down to 1 at the last.
-    fn analog_output(&self, level: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, level: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
+        let level: &dyn LevelHost = level;
         event.output = MAX_STAGE + 1 - stage(level, event.state);
     }
 }

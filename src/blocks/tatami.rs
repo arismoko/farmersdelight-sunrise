@@ -111,9 +111,10 @@ impl BlockPart for Tatami {
     /// tatami and the placer is not sneaking.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let context = event.context;
         let face = face_name(context.face);
         let target = offset(at(context.pos), opposite(face));
@@ -158,9 +159,10 @@ impl BlockPart for FullMat {
     /// the head (replaceable, with a block under it).
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let facing = looking(event.context.yaw);
         let pair = offset(at(event.context.pos), facing);
         // Asked again after `on_placed` wrote the head (see `Tatami`): the head this placement
@@ -178,7 +180,8 @@ impl BlockPart for FullMat {
         }
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(floor_below(level, at(event.pos)))
     }
 
@@ -284,13 +287,15 @@ impl BlockPart for HalfMat {
     /// `getStateForPlacement`: facing the placer.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(level.state_with_property(event.state, "facing", facing_for_yaw(event.context.yaw)))
     }
 
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(floor_below(level, at(event.pos)))
     }
 

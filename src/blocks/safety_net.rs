@@ -47,9 +47,10 @@ impl BlockPart for SafetyNet {
     /// `getStateForPlacement`: waterlogged in water.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let water = crate::blocks::rope::is_water(level, event.fluid);
         Some(level.state_with_property(
             event.state,
@@ -98,7 +99,7 @@ impl BlockPart for SafetyNet {
         event.factor = event.factor.max(BOUNCE);
     }
 
-    fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
+    fn fire_odds(&self, _: LevelSide<'_>, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))
     }
 }

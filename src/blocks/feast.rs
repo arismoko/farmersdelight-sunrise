@@ -280,7 +280,8 @@ pub struct Feast {
 
 #[crate::engine::part]
 impl BlockPart for Feast {
-    fn can_survive(&self, level: &dyn LevelHost, event: &mut CanSurviveEvent) -> Option<bool> {
+    fn can_survive(&self, level: LevelSide<'_>, event: &mut CanSurviveEvent) -> Option<bool> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         Some(supported(level, [event.pos.x, event.pos.y, event.pos.z]))
     }
 
@@ -327,7 +328,8 @@ impl BlockPart for Feast {
     }
 
     /// `getAnalogOutputSignal`: the servings left (the medley's 8 is a signal of 8).
-    fn analog_output(&self, level: &dyn LevelHost, event: &mut AnalogOutputEvent) {
+    fn analog_output(&self, level: &mut dyn LevelRandomHost, event: &mut AnalogOutputEvent) {
+        let level: &dyn LevelHost = level;
         event.output =
             servings_in(level.state_string(event.state), self.spec.servings_property) as i32;
     }

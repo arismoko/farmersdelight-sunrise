@@ -6,7 +6,6 @@
 //! slot's total, `CookingTotalTimes` its progress. No XP (Q12). Placed lit (Q7).
 use super::cutting_board::state_value;
 use mod_api::*;
-use std::collections::BTreeMap;
 
 pub const ID: &str = "farmersdelight:stove";
 pub const SLOTS: usize = 6;
@@ -108,9 +107,10 @@ fn lit_of(name: &str) -> bool {
 impl BlockPart for Stove {
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         // facing comes from the template's own placement (stonecutter: opposite the placer).
         let facing = super::cutting_board::facing_for_yaw(event.context.yaw);
         let state = level.state_with_property(event.state, "facing", facing)?;
@@ -318,7 +318,7 @@ impl Stove {
         }
         let mut next = slots;
         next[slot] = Some(one);
-        let mut merge = BTreeMap::new();
+        let mut merge = Compound::new();
         write_ints(&mut merge, TOTALS, &totals);
         write_ints(&mut merge, PROGRESS, &progress);
         merge.insert(INVENTORY.into(), inventory_tag(&*host, &next));
@@ -500,7 +500,7 @@ impl BlockEntityPart for Stove {
         &self,
         event: &mut BlockEntityUpdateTagEvent<'_>,
     ) -> Option<Compound> {
-        let mut tag = BTreeMap::new();
+        let mut tag = Compound::new();
         if let Some(inv) = event.entity.nbt.get(&INVENTORY.into()) {
             tag.insert(INVENTORY.into(), inv.clone());
         }
@@ -680,7 +680,7 @@ mod tests {
 
     #[test]
     fn q4_swapped_key_names() {
-        let mut nbt = BTreeMap::new();
+        let mut nbt = Compound::new();
         write_ints(&mut nbt, TOTALS, &[600, 0, 0, 0, 0, 0]);
         write_ints(&mut nbt, PROGRESS, &[12, 0, 0, 0, 0, 0]);
         assert_eq!(TOTALS, "CookingTimes");

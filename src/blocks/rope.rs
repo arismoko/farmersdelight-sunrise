@@ -136,9 +136,10 @@ impl BlockPart for Rope {
     /// engine can make); a click on a top or bottom face ties only to rope, bars, panes and walls.
     fn state_for_placement(
         &self,
-        level: &dyn LevelHost,
+        level: LevelSide<'_>,
         event: &mut StateForPlacementEvent<'_>,
     ) -> Option<Option<BlockState>> {
+        let (LevelSide::Server(level) | LevelSide::Client(level)) = level;
         let face = event.context.face;
         if !matches!(face, Direction::Up | Direction::Down) {
             return None;
@@ -537,7 +538,7 @@ impl BlockPart for RopeFenceGate {
         level.state_with_property(event.state, "in_wall", bool_str(in_wall))
     }
 
-    fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
+    fn fire_odds(&self, _: LevelSide<'_>, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))
     }
 }
@@ -547,7 +548,7 @@ pub struct NotFlammable;
 
 #[crate::engine::part]
 impl BlockPart for NotFlammable {
-    fn fire_odds(&self, _: &dyn LevelHost, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
+    fn fire_odds(&self, _: LevelSide<'_>, _: &mut FireOddsEvent) -> Option<(i32, i32)> {
         Some((0, 0))
     }
 }
