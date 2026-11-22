@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.6.30-sunrise.2 — 2026-11-22
+
+Retarget from Sunrise `2d81263` to the Nightly `9425651` (2026-11-19, signed SDK; `retarget/NIGHTLY_PLAN.md`).
+`3.6.30-sunrise.1` stays the build for `2d81263`.
+
+- Engine API moves: block placement/survival methods take `LevelSide`; FD's loot types (`smoker_cook`,
+  `copy_skillet`, `can_item_perform_ability`) are registered loot codecs; Nourishment and Comfort are effect parts;
+  the cooking pot screen lives on its menu part; the tatami/mat partner is written in `set_placed_by`.
+- Closer to FD (engine gaps fixed upstream): a player under Nourishment can always eat (A16 gone); Nourishment reads
+  `naturalHealthRegeneration` (A15 gone); `enableVanillaCropCrates = false` removes the vanilla crate recipes again
+  (A53 gone); rice has FD's block states (A22 gone); the skillet fires `minecraft:consume_item` (data-pack
+  advancements see it). Single-player recipe-book clicks and the page-2 creative tab names work (engine fixes).
+- Fixed: the stove and skillet no longer accept items from hoppers (FD exposes neither to automation); the cooking
+  pot's meal-slot tooltip is the meal name and a gray "Served on" line, as FD.
+- Add-on API unchanged (`fd_port_api = 1`); add-ons rebuild against this version.
+
 ## 3.6.30-sunrise.1 — 2026-11-17
 
 Retarget from Horizon `afe471cf` to Sunrise `2d81263` (signed SDK; RETARGET_PLAN). Same content and behaviour,

@@ -7,8 +7,9 @@ drinks and pet foods with Nourishment and Comfort, storage blocks, baskets, cabi
 net, rotten tomatoes, the Backstabbing enchantment, loot additions, advancements, the cooking pot recipe book, HUD
 overlays, tooltips, config files and FD's 44 translations.
 
-Version `3.6.30-sunrise.1` (Farmer's Delight 3.6.30, Minecraft 26.3), built for Sunrise `2d8126336e579777eabf9b2fd8b3d476236a04f2`
-(signed SDK `sdk-2d81263…`). Until `3.6.30-horizon.3` (tag `v3.6.30-horizon.3`) the port targeted Horizon `afe471cf`;
+Version `3.6.30-sunrise.2` (Farmer's Delight 3.6.30, Minecraft 26.3), built for the Sunrise Nightly
+`94256510f74e6843754e0a93fd9e4da7e45b1056` (2026-11-19, signed SDK `sdk-9425651…`). `3.6.30-sunrise.1` is the same
+port for Sunrise `2d81263`. Until `3.6.30-horizon.3` (tag `v3.6.30-horizon.3`) the port targeted Horizon `afe471cf`;
 the target is set in `tools/target.toml.in`.
 
 **Download:** [Releases](https://github.com/play-go/farmersdelight-sunrise/releases) (`ported_farmersdelight-<version>.smod` with its SHA-256).
@@ -46,15 +47,10 @@ recorded as an accepted delta (A-nn) with its engine gap (E-nn) in `PROGRESS.md`
 - the item-default config keys (stackable soups, rabbit stew buff, vanilla soup Nourishment, straw bed rename) have
   no effect: the engine reads config files after building item defaults (E-35, A47);
 - the village config keys cannot switch off FD's village additions (E-26, A26);
-- in single player, clicking a recipe in the cooking pot's recipe book does not place it (it works on servers;
-  E-36, A48); the book's tabs are ordered Drinks, Meals, Misc (A49);
+- the cooking pot recipe book's tabs are ordered Drinks, Meals, Misc (A49);
 - the Comfort overlay ignores absorption hearts (A50); tooltip durations assume 20 ticks per second (A51);
 - standing canvas signs open the text editor when placed (E-31, A34); a custom name is lost when a cabinet or
   basket is broken by something other than a player (E-30, A33);
-- on page 2 of the creative inventory, the hovered tab's name can be drawn under a page-1 tab name (engine, E-39).
-- `enableVanillaCropCrates = false` no longer removes the carrot, potato and beetroot crate recipes: Sunrise's
-  startup recipe load refuses a recipe whose mod-registered condition it does not know (E-43, A53). The default
-  (`true`) behaves as FD.
 
 ## For add-on authors
 
@@ -62,7 +58,7 @@ Depend on the exact base version, as the API may change in any release:
 
 ```toml
 [dependencies]
-ported_farmersdelight = "=3.6.30-sunrise.1"
+ported_farmersdelight = "=3.6.30-sunrise.2"
 ```
 
 What stays stable while `fd_port_api` (a `[properties]` value in `sunrise-mod.toml`, also
