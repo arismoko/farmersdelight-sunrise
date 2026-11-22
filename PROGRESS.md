@@ -2242,3 +2242,51 @@ Append-only task log (CODEX_HANDOFF §6). Plan files: the port's working directo
   declared; MD stone knife given; rice placed → `rice[age=0,supporting=false]`.
 - checks: test 100 + 1 ignored, decl check 237.
 - next: RT-08 FD in-game replay on `fd-nightly`.
+
+## RT-08 FD in-game re-validation on Nightly 9425651 — PASS (LAN: NOT RUN) — 2026-11-22
+- build pin: sunrise@94256510f74e6843754e0a93fd9e4da7e45b1056 | branch `nightly` | mod commits: 977848c, b00baeb, (this
+  commit) | rig: RT-07 (`../run/launch-nightly.sh`), single player `SRTest` copy (new pad 40..62,69,-4..20), dedicated
+  server `../run/srn/fd-server` (port 25572, world `SRNMP`, engine `native-build --server-output ../run/srn/server-export`),
+  clients `../run/srn/mp/client.sh A Alice` / `B Bob`. Evidence `../run/shots/RT-08/`.
+- fixes found by this pass:
+  - **tatami mat lost its foot** (and paired tatami would too): Sunrise now abandons a placement when an `entity_place`
+    listener changes the world (`place_item_block` compares the level revision after the event). The partner write
+    (FD `setPlacedBy`) moved to the new `BlockPart::set_placed_by` (977848c). Mat: foot+head; tatami pair: both
+    `paired=true`, facing each other; MP: Bob places, Alice and the server see both halves.
+  - **stove and skillet were open to hoppers** (since M2, unrecorded): Refabricated registers `ItemStorage.SIDED` only
+    for the cutting board, cabinet, pot and basket; a hopper could stack 8 beef into one stove slot (FD: limit 1).
+    Their `ModContainer`s keep the slots as storage with no faces/inputs/outputs (b00baeb). Hopper now keeps its items;
+    the player still puts one item per click.
+- single player, all as FD / as RT-04:
+  - placement by the player (C1, now also predicted on the client): cutting board, stove, cabinet, pot, feast face away
+    from the player; pie faces the player; basket from the look direction; rice bale the clicked face; crates, bales,
+    compost, rich soil, safety net, ropes (chain under a plank). Seeds/onion only on farmland, wild crops on grass and
+    sand (not stone), colony on mycelium (age 3), rice only in water over dirt ("Rice must be planted in shallow
+    water" when dry; advancement "Dipping Your Roots"). Rice's water is drawn (E-21 fixed, `rice-water.png`).
+  - loot (C2): wild cabbage with shears → itself, by hand → seeds (`can_item_perform_ability` both ways); skillet
+    broken in survival → skillet (`copy_skillet`); no data-load refusal. `smoker_cook` has no FD table using it
+    (unit-tested only).
+  - effects (C3): Comfort on a hurt no-AI pig +1 health per 80 ticks; with Regeneration only Regeneration's healing
+    (the live-effects check works for mobs). Nourishment cancels Hunger V (food and saturation stay 20; Hunger alone
+    19 → 18). Note: `data get … foodExhaustionLevel` reads 0 on this build even in the plain base; use saturation.
+  - pot (C4): screen from the menu part (background, flames, arrow, recipe book; `pot-screen.png`); **tooltips
+    hover-tested for the first time** (ctl `drag-at` moves the pointer): "Heated" on the heat icon, meal slot "Mushroom
+    Stew" + gray "Served on: Bowl" (`pot-heat-tooltip.png`, `pot-meal-tooltip.png`). Mushroom stew on a lit stove
+    (bowls to the container slot, one stew per 200 ticks), shift-click take → 4 stews + 4 XP. Quick-move: six
+    inputs at 60, 64 carrots → 24 in, 40 stay (= RT-04).
+  - Backstabbing III, iron knife, NoAI 200-hp pig: front 3.5, 3.5; behind 6.3, 6.3 (= RT-04). Signal smoke: player
+    campfire on straw/rice bale `signal_fire=true`, on a crate false. Cutting board: takes the whole beef stack (FD
+    `insertItem` of the copy), knife cut → 2 minced beef, knife 250 → 249. Crops at random_tick_speed 200: cabbage
+    0→3, tomatoes 0→2, onions 1→2 (set back to 3). Cabinet: hopper above → 10 carrots in. Basket: items at its open
+    face collected, items on its back not. E-39: page 2 hover shows only "Corn Delight" (fixed upstream).
+  - restart: pad blocks, board/stove/pot (meal + bowl)/cabinet/basket contents and the inventory identical
+    (`restart-before.txt` = `restart-after.txt`). 0 ERROR lines in every log.
+- dedicated server + two clients: handshake accepted the 3 mods; Bob's menu cooks CD corn soup (milk bucket's bucket
+  ejected beside the pot, soup taken; 0 XP from one 0.35-XP soup is vanilla rounding); level-1 farmer offers
+  `farmersdelight:onion`; V4: MD stone knife cuts CD corn on an FD board → 2 corn seeds + 1 corncob; tatami mat as above.
+- NOT RUN: LAN (offline developer session, as RT-04); skillet cooking/flip on a stove; feast serving; canvas sign text
+  colour; Comfort on a player.
+- deltas: A22 retired (RT-07); no new A-id (both fixes move toward FD).
+- rig notes: launcher 1.1.4's `play` ignores the native build (RT-07); right after `gamemode survival` a `ctl tp` is
+  dropped (teleport first, then switch).
+- next: RT-09 (CD carry re-pin and rows on the Nightly, MD dependency), then RT-10 E-gap audit.
